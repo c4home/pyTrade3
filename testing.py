@@ -99,14 +99,15 @@ class DatabaseManager:
     @contextmanager
     def get_cursor(self):
         """Context manager for database operations with automatic commit/rollback"""
-        conn = self.connection
-        cursor = conn.cursor()
-        try:
-            yield cursor
-            conn.commit()
-        except Exception as e:
-            conn.rollback()
-            raise e
+        with self._lock:
+            conn = self.connection
+            cursor = conn.cursor()
+            try:
+                yield cursor
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                raise e
 
     def close(self):
         """Close the thread-local connection"""
@@ -360,35 +361,30 @@ class DatabaseManager:
             
     def save_target_to_db(self, symbol, target_price, firm_name, date_str):
         try:
-            conn = sqlite3.connect('trading_bot.db')
-            cursor = conn.cursor()
+            with self.get_cursor() as cursor:
+                # 1. Create table with the new "latest_source" and "estimation_date" columns
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS analyst_targets (
+                        symbol TEXT PRIMARY KEY,
+                        latest_target REAL,
+                        latest_source TEXT,
+                        estimation_date TEXT,
+                        last_updated TIMESTAMP
+                    )
+                ''')
 
-            # 1. Create table with the new "latest_source" and "estimation_date" columns
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS analyst_targets (
-                    symbol TEXT PRIMARY KEY,
-                    latest_target REAL,
-                    latest_source TEXT,
-                    estimation_date TEXT,
-                    last_updated TIMESTAMP
-                )
-            ''')
-
-            # 2. UPSERT: Save the price, the bank name, and the original estimation date
-            cursor.execute('''
-                INSERT INTO analyst_targets (symbol, latest_target, latest_source, estimation_date, last_updated)
-                VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT(symbol) DO UPDATE SET 
-                    latest_target = excluded.latest_target,
-                    latest_source = excluded.latest_source,
-                    estimation_date = excluded.estimation_date,
-                    last_updated = excluded.last_updated
-            ''', (symbol, target_price, firm_name, date_str, datetime.now()))
-
-            conn.commit()
-            conn.close()
+                # 2. UPSERT: Save the price, the bank name, and the original estimation date
+                cursor.execute('''
+                    INSERT INTO analyst_targets (symbol, latest_target, latest_source, estimation_date, last_updated)
+                    VALUES (?, ?, ?, ?, ?)
+                    ON CONFLICT(symbol) DO UPDATE SET 
+                        latest_target = excluded.latest_target,
+                        latest_source = excluded.latest_source,
+                        estimation_date = excluded.estimation_date,
+                        last_updated = excluded.last_updated
+                ''', (symbol, target_price, firm_name, date_str, datetime.now()))
         except Exception as e:
-            print(f"Database Error: {e}")
+            logger.error(f"Database Error in save_target_to_db: {e}")
         
     def add_stock(self, stock_id, max_amount, profit_target, drop_threshold):
         """Add or update stock in watchlist"""
@@ -541,45 +537,67 @@ class CSVManager:
 # ==================== EXCHANGE RATE ====================
 class ExchangeRateManager:
     def __init__(self):
-        self.eur_usd_rate = 1.0
+        self.rates = {
+            "USD": 1.08,
+            "GBP": 0.85,
+            "CAD": 1.48,
+            "HKD": 8.50,
+            "EUR": 1.0
+        }
         self.last_update = 0
         self.update_interval = 3600
 
+    @property
+    def eur_usd_rate(self):
+        return self.rates.get("USD", 1.08)
+
+    @eur_usd_rate.setter
+    def eur_usd_rate(self, value):
+        self.rates["USD"] = value
+
     def get_eur_usd_rate(self):
+        return self.get_rate("USD")
+
+    def get_rate(self, currency):
+        currency = currency.upper()
+        if currency == "EUR":
+            return 1.0
+        
         now = time.time()
-        if now - self.last_update < self.update_interval:
-            return self.eur_usd_rate
-
-        def fetch():
-            try:
-                url = "https://query1.finance.yahoo.com/v8/finance/chart/EURUSD=X"
-                headers = {'User-Agent': 'Mozilla/5.0'}
-                response = requests.get(url, headers=headers, timeout=10)
-                if response.status_code == 200:
-                    data = response.json()
-                    price = data['chart']['result'][0]['meta']['regularMarketPrice']
-                    new_rate = round(float(price), 4)
-                    if abs(new_rate - self.eur_usd_rate) > 0.1:  # actually changed
-                        self.eur_usd_rate = new_rate
-                        self.last_update = time.time()
-            except Exception as e:
-                pass 
-
-        # ONLY submit fetch if cache expired
         if now - self.last_update >= self.update_interval:
+            self.last_update = now
+            def fetch():
+                for curr in ["USD", "GBP", "CAD", "HKD"]:
+                    try:
+                        url = f"https://query1.finance.yahoo.com/v8/finance/chart/EUR{curr}=X"
+                        headers = {'User-Agent': 'Mozilla/5.0'}
+                        response = requests.get(url, headers=headers, timeout=10)
+                        if response.status_code == 200:
+                            data = response.json()
+                            price = data['chart']['result'][0]['meta']['regularMarketPrice']
+                            new_rate = float(price)
+                            if new_rate > 0:
+                                self.rates[curr] = round(new_rate, 4)
+                    except Exception as e:
+                        pass
             executor.submit(fetch)
-    
-        return self.eur_usd_rate
+
+        return self.rates.get(currency, 1.0)
 
     def eur_to_native(self, eur_amount, currency):
         if currency.upper() == 'EUR':
             return eur_amount
-        return eur_amount * self.get_eur_usd_rate()
+        return eur_amount * self.get_rate(currency)
 
     def get_currency_symbol(self, currency="USD"):
-        """Return $ or € based on currency"""
-        if currency.upper() == "EUR":
+        """Return $, €, £, or HK$ based on currency"""
+        currency = currency.upper()
+        if currency == "EUR":
             return "€"
+        elif currency == "GBP":
+            return "£"
+        elif currency == "HKD":
+            return "HK$"
         return "$"
 
 # ==================== IBKR API ====================
@@ -765,7 +783,7 @@ class TradingBot:
         self.asset_type = info_dict["asset_type"]
         self.sector = info_dict["sector"]
         self.currency = info_dict["currency"]
-        self.currency_symbol = {"USD": "$", "EUR": "€"}.get(self.currency, "$")
+        self.currency_symbol = {"USD": "$", "EUR": "€", "GBP": "£", "HKD": "HK$"}.get(self.currency, "$")
         self.exchange_tz_name = info_dict["exchange_tz_name"]
 
         cached_price = self.db_manager.get_latest_price(self.stock_id)
@@ -847,37 +865,48 @@ class TradingBot:
         adx = dx.ewm(alpha=1/period, adjust=False).mean()
         return adx.iloc[-1]
     
-    def get_bank_note(self):
-        # 1. Initialize fallback to None to avoid NameError
+    def get_bank_note(self, run_async=True):
         fallback = None 
-        
-        # 2. Check if we have data in the DB first
         cached_data = self.db_manager.get_cached_bank_note(self.stock_id)
 
         if cached_data:
             target, source, est_date, last_upd = cached_data
-            
-            # Safe date parsing (handles cases with or without microseconds)
             try:
                 if '.' in last_upd:
                     last_upd_dt = datetime.strptime(last_upd, '%Y-%m-%d %H:%M:%S.%f')
                 else:
                     last_upd_dt = datetime.strptime(last_upd, '%Y-%m-%d %H:%M:%S')
             except ValueError:
-                # If parsing fails entirely, treat as very old data
                 last_upd_dt = datetime.min
 
-            # Only refresh if data is older than 24 hours
             if (datetime.now() - last_upd_dt).total_seconds() < 86400:
                 self.latest_bank_target = target
                 self.latest_bank_source = source
                 self.latest_bank_date = est_date
                 return target, source, est_date
             else:
-                # Data is stale, but save it as fallback
                 fallback = (target, source, est_date)
 
-        # 3. Fetch from API
+        if run_async:
+            if not getattr(self, '_fetching_bank_note', False):
+                self._fetching_bank_note = True
+                def async_fetch():
+                    try:
+                        self.fetch_fresh_bank_note(fallback)
+                    finally:
+                        self._fetching_bank_note = False
+                executor.submit(async_fetch)
+            
+            if fallback:
+                self.latest_bank_target = fallback[0]
+                self.latest_bank_source = fallback[1]
+                self.latest_bank_date = fallback[2]
+                return fallback
+            return None, "N/A", "--"
+        else:
+            return self.fetch_fresh_bank_note(fallback)
+
+    def fetch_fresh_bank_note(self, fallback=None):
         logger.info(f"Fetching fresh analyst targets for {self.stock_id}...")
         firms = [
             ("Barclays", self.get_barclays_target),
@@ -889,7 +918,6 @@ class TradingBot:
         for name, fetch_method in firms:
             try:
                 result = fetch_method(self.stock_id)
-                # Check for valid result structure
                 if result and len(result) == 3 and result[0] is not None:
                     price, _, date_str = result
                     valid_data.append({
@@ -903,8 +931,6 @@ class TradingBot:
 
         if valid_data:
             latest = sorted(valid_data, key=lambda x: x['date_obj'], reverse=True)[0]
-            
-            # UPDATE MEMORY
             self.latest_bank_target = latest['price']
             self.latest_bank_source = latest['name']
             self.latest_bank_date = latest['date_str']
@@ -915,162 +941,157 @@ class TradingBot:
             )
             return self.latest_bank_target, self.latest_bank_source, self.latest_bank_date
 
-        # 4. Final Fallback Logic
         if fallback:
             logger.info(f"API fetch failed. Using stale fallback for {self.stock_id}.")
-            
-            # --- THIS IS THE FIX FOR QUALCOMM ---
             self.latest_bank_target = fallback[0]
             self.latest_bank_source = fallback[1]
             self.latest_bank_date = fallback[2]
-            # ------------------------------------
-            
             return fallback
 
-        # 5. Cache "No Data Found" if absolutely nothing exists
         logger.info(f"No analyst data found for {self.stock_id}. Caching 'N/A' for 24h.")
         self.db_manager.save_target_to_db(self.stock_id, 0.0, "--", "--")
+        self.latest_bank_target = 0.0
+        self.latest_bank_source = "--"
+        self.latest_bank_date = "--"
         return None, "N/A", "--"
     
     def calculate_technical_indicators(self, force=False):
-       now = time.time()
-       market_open = self.is_market_open()
-       interval = self.indicators_interval_open if market_open else self.indicators_interval_closed
-       
-       if force or now - self.last_indicators_fetch >= interval:
-           try:
-               # 1. Fetch Data
-               # Use '1y' period so MA200 can be calculated (1mo is too short)
-               data = yf.download(
-                   self.stock_id, 
-                   period="1y", 
-                   interval="1d", 
-                   progress=False,
-                   auto_adjust=False, # Keep consistent data structure
-                   multi_level_index=False # Try to force single level (works in newest yfinance)
-               )
-               
-               if data.empty or len(data) < 200:
-                   logger.warning(f"Insufficient data for {self.stock_id}: {len(data)} rows")
-                   return
-    
-               # 2. FIX: Flatten MultiIndex if present
-               # This handles the specific error you saw by forcing data to be simple
-               if isinstance(data.columns, pd.MultiIndex):
-                   try:
-                       # If columns are (Price, Ticker), drop the Ticker level
-                       data.columns = data.columns.droplevel(1) 
-                   except:
-                       pass
-                    
-               # 3. Safe Extraction (Force Series)
-               # If data['Close'] is still a DataFrame, .iloc[:, 0] converts it to a Series
-               close = data['Close'].iloc[:, 0] if isinstance(data['Close'], pd.DataFrame) else data['Close']
-               high  = data['High'].iloc[:, 0]  if isinstance(data['High'], pd.DataFrame)  else data['High']
-               low   = data['Low'].iloc[:, 0]   if isinstance(data['Low'], pd.DataFrame)   else data['Low']
-               volume= data['Volume'].iloc[:, 0] if isinstance(data['Volume'], pd.DataFrame) else data['Volume']
-               
-               if len(close) >= 2:
-                    self.previous_close = float(close.iat[-2])
-    
-               # === Calculations (Now safe to use .iat[-1]) ===
-               self.fourteen_day_high = float(high.rolling(14).max().iat[-1])
-               self.fourteen_day_low  = float(low.rolling(14).min().iat[-1])
-               
-               # ADX
-               self.adx_value = self.calculate_adx(high, low, close)
-                
-               # RSI
-               delta = close.diff()
-               gain = delta.where(delta > 0, 0)
-               loss = -delta.where(delta < 0, 0)
-               avg_gain = gain.ewm(alpha=1/14, adjust=False, min_periods=14).mean()
-               avg_loss = loss.ewm(alpha=1/14, adjust=False, min_periods=14).mean()
-               rs = avg_gain / avg_loss.replace(0, 0.001)
-               rsi_series = 100 - (100 / (1 + rs))
-               self.rsi_value = float(rsi_series.iat[-1]) if not rsi_series.empty else 50.0
-    
-               # Moving Averages
-               self.bb_middle = close.rolling(20).mean().iat[-1]
-               ma20 = self.bb_middle
-               ma50 = close.rolling(50).mean().iat[-1]
-               ma200 = close.rolling(200).mean().iat[-1]
-               price = close.iat[-1]
-    
-               # Trend Signals
-               if price > ma20 > ma50 > ma200:
-                   self.ma_signal = "S_BULL"
-               elif price > ma20 and ma20 > ma50:
-                   self.ma_signal = "BULL"
-               elif price > ma50:
-                   self.ma_signal = "N_BULL"
-               elif price < ma20 and ma20 < ma50:
-                   self.ma_signal = "BEAR"
-               elif price < ma50:
-                   self.ma_signal = "N_BEAR"
-               else:
-                   self.ma_signal = "NEUTRAL"
-    
-               # MACD
-               ema12 = close.ewm(span=12, adjust=False).mean()
-               ema26 = close.ewm(span=26, adjust=False).mean()
-               macd_line = ema12 - ema26
-               signal_line = macd_line.ewm(span=9, adjust=False).mean()
-               
-               macd_val = float(macd_line.iat[-1])
-               signal_val = float(signal_line.iat[-1])
-    
-               if macd_val > signal_val and macd_val > 0:
-                   self.macd_signal = "S_BULL"
-               elif macd_val > signal_val:
-                   self.macd_signal = "BULL"
-               elif macd_val < signal_val and macd_val < 0:
-                   self.macd_signal = "S_BEAR"
-               elif macd_val < signal_val:
-                   self.macd_signal = "BEAR"
-               else:
-                   self.macd_signal = "NEUTRAL"
+        now = time.time()
+        market_open = self.is_market_open()
+        interval = self.indicators_interval_open if market_open else self.indicators_interval_closed
+        
+        if force or now - self.last_indicators_fetch >= interval:
+            if getattr(self, '_fetching_indicators', False):
+                return
+            self._fetching_indicators = True
+            self.last_indicators_fetch = now
 
-               # --- NEW: Bollinger Bands Calculation ---
-               # Standard Deviation of the last 20 periods
-               rolling_std = close.rolling(20).std().iat[-1]
-               
-               self.bb_upper = ma20 + (2 * rolling_std)
-               self.bb_lower = ma20 - (2 * rolling_std)
-               
-               # %B indicates where the price is relative to the bands
-               # < 0: Below lower band (Oversold)
-               # > 1: Above upper band (Overbought)
-               if (self.bb_upper - self.bb_lower) != 0:
-                   self.bb_pct_b = (price - self.bb_lower) / (self.bb_upper - self.bb_lower)
-               else:
-                   self.bb_pct_b = 0.5
-                   
-               # Volume
-               self.today_volume = float(volume.iat[-1])
-               self.avg_volume_14d = float(volume.rolling(14).mean().iat[-1])
-    
-               # Earnings 
-               ticker_obj = yf.Ticker(self.stock_id)
-               self.next_earnings_date = self.fetch_next_event_date(ticker_obj)
-               
-               # Target Price & Analysts
-               self.target_price = ticker_obj.info.get('targetMeanPrice', 0)
-               self.previous_close = ticker_obj.info.get('previousClose', 0)
-               self.num_analysts = ticker_obj.info.get('numberOfAnalystOpinions', 0)
-               
-               # Update DB
-               self.db_manager.update_cached_indicators(
-                   self.stock_id, self.fourteen_day_high, self.fourteen_day_low,
-                   self.rsi_value, self.adx_value, self.bb_upper, self.bb_middle, self.bb_lower,
-                   self.ma_signal, self.macd_signal,
-                   self.next_earnings_date, self.today_volume, self.avg_volume_14d,
-                   self.previous_close, self.target_price, self.num_analysts
-               )
-               self.last_indicators_fetch = now
-    
-           except Exception as e:
-               logger.error(f"Indicators error for {self.stock_id}: {e}")
+            def fetch_task():
+                try:
+                    data = yf.download(
+                        self.stock_id, 
+                        period="1y", 
+                        interval="1d", 
+                        progress=False,
+                        auto_adjust=False,
+                        multi_level_index=False
+                    )
+                    
+                    if data.empty or len(data) < 200:
+                        logger.warning(f"Insufficient data for {self.stock_id}: {len(data)} rows")
+                        return
+         
+                    if isinstance(data.columns, pd.MultiIndex):
+                        try:
+                            data.columns = data.columns.droplevel(1) 
+                        except:
+                            pass
+                         
+                    close = data['Close'].iloc[:, 0] if isinstance(data['Close'], pd.DataFrame) else data['Close']
+                    high  = data['High'].iloc[:, 0]  if isinstance(data['High'], pd.DataFrame)  else data['High']
+                    low   = data['Low'].iloc[:, 0]   if isinstance(data['Low'], pd.DataFrame)   else data['Low']
+                    volume= data['Volume'].iloc[:, 0] if isinstance(data['Volume'], pd.DataFrame) else data['Volume']
+                    
+                    if len(close) >= 2:
+                        self.previous_close = float(close.iat[-2])
+         
+                    self.fourteen_day_high = float(high.rolling(14).max().iat[-1])
+                    self.fourteen_day_low  = float(low.rolling(14).min().iat[-1])
+                    
+                    self.adx_value = self.calculate_adx(high, low, close)
+                     
+                    delta = close.diff()
+                    gain = delta.where(delta > 0, 0)
+                    loss = -delta.where(delta < 0, 0)
+                    avg_gain = gain.ewm(alpha=1/14, adjust=False, min_periods=14).mean()
+                    avg_loss = loss.ewm(alpha=1/14, adjust=False, min_periods=14).mean()
+                    rs = avg_gain / avg_loss.replace(0, 0.001)
+                    rsi_series = 100 - (100 / (1 + rs))
+                    self.rsi_value = float(rsi_series.iat[-1]) if not rsi_series.empty else 50.0
+         
+                    self.bb_middle = close.rolling(20).mean().iat[-1]
+                    ma20 = self.bb_middle
+                    ma50 = close.rolling(50).mean().iat[-1]
+                    ma200 = close.rolling(200).mean().iat[-1]
+                    price = close.iat[-1]
+
+                    self._cached_ma200 = float(ma200)
+                    self._ma200_last_update = time.time()
+
+                    tr0 = abs(high - low)
+                    tr1 = abs(high - close.shift())
+                    tr2 = abs(low - close.shift())
+                    tr = pd.concat([tr0, tr1, tr2], axis=1).max(axis=1)
+                    atr = tr.rolling(14).mean().iat[-1]
+                    self._cached_atr_14 = float(atr)
+                    self._atr_last_update = time.time()
+         
+                    if price > ma20 > ma50 > ma200:
+                        self.ma_signal = "S_BULL"
+                    elif price > ma20 and ma20 > ma50:
+                        self.ma_signal = "BULL"
+                    elif price > ma50:
+                        self.ma_signal = "N_BULL"
+                    elif price < ma20 and ma20 < ma50:
+                        self.ma_signal = "BEAR"
+                    elif price < ma50:
+                        self.ma_signal = "N_BEAR"
+                    else:
+                        self.ma_signal = "NEUTRAL"
+         
+                    ema12 = close.ewm(span=12, adjust=False).mean()
+                    ema26 = close.ewm(span=26, adjust=False).mean()
+                    macd_line = ema12 - ema26
+                    signal_line = macd_line.ewm(span=9, adjust=False).mean()
+                    
+                    macd_val = float(macd_line.iat[-1])
+                    signal_val = float(signal_line.iat[-1])
+         
+                    if macd_val > signal_val and macd_val > 0:
+                        self.macd_signal = "S_BULL"
+                    elif macd_val > signal_val:
+                        self.macd_signal = "BULL"
+                    elif macd_val < signal_val and macd_val < 0:
+                        self.macd_signal = "S_BEAR"
+                    elif macd_val < signal_val:
+                        self.macd_signal = "BEAR"
+                    else:
+                        self.macd_signal = "NEUTRAL"
+     
+                    rolling_std = close.rolling(20).std().iat[-1]
+                    self.bb_upper = ma20 + (2 * rolling_std)
+                    self.bb_lower = ma20 - (2 * rolling_std)
+                    if (self.bb_upper - self.bb_lower) != 0:
+                        self.bb_pct_b = (price - self.bb_lower) / (self.bb_upper - self.bb_lower)
+                    else:
+                        self.bb_pct_b = 0.5
+                        
+                    self.today_volume = float(volume.iat[-1])
+                    self.avg_volume_14d = float(volume.rolling(14).mean().iat[-1])
+         
+                    ticker_obj = yf.Ticker(self.stock_id)
+                    self.next_earnings_date = self.fetch_next_event_date(ticker_obj)
+                    
+                    self.target_price = ticker_obj.info.get('targetMeanPrice', 0)
+                    self.previous_close = ticker_obj.info.get('previousClose', 0)
+                    self.num_analysts = ticker_obj.info.get('numberOfAnalystOpinions', 0)
+                    
+                    self.db_manager.update_cached_indicators(
+                        self.stock_id, self.fourteen_day_high, self.fourteen_day_low,
+                        self.rsi_value, self.adx_value, self.bb_upper, self.bb_middle, self.bb_lower,
+                        self.ma_signal, self.macd_signal,
+                        self.next_earnings_date, self.today_volume, self.avg_volume_14d,
+                        self.previous_close, self.target_price, self.num_analysts
+                    )
+                    
+                    self.update_analyst_data(run_async=False)
+                    
+                except Exception as e:
+                    logger.error(f"Indicators background error for {self.stock_id}: {e}")
+                finally:
+                    self._fetching_indicators = False
+            
+            executor.submit(fetch_task)
 
     def get_ma200(self):
         """
@@ -1080,23 +1101,7 @@ class TradingBot:
         now = time.time()
         if hasattr(self, '_cached_ma200') and now - getattr(self, '_ma200_last_update', 0) < 1800:  # 30 min cache
             return self._cached_ma200
-
-        try:
-            ticker = yf.Ticker(self.stock_id)
-            hist = ticker.history(period="300d")  # Need 300+ days for MA200
-            if len(hist) < 200:
-                # Not enough data → use MA50 as proxy
-                ma200 = hist['Close'].rolling(50).mean().iloc[-1]
-            else:
-                ma200 = hist['Close'].rolling(200).mean().iloc[-1]
-
-            self._cached_ma200 = float(ma200)
-            self._ma200_last_update = now
-            return float(ma200)
-
-        except Exception as e:
-            logger.error(f"MA200 fetch failed for {self.stock_id}: {e}")
-            return self.market_value  # fallback to current price
+        return getattr(self, '_cached_ma200', self.market_value)
         
     def get_atr_14(self):
         """
@@ -1104,34 +1109,10 @@ class TradingBot:
         Cached for performance — only recalculates when needed.
         """
         now = time.time()
-        # Reuse cached value if recent (avoid recalculating every second)
-        if hasattr(self, '_cached_atr_14') and now - self._atr_last_update < 300:
+        if hasattr(self, '_cached_atr_14') and now - getattr(self, '_atr_last_update', 0) < 300:
             return self._cached_atr_14
+        return getattr(self, '_cached_atr_14', 1.0)
 
-        try:
-            ticker = yf.Ticker(self.stock_id)
-            hist = ticker.history(period="60d")
-            if len(hist) < 15:
-                atr = 1.0  # fallback
-            else:
-                high = hist['High']
-                low = hist['Low']
-                close = hist['Close']
-
-                tr0 = abs(high - low)
-                tr1 = abs(high - close.shift())
-                tr2 = abs(low - close.shift())
-                tr = pd.concat([tr0, tr1, tr2], axis=1).max(axis=1)
-                atr = tr.rolling(14).mean().iloc[-1]
-
-            # Cache result
-            self._cached_atr_14 = float(atr)
-            self._atr_last_update = now
-            return float(atr)
-
-        except Exception as e:
-            logger.error(f"ATR fetch failed for {self.stock_id}: {e}")
-            return 1.0  # safe fallback
         
     def fetch_next_event_date(self, ticker):
         # ---- 1. Earnings (only for stocks) --------------------------------
@@ -1168,6 +1149,12 @@ class TradingBot:
         interval = self.yf_fetch_interval_open if self.is_market_open() else self.yf_fetch_interval_closed
         if now - self.last_yf_fetch < interval:
             return self.market_value
+        
+        if getattr(self, '_fetching_market_value', False):
+            return self.market_value
+        self._fetching_market_value = True
+        self.last_yf_fetch = now
+
         def fetch():
             try:
                 ticker = yf.Ticker(self.stock_id)
@@ -1176,10 +1163,11 @@ class TradingBot:
                     price = hist['Close'].iloc[-1]
                     with self.ibapi.data_lock:
                         self.market_value = round(price, 2)
-                    self.last_yf_fetch = time.time()
                     self.db_manager.update_latest_price(self.stock_id, price)
             except:
                 pass
+            finally:
+                self._fetching_market_value = False
         executor.submit(fetch)
         return self.market_value
 
@@ -1193,9 +1181,10 @@ class TradingBot:
 
         # Calculate invested in EUR for THIS stock only
         if self.quantity > 0 and self.bought_price > 0:
-            usd_invested = self.quantity * self.bought_price
-            eur_rate = self.exchange_manager.get_eur_usd_rate()
-            eur_invested = usd_invested / eur_rate if eur_rate > 0 else usd_invested  # Fallback if rate=0
+            native_invested = self.quantity * self.bought_price
+            native_currency, _ = self.get_native_currency_and_exchange()
+            rate = self.exchange_manager.get_rate(native_currency)
+            eur_invested = native_invested / rate if rate > 0 else native_invested
         else:
             eur_invested = 0.0
 
@@ -1260,6 +1249,10 @@ class TradingBot:
             if self.csv_manager:
                 self.csv_manager.update_order_status(order_id, "FILLED")
 
+            # Update PDT Protector with new trades
+            if self.app and hasattr(self.app, 'pdt_protector'):
+                self.app.pdt_protector.register_day_trade_if_needed(self.stock_id)
+
             # Update last trade time
             if action == "BUY":
                 self.last_buy_time = time.time()
@@ -1285,7 +1278,7 @@ class TradingBot:
         symbol = self.stock_id.upper()
 
         if symbol.endswith(".L"):
-            return "EUR", "LSE"          # London
+            return "GBP", "LSE"          # London (Corrected to GBP)
         elif symbol.endswith(".PA"):
             return "EUR", "SBF"          # Paris
         elif symbol.endswith(".AS"):
@@ -1320,38 +1313,29 @@ class TradingBot:
         price_native = latest["price"]          # e.g. 156.77 USD, 124.50 GBP, 87.32 EUR
 
         # === 3. CONVERT AVAILABLE CASH TO NATIVE CURRENCY ===
-        eur_usd = self.exchange_manager.get_eur_usd_rate()   # e.g. 1.085
-
-        if native_currency == "EUR":
-            cash_native = self.cash_left * 0.98
-        elif native_currency == "USD":
-            cash_native = self.cash_left * 0.98 * eur_usd
-        else:
-            cash_native = self.cash_left * 0.98 * eur_usd   # fallback
+        rate = self.exchange_manager.get_rate(native_currency)
+        cash_native = self.cash_left * 0.98 * rate
 
         # === 4. CALCULATE QUANTITY ===
         quantity = int(cash_native / price_native)
-        if quantity < 3:
-            logger.warning(f"Low Cash €{self.cash_left:,.0f}")
+        if quantity < 1:
+            logger.warning(f"Low Cash €{self.cash_left:,.0f} (Quantity < 1)")
             return False
 
         # === 5. RESPECT MAX_AMOUNT (in EUR) AND AVAILABLE CASH ===
         total_cost_eur = quantity * price_native
-        if native_currency == "USD":
-            total_cost_eur = total_cost_eur / eur_usd
+        if native_currency != "EUR":
+            total_cost_eur = total_cost_eur / rate
 
-        # Use the MINIMUM of max_amount and actual available cash
+        # Use the MINIMUM of max_amount and available cash
         effective_limit = min(self.max_amount, self.cash_left, self.ibapi.available_cash) * self.CASH_BUFFER_MULTIPLIER
 
         if total_cost_eur > effective_limit:
             # Recalculate to stay under BOTH max_amount AND available cash
-            max_native = effective_limit
-            if native_currency == "USD":
-                max_native = max_native * eur_usd
-
+            max_native = effective_limit * rate
             quantity = int(max_native / price_native)
-            if quantity < 3:
-                logger.warning(f"Insufficient funds")
+            if quantity < 1:
+                logger.warning(f"Insufficient funds (Quantity < 1)")
                 return False
 
         # === 6. BUILD REASON ===
@@ -1423,10 +1407,6 @@ class TradingBot:
         if not self.is_market_open() or self.has_pending_order() or self.quantity == 0:
             return False
         
-        if not self.app.pdt_protector.can_trade():
-                logger.warning(f"PDT protection blocked SELL {self.stock_id}")
-                return False
-
         latest = self.db_manager.get_latest_price(self.stock_id)
         if not latest or time.time() - latest["fetched_at"] > 30:
             return False
@@ -1436,6 +1416,7 @@ class TradingBot:
 
         reason = f"PROFIT {self.pnl_percent:.1f}% | Score:{self.smart_score} | RSI:{self.rsi_value:.0f}"
 
+        # === 1. BUILD CONTRACT ===
         contract = Contract()
         contract.symbol = self.ibkr_symbol
         contract.secType = "STK"
@@ -1443,6 +1424,7 @@ class TradingBot:
         contract.currency = native_currency
         contract.primaryExchange = primary_exchange
 
+        # === 2. CREATE ORDER ===
         order = Order()
         order.action = "SELL"
         order.orderType = "MKT"
@@ -1452,8 +1434,9 @@ class TradingBot:
         order.tif = "DAY"
         order.transmit = True
 
+        # === 3. SEND ORDER ===
         oid = self.ibapi.get_next_order_id()
-        # Register callback
+        # Register callback for when order completes
         self.ibapi.order_callbacks[oid] = lambda order_id, status, filled, avg_price: self._on_order_completed(
             order_id=order_id,
             status=status,
@@ -1474,23 +1457,28 @@ class TradingBot:
         # ONLY save with "Pending" status
         if self.csv_manager:
             self.csv_manager.save_order(
-                oid, self.stock_id, "SELL", self.quantity,
-                price_native, native_currency, "Pending", reason
+                order_id=oid,
+                stock_id=self.stock_id,
+                action="SELL",
+                quantity=self.quantity,
+                price=price_native,
+                currency=native_currency,
+                status="Pending",
+                reason=reason
             )
 
         logger.info(f"SELL {self.quantity} {self.stock_id} @ {price_native:.2f} {native_currency}")
         
-        self.app.pdt_protector.register_day_trade_if_needed(self.stock_id)
         return True
     
-    def update_analyst_data(self):
+    def update_analyst_data(self, run_async=True):
         # 1. Skip for assets without analyst coverage
         if self.asset_type in ["ETF", "ETC"]:
             self.analyst_data = []
             return
 
         # 2. Get Bank Data (Tier 1)
-        bank_target, bank_source, bank_date = self.get_bank_note()
+        bank_target, bank_source, bank_date = self.get_bank_note(run_async=run_async)
 
         # 3. Get yfinance Data (Tier 2) + Estimate Date
         try:
@@ -1721,6 +1709,7 @@ class TradingBot:
             self.score_reason = "Insufficient Data"
             return
 
+        self.score_reason = ""
         ma200 = self.get_ma200()
         
         # --- FACTOR 1: MARKET STRUCTURE (Trend) ---
@@ -1740,8 +1729,6 @@ class TradingBot:
         elif self.rsi_value < 40: dip_points += 2
         
         # 2. Bollinger Bands (Volatility) - Max 3 points
-        # Using %B calculated earlier. If price is near/below lower band.
-        # If you haven't implemented %B yet, assume < 0.05 is "touching lower band"
         if hasattr(self, 'bb_pct_b'):
             if self.bb_pct_b < 0:      dip_points += 3  # Below Lower Band (Extreme)
             elif self.bb_pct_b < 0.1:  dip_points += 2  # Touching Lower Band
@@ -1760,7 +1747,6 @@ class TradingBot:
         elif "BULL" in self.macd_signal: mom_points += 2
         
         # 2. ADX (Trend Strength) - Max 2 points
-        # Momentum needs a strong trend, not choppy market
         if self.adx_value > 25: mom_points += 1
         if self.adx_value > 35: mom_points += 1
         
@@ -1798,9 +1784,11 @@ class TradingBot:
         final_target = bank_target if bank_target else self.target_price
 
         if final_target and final_target > 0 and self.market_value > 0:
-            # Currency Normalization (Handles GBp vs GBP)
             temp_target = final_target
-            if self.market_value > 10 and temp_target < 10:
+            # Currency Normalization (Handles GBp vs GBP)
+            if self.stock_id.upper().endswith(".L") and self.market_value > temp_target * 10:
+                temp_target = temp_target * 100
+            elif self.market_value > 10 and temp_target < 10:
                 temp_target = temp_target * 100
 
             # --- COMBINED UNDER/OVERVALUATION LOGIC ---
@@ -1828,26 +1816,23 @@ class TradingBot:
                 self.score_reason += " [Bank Target: -1 (Above Target)]"
 
         # --- FINAL SCORE CALCULATION ---
-        # Add the technical base score + analyst modifier + target bonus
         self.smart_score = self.base_score + analyst_mod + target_bonus
 
-        
         # Cap limits
         self.smart_score = max(0, min(12, int(self.smart_score)))
         
-        self.score_reason = f"[{current_strategy}] Base:{self.base_score} {analyst_note}"
+        bonus_reason = self.score_reason
+        self.score_reason = f"[{current_strategy}] Base:{self.base_score} {analyst_note}{bonus_reason}".strip()
         return self.smart_score
          
     def check_trading_conditions(self):
         
-        self.update_analyst_data()
+        self.update_analyst_data(run_async=True)
         if self.manual_mode:
             return None # Skip all automated logic
         
         # Safety guards
         if self.fourteen_day_high <= 0 or self.market_value <= 0:
-            return None
-        if self.quantity > 0 and time.time() - self.last_buy_time < 1800:  # Min 30 min hold
             return None
 
         # Update dynamic target
@@ -1863,20 +1848,7 @@ class TradingBot:
         # Run Score Calculation
         self.calculate_score()
 
-        # Earnings check (skip 3 days before, 2 after)
-        earnings_ok = True
-        if self.next_earnings_date and self.next_earnings_date != "No payment":
-            earn_date = datetime.strptime(self.next_earnings_date, "%Y-%m-%d").date()
-            days = (earn_date - datetime.now().date()).days
-            if -2 <= days <= 3:
-                earnings_ok = False
-
-        # Cooldown check
-        now = time.time()
-        if now - self.last_buy_time < 172800 or now - self.last_sell_time < 172800:  # 48 hours
-            return None
-
-        # -- SELL LOGIC --
+        # -- SELL LOGIC (Exempt from cooldowns, prioritised) --
         if self.quantity > 0:
             # 1. Take Profit (Dynamic)
             if self.pnl_percent >= self.dynamic_profit_target * 100:
@@ -1888,18 +1860,31 @@ class TradingBot:
             return None
 
         # -- BUY LOGIC --
-        if not self.is_market_open() or min(self.cash_left,self.ibapi.available_cash) < self.MIN_CASH_FOR_BUY or not earnings_ok:
+        
+        # 1. Cooldown checks for BUY
+        now = time.time()
+        if now - self.last_buy_time < 172800 or now - self.last_sell_time < 172800:  # 48 hours
+            return None
+
+        if self.quantity > 0 and now - self.last_buy_time < 1800:  # Min 30 min hold
+            return None
+
+        # 2. Earnings check (skip 3 days before, 2 after)
+        earnings_ok = True
+        if self.next_earnings_date and self.next_earnings_date != "No payment":
+            earn_date = datetime.strptime(self.next_earnings_date, "%Y-%m-%d").date()
+            days = (earn_date - datetime.now().date()).days
+            if -2 <= days <= 3:
+                earnings_ok = False
+
+        if not self.is_market_open() or min(self.cash_left, self.ibapi.available_cash) < self.MIN_CASH_FOR_BUY or not earnings_ok:
             return None
         
         current_strategy = "DIP" if "DIP" in self.score_reason else "MOMENTUM"
         
         # 1. DIP STRATEGY TRIGGER
-        # We lower the score requirement to 7, but we ensure we aren't crashing hard
         if current_strategy == "DIP" and self.smart_score >= 7:
-            # Confirmation: Don't buy if today is a massive red candle (-3% or worse)
-            # unless RSI is EXTREME (<20)
             daily_drop = (self.market_value - self.previous_close) / self.previous_close
-            
             if daily_drop < -0.03 and self.rsi_value > 20:
                 return None # Catching a falling knife
             
@@ -1907,7 +1892,6 @@ class TradingBot:
             return 'BUY'
 
         # 2. MOMENTUM STRATEGY TRIGGER
-        # Score > 8 implies Strong Trend (ADX) + Volume + MACD
         if current_strategy == "MOMENTUM" and self.smart_score >= 8:
             self.score_reason += " (Momentum Entry)"
             return 'BUY'
@@ -1935,6 +1919,29 @@ class PDTProtector:
     def __init__(self, db_manager):
         self.db = db_manager
         self.day_trades = collections.deque()
+        self._load_history()
+
+    def _load_history(self):
+        self.day_trades.clear()
+        cutoff = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            with self.db.get_cursor() as cur:
+                cur.execute("""
+                    SELECT t1.timestamp FROM trading_history t1
+                    WHERE t1.action = 'SELL' AND t1.timestamp >= ?
+                    AND t1.stock_id IN (
+                        SELECT t2.stock_id FROM trading_history t2
+                        WHERE t2.action = 'BUY' AND DATE(t2.timestamp) = DATE(t1.timestamp)
+                    )
+                    ORDER BY t1.timestamp ASC
+                """, (cutoff,))
+                rows = cur.fetchall()
+                for row in rows:
+                    dt = datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S')
+                    self.day_trades.append(dt)
+            logger.info(f"PDT Protector: Loaded {len(self.day_trades)} day trades from the last 7 days.")
+        except Exception as e:
+            logger.error(f"Failed to load PDT history: {e}")
 
     def _cleanup(self):
         cutoff = datetime.now() - timedelta(days=7)
@@ -1945,22 +1952,8 @@ class PDTProtector:
         self._cleanup()
         return len(self.day_trades)
 
-    def register_day_trade_if_needed(self, symbol):
-        # Call this after every successful SELL
-        today = datetime.now().date()
-        with self.db.get_cursor() as cur:
-            cur.execute("""
-                SELECT action FROM trading_history 
-                WHERE stock_id = ? AND DATE(timestamp) = DATE('now')
-                ORDER BY timestamp
-            """, (symbol,))
-            trades = [row[0] for row in cur.fetchall()]
-
-        # If we had BUY → SELL same day → it's a day trade
-        if len(trades) >= 2 and trades[0] == 'Buy' and trades[-1] == 'Sell':
-            if not self.day_trades or self.day_trades[-1].date() != today:
-                self.day_trades.append(datetime.now())
-                logger.warning(f"DAY TRADE recorded for {symbol} → Total in 5d: {self.count_day_trades_5d()}/3")
+    def register_day_trade_if_needed(self, symbol=None):
+        self._load_history()
 
     def can_trade(self):
         count = self.count_day_trades_5d()
@@ -1968,6 +1961,17 @@ class PDTProtector:
             logger.error(f"PDT LIMIT REACHED ({count}/3) ALL TRADES BLOCKED")
             return False
         return True
+
+def format_currency_short(val, sym="€"):
+    if val is None:
+        return "--"
+    abs_val = abs(val)
+    sign = "-" if val < 0 else ""
+    if abs_val >= 1000:
+        val_str = f"{abs_val/1000:.1f}k" if abs_val % 1000 != 0 else f"{abs_val/1000:.0f}k"
+        return f"{sign}{sym}{val_str}"
+    return f"{sign}{sym}{abs_val:.0f}"
+
             
 # ==================== MAIN GUI ====================
 class TradingApp(QMainWindow):
@@ -2043,8 +2047,10 @@ class TradingApp(QMainWindow):
                 continue
             val = bot.current_value  # In bot's local currency (from yf)
             curr = bot.currency.upper()
-            if curr == "USD":
-                val *= usd_to_eur
+            if curr != "EUR":
+                rate = self.exchange_manager.get_rate(curr)
+                if rate > 0:
+                    val = val / rate
 
             if bot.asset_type == "STOCK":
                 stock_val += val
@@ -2168,175 +2174,260 @@ class TradingApp(QMainWindow):
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
 
+        # Style sheet for standard buttons
+        common_button_style = """
+            QPushButton {
+                background-color: #34495e;
+                color: white;
+                font-weight: bold;
+                border-radius: 4px;
+                padding: 5px 12px;
+                border: 1px solid #2c3e50;
+            }
+            QPushButton:hover {
+                background-color: #415b76;
+            }
+            QPushButton:pressed {
+                background-color: #2c3e50;
+            }
+            QPushButton:disabled {
+                background-color: #7f8c8d;
+                color: #bdc3c7;
+            }
+        """
+
         conn_frame = QGroupBox("IBKR Connection")
-        conn_layout = QHBoxLayout()
+        conn_main_layout = QVBoxLayout()
         
-        conn_layout.addWidget(QLabel("Host:"))
+        # Row 1: Connection controls
+        conn_row_layout = QHBoxLayout()
+        
+        conn_row_layout.addWidget(QLabel("Host:"))
         self.host_edit = QLineEdit(ENV["IBKR_HOST"])
         self.host_edit.setFixedWidth(80)
-        conn_layout.addWidget(self.host_edit)
+        conn_row_layout.addWidget(self.host_edit)
         
-        conn_layout.addWidget(QLabel("Port:"))  
-        self.port_edit = QLineEdit(ENV["IBKR_PORT"])   #For real account      
+        conn_row_layout.addWidget(QLabel("Port:"))  
+        self.port_edit = QLineEdit(ENV["IBKR_PORT"])
         self.port_edit.setFixedWidth(80)
-        conn_layout.addWidget(self.port_edit)
+        conn_row_layout.addWidget(self.port_edit)
         
-        conn_layout.addWidget(QLabel("Client:"))
+        conn_row_layout.addWidget(QLabel("Client:"))
         self.client_edit = QLineEdit(ENV["IBKR_CLIENT_ID"])
-        self.client_edit.setFixedWidth(19)
-        conn_layout.addWidget(self.client_edit)
+        self.client_edit.setFixedWidth(30)
+        conn_row_layout.addWidget(self.client_edit)
         
         self.auto_connect_cb = QCheckBox("Auto‑connect")
-        self.auto_connect_cb.setChecked(True)      # default = ON
-        conn_layout.addWidget(self.auto_connect_cb)
+        self.auto_connect_cb.setChecked(True)
+        conn_row_layout.addWidget(self.auto_connect_cb)
     
         self.conn_btn = QPushButton("Connect")
+        self.conn_btn.setStyleSheet(common_button_style)
         self.conn_btn.clicked.connect(self.toggle_connection)
-        conn_layout.addWidget(self.conn_btn)
+        conn_row_layout.addWidget(self.conn_btn)
         
         self.status_label = QLabel("Disconnected")
         self.status_label.setStyleSheet("color: red; font-weight: bold;")
-        conn_layout.addWidget(self.status_label)
+        conn_row_layout.addWidget(self.status_label)
         
-        # Push everything after this to the right
-        conn_layout.addStretch()
-                
-        self.rate_label = QLabel("EUR/USD: --")
-        conn_layout.addWidget(self.rate_label)
-        
-        self.csv_btn = QPushButton("View CSV")
-        self.csv_btn.clicked.connect(self.open_csv)
-        conn_layout.addWidget(self.csv_btn)
+        conn_row_layout.addSpacing(15)
         
         self.trade_btn = QPushButton("Start Trading")
+        self.trade_btn.setStyleSheet(common_button_style)
         self.trade_btn.clicked.connect(self.toggle_trading)
         self.trade_btn.setEnabled(False)
-        conn_layout.addWidget(self.trade_btn)
+        conn_row_layout.addWidget(self.trade_btn)
         
         self.trade_status_label = QLabel("Manual")
         self.trade_status_label.setStyleSheet("color: red; font-weight: bold;")
-        conn_layout.addWidget(self.trade_status_label)
-
-        conn_frame.setLayout(conn_layout)
+        conn_row_layout.addWidget(self.trade_status_label)
+        
+        conn_row_layout.addStretch()
+                
+        self.csv_btn = QPushButton("View CSV")
+        self.csv_btn.setStyleSheet(common_button_style)
+        self.csv_btn.clicked.connect(self.open_csv)
+        conn_row_layout.addWidget(self.csv_btn)
+        
+        conn_main_layout.addLayout(conn_row_layout)
+        
+        # Row 2: Portfolio Dashboard Banner
+        dash_row_layout = QHBoxLayout()
+        
+        self.portfolio_label = QLabel("Total Value: €--  |  Cash: €--  |  Portfolio: €--  |  Allocation: --")
+        self.portfolio_label.setStyleSheet("font-size: 13px; font-weight: 500; color: #dfdfdf;")
+        dash_row_layout.addWidget(self.portfolio_label)
+        
+        dash_row_layout.addStretch()
+        
+        self.rate_label = QLabel("EUR/USD: --")
+        self.rate_label.setStyleSheet("font-size: 13px; font-weight: bold; color: #3498db;")
+        dash_row_layout.addWidget(self.rate_label)
+        
+        conn_main_layout.addLayout(dash_row_layout)
+        conn_frame.setLayout(conn_main_layout)
         layout.addWidget(conn_frame)
 
         self.table = QTableWidget()
         self.table.setColumnCount(28)
-        # enable wrapping for the whole table
         self.table.setWordWrap(True)                 
+        self.table.setStyleSheet("""
+            QTableWidget {
+                background-color: #121212;
+                gridline-color: #2c3e50;
+                color: #ffffff;
+                font-size: 10px;
+            }
+            QTableWidget::item {
+                padding: 1px 3px;
+            }
+            QHeaderView::section {
+                background-color: #2c3e50;
+                color: #ffffff;
+                font-size: 10px;
+                font-weight: bold;
+                padding: 2px 3px;
+                border: 1px solid #1d1d1d;
+            }
+        """)
         headers = [
             "Company", "Sym", "Type", "Sector",
-            "Price","Price%", "TPrice", "Bank Note", "Score", "14H", "14L", "RSI", "ADX", "MA", "MACD", "Volume",
-            "Qty", "Buy@", "Value", "P&L%", "Left", "Max", "Profit","~Profit", "Drop","~Drop", "Earn Date", "Status"
+            "Price", "Chg%", "Target", "Bank Target", "Score", "14H", "14L", "RSI", "ADX", "MA", "MACD", "Vol(M)",
+            "Qty", "Buy@", "Value", "P&L%", "Left", "Max", "TP%", "DynTP", "SL%", "DynSL", "Earnings", "Status"
         ]
 
-        # --- Headers bold ---
         self.table.setHorizontalHeaderLabels(headers)
         font = QFont()
         font.setBold(True)
         self.table.horizontalHeader().setFont(font)
 
         self.table.setColumnHidden(3, True)  # Hide Sector column
-        self.table.setColumnHidden(2, True)  # Hide Sector column
+        self.table.setColumnHidden(2, True)  # Hide Type column
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.horizontalHeader().sectionClicked.connect(self.on_header_clicked)
-
-        # New: Connect to selection changed signal for custom highlighting
         self.table.itemSelectionChanged.connect(self.highlight_selected_row)
 
-        column_widths = [120, 50, 50, 80, 60, 55, 55, 140, 50, 60, 60, 30, 30, 50, 50, 50, 40, 50, 50, 55, 50, 50, 50, 50, 40, 50, 80, 60]
+        column_widths = [110, 42, 50, 80, 46, 46, 46, 105, 32, 45, 45, 25, 25, 45, 45, 40, 30, 45, 45, 48, 45, 45, 40, 40, 35, 40, 68, 52]
         for i, w in enumerate(column_widths):
             if w:
                 self.table.setColumnWidth(i, w)
             else:
-                self.table.horizontalHeader().setSectionResizeMode(
-                    i, QHeaderView.ResizeMode.Stretch)
+                self.table.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.Stretch)
 
         layout.addWidget(self.table)
 
         input_frame = QGroupBox("Stock Settings")
-        input_layout = QHBoxLayout()
+        input_main_layout = QVBoxLayout()
         
-        input_layout.addWidget(QLabel("Symbol:"))
+        # Row 1: Inputs
+        row1_layout = QHBoxLayout()
+        row1_layout.addWidget(QLabel("Symbol:"))
         self.sym_edit = QLineEdit()
         self.sym_edit.setFixedWidth(80)
-        input_layout.addWidget(self.sym_edit)
+        row1_layout.addWidget(self.sym_edit)
         
-        input_layout.addWidget(QLabel("MaxEUR:"))
+        row1_layout.addWidget(QLabel("MaxEUR:"))
         self.max_edit = QLineEdit("0")
         self.max_edit.setFixedWidth(80)
-        input_layout.addWidget(self.max_edit)
+        row1_layout.addWidget(self.max_edit)
         
-        input_layout.addWidget(QLabel("Profit%:"))
+        row1_layout.addWidget(QLabel("Profit%:"))
         self.profit_edit = QLineEdit("5")
         self.profit_edit.setFixedWidth(80)
-        input_layout.addWidget(self.profit_edit)
+        row1_layout.addWidget(self.profit_edit)
         
-        input_layout.addWidget(QLabel("Drop%:"))
+        row1_layout.addWidget(QLabel("Drop%:"))
         self.drop_edit = QLineEdit("5")
         self.drop_edit.setFixedWidth(80)
-        input_layout.addWidget(self.drop_edit)
+        row1_layout.addWidget(self.drop_edit)
         
-        # Push everything after this to the right
-        input_layout.addStretch()
-
-        self.add_btn = QPushButton("Add")
+        row1_layout.addStretch()
+        input_main_layout.addLayout(row1_layout)
+        
+        # Row 2: Action Buttons
+        row2_layout = QHBoxLayout()
+        
+        self.add_btn = QPushButton("Add Stock")
+        self.add_btn.setStyleSheet(common_button_style)
         self.add_btn.clicked.connect(self.add_stock)
-        input_layout.addWidget(self.add_btn)
+        row2_layout.addWidget(self.add_btn)
         
-        self.apply_btn = QPushButton("Apply")
+        self.apply_btn = QPushButton("Apply Settings")
+        self.apply_btn.setStyleSheet(common_button_style)
         self.apply_btn.clicked.connect(self.apply_changes)
-        input_layout.addWidget(self.apply_btn)
+        row2_layout.addWidget(self.apply_btn)
         
-        self.remove_btn = QPushButton("Remove")
+        self.remove_btn = QPushButton("Remove Stock")
+        self.remove_btn.setStyleSheet(common_button_style)
         self.remove_btn.clicked.connect(self.remove_stock)
-        input_layout.addWidget(self.remove_btn)
+        row2_layout.addWidget(self.remove_btn)
         
-        self.buy_btn = QPushButton("BUY")
+        row2_layout.addSpacing(25)
+        row2_layout.addStretch()
+        
+        self.buy_btn = QPushButton("Manual BUY")
         self.buy_btn.setStyleSheet("""
             QPushButton {
                 background-color: #2ecc71;
                 color: white;
                 font-weight: bold;
+                border-radius: 4px;
+                padding: 5px 12px;
+                min-width: 85px;
             }
             QPushButton:hover {
                 background-color: #27ae60;
             }
+            QPushButton:pressed {
+                background-color: #1e8449;
+            }
         """)
         self.buy_btn.clicked.connect(self.handle_manual_buy)
-        input_layout.addWidget(self.buy_btn)
+        row2_layout.addWidget(self.buy_btn)
 
-
-        self.sell_btn = QPushButton("SELL")
+        self.sell_btn = QPushButton("Manual SELL")
         self.sell_btn.setStyleSheet("""
             QPushButton {
                 background-color: #e74c3c;
                 color: white;
                 font-weight: bold;
+                border-radius: 4px;
+                padding: 5px 12px;
+                min-width: 85px;
             }
             QPushButton:hover {
                 background-color: #c0392b;
             }
+            QPushButton:pressed {
+                background-color: #922b21;
+            }
         """)
         self.sell_btn.clicked.connect(self.handle_manual_sell)
-        input_layout.addWidget(self.sell_btn)
+        row2_layout.addWidget(self.sell_btn)
 
-        self.hold_btn = QPushButton("HOLD")
+        self.hold_btn = QPushButton("Toggle HOLD")
         self.hold_btn.setStyleSheet("""
             QPushButton {
                 background-color: #f1c40f;
                 color: black;
                 font-weight: bold;
+                border-radius: 4px;
+                padding: 5px 12px;
+                min-width: 85px;
             }
             QPushButton:hover {
                 background-color: #f39c12;
             }
+            QPushButton:pressed {
+                background-color: #d68910;
+            }
         """)
         self.hold_btn.clicked.connect(self.handle_manual_hold)
-        input_layout.addWidget(self.hold_btn)
+        row2_layout.addWidget(self.hold_btn)
 
-        input_frame.setLayout(input_layout)
+        input_main_layout.addLayout(row2_layout)
+        input_frame.setLayout(input_main_layout)
         layout.addWidget(input_frame)
 
     def highlight_selected_row(self):
@@ -2389,18 +2480,38 @@ class TradingApp(QMainWindow):
             market_open = any(bot.is_market_open() for bot in self.bots.values())
             interval = self.ibapi.cash_fetch_interval if market_open else self.ibapi.max_cash_cache_age
             if now - self.ibapi.last_cash_fetch >= interval:
-                self.ibapi.cancelAccountSummary(9001)
-                time.sleep(0.5)  # Give TWS time to process
-                self.ibapi.cash_ready_event.clear()
-                self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds")
-                if self.ibapi.cash_ready_event.wait(15):  # Increase timeout to 15s
-                    self.ibapi.last_cash_fetch = time.time()
+                self.ibapi.last_cash_fetch = now
+                def fetch_cash():
+                    try:
+                        self.ibapi.cancelAccountSummary(9001)
+                        time.sleep(0.5)
+                        self.ibapi.cash_ready_event.clear()
+                        self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds")
+                        self.ibapi.cash_ready_event.wait(15)
+                    except Exception as e:
+                        logger.error(f"Error fetching cash summary in background: {e}")
+                executor.submit(fetch_cash)
 
             # ---------- 2. EUR/USD ----------
             rate = self.exchange_manager.get_eur_usd_rate()
             self.rate_label.setText(f"EUR/USD: {rate:.3f}")
 
             # ---------- 3. CONNECTION + CASH + PORTFOLIO + TOTAL ----------
+            if self.ibapi and hasattr(self.ibapi, 'isConnected'):
+                self.connected = self.ibapi.isConnected()
+
+            # Synchronize connection controls and trade button status based on actual connection status
+            if self.connected:
+                self.conn_btn.setText("Disconnect")
+                self.conn_btn.setEnabled(True)
+                if not self.auto_trading:
+                    self.trade_btn.setEnabled(True)
+            else:
+                self.conn_btn.setText("Connect")
+                if self.status_label.text() != "Connecting...":
+                    self.conn_btn.setEnabled(True)
+                self.trade_btn.setEnabled(False)
+
             cash_val   = self.ibapi.available_cash if self.connected else 0.0
             port_val   = self.ibapi.portfolio_value if self.connected else 0.0
             total_val  = cash_val + port_val
@@ -2416,10 +2527,16 @@ class TradingApp(QMainWindow):
             conn_text = "Connected" if self.connected else "Disconnected"
             conn_color = "green" if self.connected else "red"
 
-            self.status_label.setText(
-                f"{conn_text} – Total: €{total_str} – Cash: €{cash_str} – Portfolio: €{port_str} ({comp_str})"
-            )
+            self.status_label.setText(conn_text)
             self.status_label.setStyleSheet(f"color: {conn_color}; font-weight: bold;")
+
+            if self.connected:
+                self.portfolio_label.setText(
+                    f"Total Value: <b>€{total_str}</b>  |  Cash: <b>€{cash_str}</b>  |  "
+                    f"Portfolio: <b>€{port_str}</b>  |  Allocation: <b>{comp_str}</b>"
+                )
+            else:
+                self.portfolio_label.setText("Total Value: €--  |  Cash: €--  |  Portfolio: €--  |  Allocation: --")
             # ---------- 4. TABLE ----------
             selected_symbol = None
             selected_items = self.table.selectedItems()
@@ -2437,22 +2554,13 @@ class TradingApp(QMainWindow):
                 bot.update_position()
                 bot.calculate_technical_indicators()
                 bot.check_trading_conditions()
-                
-                # --- NEW: Explicitly calculate score for UI ---
                 bot.calculate_score()
                 
                 status = bot.get_status()
-                volume_display = f"{bot.today_volume / 1e6:.2f}"
+                volume_display = f"{bot.today_volume / 1e6:.1f}"
                 # 1. Format the TPrice string with the warning emoji
                 if bot.target_price > 0:
                     t_price_display = f"{bot.currency_symbol}{bot.target_price:.2f}"
-
-                    # num_analysts = getattr(bot, 'num_analysts', 0)
-                    # # Add warning if reliability is low (less than 3 analysts)
-                    # if num_analysts < 3:
-                    #     t_price_display = f"⚠️ {t_price_str} ({num_analysts})"
-                    # else:
-                    #     t_price_display = f"{t_price_str} ({num_analysts})"
                 else:
                     t_price_display = "--"
                 
@@ -2460,14 +2568,12 @@ class TradingApp(QMainWindow):
                 # Retrieve data from the bot
                 bank_target_long = getattr(bot, 'latest_bank_target', 0)
                                 
-                # 1. Determine Currency Symbol (Optional: can be dynamic based on bot.currency)
-                # If your bot has a currency attribute, use that, otherwise default to $
+                # 1. Determine Currency Symbol
                 currency_sym = "$" 
                 if ".L" in bot.stock_id: currency_sym = "£"
                 if ".PA" in bot.stock_id or ".DE" in bot.stock_id: currency_sym = "€"
 
-                # 2. Format the Price: remove .00 by formatting as a 'general' number
-                # {bank_target_long:g} removes trailing zeros. 
+                # 2. Format the Price: remove .00
                 bank_target = f"{bank_target_long:g}" if bank_target_long else ""
                 
                 bank_name_long = getattr(bot, 'latest_bank_source', "--")
@@ -2476,24 +2582,56 @@ class TradingApp(QMainWindow):
                     "JPMorgan Chase & Co.": "JPM",
                     "Goldman Sachs": "GS",
                     "Barclays": "BCS",
+                    "Deutsche Bank": "DB",
+                    "Bank of America": "BofA",
+                    "Citigroup": "Citi",
+                    "Credit Suisse": "CS",
+                    "HSBC": "HSBC",
+                    "RBC Capital Markets": "RBC",
+                    "KeyBanc": "Key",
+                    "Berenberg": "BER",
+                    "Jefferies": "JEF",
+                    "Wells Fargo": "WFC",
+                    "Piper Sandler": "PIP",
+                    "Truist Securities": "TUI",
+                    "Bernstein": "AB",
+                    "Mizuho": "MIZ",
+                    "Nomura": "NOM",
+                    "Susquehanna": "SUS",
+                    "Evercore ISI": "EVR",
+                    "Raymond James": "RJ",
+                    "Canaccord Genuity": "CG",
+                    "Stifel": "SF",
+                    "BMO Capital Markets": "BMO",
+                    "Oppenheimer": "OPP",
+                    "Wedbush": "WED",
+                    "Cowen": "COW",
+                    "Needham": "NDM",
+                    "Craig-Hallum": "CH",
+                    "Roth Capital": "ROTH",
+                    "Northland": "NLD",
+                    "Loop Capital": "LOOP",
+                    "Guggenheim": "GUG",
+                    "Rosenblatt": "ROS",
+                    "Benchmark": "BNC",
+                    "Colliers Securities": "COL",
                 }
                 bank_name = abbr_map.get(bank_name_long, bank_name_long)
 
                 bank_date = getattr(bot, 'latest_bank_date', "")
 
-                # Create the consolidated string: "315.0 Morgan Stanley (2025-12-17)"
-                if bank_target and bank_date and bank_date != "--":
-                    bank_note = f"{currency_sym}{bank_target} {bank_name} ({bank_date})"
+                short_date = bank_date
+                if len(bank_date) == 10 and bank_date[4] == '-' and bank_date[7] == '-':
+                    short_date = bank_date[5:]  # Get "MM-DD"
+
+                # Create the consolidated string
+                if bank_target and short_date and short_date != "--":
+                    bank_note = f"{currency_sym}{bank_target} {bank_name} ({short_date})"
                 elif bank_target:
                     bank_note = f"{currency_sym}{bank_target} {bank_name}"
                 else:
-                    bank_note = bank_name # Falls back to "N/A"
+                    bank_note = bank_name
 
-                # Set the item in ONE column (Column 6)
-                note_item = QTableWidgetItem(bank_note)
-                note_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.table.setItem(row, 8, note_item)
-                
                 # Calcul de la variation journalière
                 if bot.previous_close > 0:
                     price_pct = ((bot.market_value - bot.previous_close) / bot.previous_close) * 100
@@ -2502,8 +2640,15 @@ class TradingApp(QMainWindow):
                     
                 if bot.manual_mode:
                     status = "Hold"
+
+                earn_display = bot.next_earnings_date or '--'
+                if earn_display and len(earn_display) == 10 and earn_display[4] == '-' and earn_display[7] == '-':
+                    earn_display = earn_display[5:]
+
+                comp_name_display = bot.company_name[:12] + ".." if len(bot.company_name) > 14 else bot.company_name
+
                 items = [
-                    bot.company_name[:25], sid, bot.asset_type, bot.sector,
+                    comp_name_display, sid, bot.asset_type, bot.sector,
                     f"{bot.currency_symbol}{bot.market_value:.2f}",  
                     f"{price_pct:+.2f}%",
                     t_price_display,
@@ -2520,13 +2665,13 @@ class TradingApp(QMainWindow):
                     f"{bot.currency_symbol}{bot.bought_price:.2f}",
                     f"{bot.currency_symbol}{bot.current_value:.0f}",
                     f"{bot.pnl_percent:+.1f}%",
-                    f"€{bot.cash_left:,.0f}",
-                    f"€{bot.max_amount:,.0f}",
+                    format_currency_short(bot.cash_left, "€"),
+                    format_currency_short(bot.max_amount, "€"),
                     f"{bot.profit_target*100:.1f}%",
                     f"{bot.dynamic_profit_target*100:.1f}%",
                     f"{bot.drop_threshold*100:.1f}%",
                     f"{bot.dynamic_stop_loss:.1f}%",
-                    bot.next_earnings_date or '--',
+                    earn_display,
                     status
                 ]
 
@@ -2592,11 +2737,11 @@ class TradingApp(QMainWindow):
                             item.setForeground(QColor("green"))
                         elif bot.pnl_percent < 0:
                             item.setForeground(QColor("red"))
-                    elif col == 26:  # Earn Date column (index 24)
-                        if text != '--':
+                    elif col == 26:  # Earnings column
+                        if bot.next_earnings_date:
                             try:
-                                earn_date = datetime.strptime(text, "%Y-%m-%d").date()
-                                current_date = datetime.now().date()   # Use provided current date
+                                earn_date = datetime.strptime(bot.next_earnings_date, "%Y-%m-%d").date()
+                                current_date = datetime.now().date()
                                 delta = (earn_date - current_date).days
                                 if 0 <= delta <= 30:  # Within 30 days (including today)
                                     item.setForeground(QColor("green"))  # Warning color
@@ -2627,6 +2772,10 @@ class TradingApp(QMainWindow):
                     if symbol_item and symbol_item.text() == selected_symbol:
                         self.table.selectRow(row)
                         break
+
+            # Automatically and dynamically resize all columns to prevent text truncation
+            self.table.resizeColumnsToContents()
+
             self.table.verticalScrollBar().setValue(v_scroll)
             self.table.horizontalScrollBar().setValue(h_scroll)
         except Exception as e:
@@ -2647,34 +2796,62 @@ class TradingApp(QMainWindow):
         else:
             # ----- CONNECT -----
             host = self.host_edit.text().strip() or ENV["IBKR_HOST"]
-            try:
-                port = int(self.port_edit.text())
-            except ValueError:
-                port = int(ENV["IBKR_PORT"])
-            try:
-                cid = int(self.client_edit.text())
-            except ValueError:
-                cid = int(ENV["IBKR_CLIENT_ID"])
-            self.ibapi.connect(host, port, clientId=cid)
-            threading.Thread(target=self.ibapi.run, daemon=True).start()
+            self.status_label.setText("Connecting...")
+            self.status_label.setStyleSheet("color: orange; font-weight: bold;")
+            self.conn_btn.setEnabled(False)
+            
+            def connect_task():
+                try:
+                    try:
+                        port = int(self.port_edit.text())
+                    except ValueError:
+                        port = int(ENV["IBKR_PORT"])
+                    try:
+                        cid = int(self.client_edit.text())
+                    except ValueError:
+                        cid = int(ENV["IBKR_CLIENT_ID"])
+                    
+                    self.ibapi.connect(host, port, clientId=cid)
+                    threading.Thread(target=self.ibapi.run, daemon=True).start()
 
-            if self.ibapi.connected_event.wait(12):   # a little longer timeout
-                self.connected = True
-                self.status_label.setText("Connected")
-                self.status_label.setStyleSheet("color: green; font-weight: bold;")
-                self.conn_btn.setText("Disconnect")
-                self.trade_btn.setEnabled(True)
-                self.ibapi.reqPositions()
+                    if self.ibapi.connected_event.wait(12):
+                        self.connected = True
+                        try:
+                            self.ibapi.reqPositions()
+                        except Exception as e:
+                            logger.error(f"Error requesting positions: {e}")
+                        
+                        try:
+                            # ---- INITIAL CASH ----
+                            self.ibapi.cash_ready_event.clear()
+                            self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds")
+                            if self.ibapi.cash_ready_event.wait(8):
+                                self.ibapi.last_cash_fetch = time.time()
+                        except Exception as e:
+                            logger.error(f"Error requesting account summary: {e}")
+                        
+                        QTimer.singleShot(0, lambda: self._on_connect_success())
+                    else:
+                        QTimer.singleShot(0, lambda: self._on_connect_fail())
+                except Exception as e:
+                    logger.error(f"Connection task failed: {e}")
+                    self.connected = False
+                    QTimer.singleShot(0, lambda: self._on_connect_fail())
+                    
+            threading.Thread(target=connect_task, daemon=True).start()
 
-                # ---- INITIAL CASH ----
-                self.ibapi.cash_ready_event.clear()
-                self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds")
-                if self.ibapi.cash_ready_event.wait(8):
-                    self.ibapi.last_cash_fetch = time.time()
-            else:
-                self.status_label.setText("Conn. failed")
-                self.status_label.setStyleSheet("color: red; font-weight: bold;")
-                self.conn_btn.setText("Connect")
+    def _on_connect_success(self):
+        self.status_label.setText("Connected")
+        self.status_label.setStyleSheet("color: green; font-weight: bold;")
+        self.conn_btn.setText("Disconnect")
+        self.conn_btn.setEnabled(True)
+        self.trade_btn.setEnabled(True)
+
+    def _on_connect_fail(self):
+        self.status_label.setText("Conn. failed")
+        self.status_label.setStyleSheet("color: red; font-weight: bold;")
+        self.conn_btn.setText("Connect")
+        self.conn_btn.setEnabled(True)
 
     def toggle_trading(self):
         if self.auto_trading:
