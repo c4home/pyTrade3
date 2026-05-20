@@ -74,6 +74,19 @@ file_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
+def clean_company_name(name):
+    if not name:
+        return ""
+    # Remove everything after a comma if it contains Inc, Ltd, Co, plc, LLC, Corp, AG, SA, NV, SE, Group, GmbH
+    name = re.sub(r',\s*(inc|ltd|co|plc|llc|corp|ag|sa|nv|se|group|gmbh|n\.v\.|s\.a\.).*$', '', name, flags=re.IGNORECASE)
+    # Remove common corporate suffixes at word boundaries
+    pattern = r'\b(inc|incorporated|corporation|corp|limited|ltd|llc|plc|co|company|holdings|holding|ag|sa|nv|se|gmbh|n\.v\.|s\.a\.|group)\b\.?'
+    name = re.sub(pattern, '', name, flags=re.IGNORECASE)
+    # Clean up double spaces or trailing/leading whitespace and commas/punctuation/ampersands
+    name = re.sub(r'\s+', ' ', name)
+    name = name.strip(' ,.-&')
+    return name
+
 # ==================== DATABASE MANAGER ====================
 class DatabaseManager:
     def __init__(self, db_path="trading_bot.db"):
@@ -187,6 +200,18 @@ class DatabaseManager:
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_trading_history_stock_id ON trading_history(stock_id)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_trading_history_timestamp ON trading_history(timestamp)")
             
+            # One-time migration: shorten all existing company names in the database
+            cursor.execute("SELECT symbol, company_name FROM company_data")
+            rows = cursor.fetchall()
+            for symbol, company_name in rows:
+                if company_name:
+                    short_name = clean_company_name(company_name)
+                    if short_name != company_name:
+                        cursor.execute(
+                            "UPDATE company_data SET company_name=? WHERE symbol=?",
+                            (short_name, symbol)
+                        )
+            
     def get_company_info(self, symbol):
         """Get company information from cache or fetch from yfinance"""
         with self.get_cursor() as cursor:
@@ -211,6 +236,7 @@ class DatabaseManager:
             info = ticker.info
             quote_type = info.get('quoteType', '').upper()
             company_name = info.get('longName', info.get('shortName', symbol))
+            company_name = clean_company_name(company_name)
 
             if quote_type == "ETF":
                 asset_type = "ETF"
@@ -865,7 +891,7 @@ class TradingBot:
         adx = dx.ewm(alpha=1/period, adjust=False).mean()
         return adx.iloc[-1]
     
-    def get_bank_note(self, run_async=True):
+    def get_bank_note(self, run_async=True, force=False):
         fallback = None 
         cached_data = self.db_manager.get_cached_bank_note(self.stock_id)
 
@@ -879,7 +905,7 @@ class TradingBot:
             except ValueError:
                 last_upd_dt = datetime.min
 
-            if (datetime.now() - last_upd_dt).total_seconds() < 86400:
+            if (datetime.now() - last_upd_dt).total_seconds() < 86400 and not force:
                 self.latest_bank_target = target
                 self.latest_bank_source = source
                 self.latest_bank_date = est_date
@@ -1117,15 +1143,30 @@ class TradingBot:
     def fetch_next_event_date(self, ticker):
         # ---- 1. Earnings (only for stocks) --------------------------------
         if self.asset_type == "STOCK":
+            # Try get_earnings_dates DataFrame
             try:
                 ed = ticker.get_earnings_dates(limit=12)
                 if ed is not None and not ed.empty:
                     now = pd.Timestamp.now(tz='UTC')
+                    if ed.index.tz is not None:
+                        now = pd.Timestamp.now(tz=ed.index.tz)
+                    else:
+                        now = pd.Timestamp.now()
                     future = ed[ed.index > now]
                     if not future.empty:
                         return future.index.min().strftime("%Y-%m-%d")
             except Exception as e:
-                logger.error(f"[EARNINGS] {self.stock_id}: {e}")
+                logger.error(f"[EARNINGS df] {self.stock_id}: {e}")
+
+            # Try calendar dict as fallback
+            try:
+                cal = ticker.calendar
+                if cal and 'Earnings Date' in cal:
+                    dates = cal['Earnings Date']
+                    if isinstance(dates, list) and len(dates) > 0:
+                        return dates[0].strftime("%Y-%m-%d")
+            except Exception as e:
+                logger.error(f"[EARNINGS cal] {self.stock_id}: {e}")
 
         # ---- 2. Dividends (ETFs / ETCs / fallback for stocks) -------------
         try:
@@ -1142,7 +1183,7 @@ class TradingBot:
             logger.error(f"[DIVIDENDS] {self.stock_id}: {e}")
 
         # ---- 3. Nothing found --------------------------------------------
-        return "No payment"
+        return None
 
     def get_market_value(self):
         now = time.time()
@@ -2242,6 +2283,13 @@ class TradingApp(QMainWindow):
         self.trade_status_label.setStyleSheet("color: red; font-weight: bold;")
         conn_row_layout.addWidget(self.trade_status_label)
         
+        conn_row_layout.addSpacing(10)
+        
+        self.update_btn = QPushButton("Update")
+        self.update_btn.setStyleSheet(common_button_style)
+        self.update_btn.clicked.connect(self.manual_refresh_data)
+        conn_row_layout.addWidget(self.update_btn)
+        
         conn_row_layout.addStretch()
                 
         self.csv_btn = QPushButton("View CSV")
@@ -2293,7 +2341,7 @@ class TradingApp(QMainWindow):
         headers = [
             "Company", "Sym", "Type", "Sector",
             "Price", "Chg%", "Target", "Bank Target", "Score", "14H", "14L", "RSI", "ADX", "MA", "MACD", "Vol(M)",
-            "Qty", "Buy@", "Value", "P&L%", "Left", "Max", "TP%", "DynTP", "SL%", "DynSL", "Earnings", "Status"
+            "Qty", "Buy@", "Value", "P&L%", "Left", "Max", "TP%", "DynTP", "SL%", "DynSL", "Earn", "Status"
         ]
 
         self.table.setHorizontalHeaderLabels(headers)
@@ -2301,8 +2349,14 @@ class TradingApp(QMainWindow):
         font.setBold(True)
         self.table.horizontalHeader().setFont(font)
 
-        self.table.setColumnHidden(3, True)  # Hide Sector column
-        self.table.setColumnHidden(2, True)  # Hide Type column
+        # Configure default column visibilities to optimize space on MacBook Air screens
+        self.table.setColumnHidden(2, True)   # Hide Type
+        self.table.setColumnHidden(3, True)   # Hide Sector
+        self.table.setColumnHidden(20, True)  # Hide Left
+
+        # Enable context menu on the horizontal header to show/hide any column they want
+        self.table.horizontalHeader().setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.table.horizontalHeader().customContextMenuRequested.connect(self.show_header_context_menu)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.horizontalHeader().sectionClicked.connect(self.on_header_clicked)
@@ -2319,62 +2373,61 @@ class TradingApp(QMainWindow):
 
         input_frame = QGroupBox("Stock Settings")
         input_main_layout = QVBoxLayout()
+        input_main_layout.setContentsMargins(10, 4, 10, 4)
         
-        # Row 1: Inputs
-        row1_layout = QHBoxLayout()
-        row1_layout.addWidget(QLabel("Symbol:"))
+        row_layout = QHBoxLayout()
+        row_layout.addWidget(QLabel("Symbol:"))
         self.sym_edit = QLineEdit()
-        self.sym_edit.setFixedWidth(80)
-        row1_layout.addWidget(self.sym_edit)
+        self.sym_edit.setFixedWidth(65)
+        self.sym_edit.setPlaceholderText("Sym")
+        row_layout.addWidget(self.sym_edit)
         
-        row1_layout.addWidget(QLabel("MaxEUR:"))
+        row_layout.addWidget(QLabel("MaxEUR:"))
         self.max_edit = QLineEdit("0")
-        self.max_edit.setFixedWidth(80)
-        row1_layout.addWidget(self.max_edit)
+        self.max_edit.setFixedWidth(65)
+        self.max_edit.setPlaceholderText("Max")
+        row_layout.addWidget(self.max_edit)
         
-        row1_layout.addWidget(QLabel("Profit%:"))
+        row_layout.addWidget(QLabel("Profit%: "))
         self.profit_edit = QLineEdit("5")
-        self.profit_edit.setFixedWidth(80)
-        row1_layout.addWidget(self.profit_edit)
+        self.profit_edit.setFixedWidth(35)
+        self.profit_edit.setPlaceholderText("%")
+        row_layout.addWidget(self.profit_edit)
         
-        row1_layout.addWidget(QLabel("Drop%:"))
+        row_layout.addWidget(QLabel("Drop%: "))
         self.drop_edit = QLineEdit("5")
-        self.drop_edit.setFixedWidth(80)
-        row1_layout.addWidget(self.drop_edit)
+        self.drop_edit.setFixedWidth(35)
+        self.drop_edit.setPlaceholderText("%")
+        row_layout.addWidget(self.drop_edit)
         
-        row1_layout.addStretch()
-        input_main_layout.addLayout(row1_layout)
-        
-        # Row 2: Action Buttons
-        row2_layout = QHBoxLayout()
+        row_layout.addSpacing(10)
         
         self.add_btn = QPushButton("Add Stock")
         self.add_btn.setStyleSheet(common_button_style)
         self.add_btn.clicked.connect(self.add_stock)
-        row2_layout.addWidget(self.add_btn)
+        row_layout.addWidget(self.add_btn)
         
         self.apply_btn = QPushButton("Apply Settings")
         self.apply_btn.setStyleSheet(common_button_style)
         self.apply_btn.clicked.connect(self.apply_changes)
-        row2_layout.addWidget(self.apply_btn)
+        row_layout.addWidget(self.apply_btn)
         
         self.remove_btn = QPushButton("Remove Stock")
         self.remove_btn.setStyleSheet(common_button_style)
         self.remove_btn.clicked.connect(self.remove_stock)
-        row2_layout.addWidget(self.remove_btn)
+        row_layout.addWidget(self.remove_btn)
         
-        row2_layout.addSpacing(25)
-        row2_layout.addStretch()
+        row_layout.addStretch()
         
-        self.buy_btn = QPushButton("Manual BUY")
+        self.buy_btn = QPushButton("Buy")
         self.buy_btn.setStyleSheet("""
             QPushButton {
                 background-color: #2ecc71;
                 color: white;
                 font-weight: bold;
                 border-radius: 4px;
-                padding: 5px 12px;
-                min-width: 85px;
+                padding: 4px 10px;
+                min-width: 60px;
             }
             QPushButton:hover {
                 background-color: #27ae60;
@@ -2384,17 +2437,17 @@ class TradingApp(QMainWindow):
             }
         """)
         self.buy_btn.clicked.connect(self.handle_manual_buy)
-        row2_layout.addWidget(self.buy_btn)
+        row_layout.addWidget(self.buy_btn)
 
-        self.sell_btn = QPushButton("Manual SELL")
+        self.sell_btn = QPushButton("Sell")
         self.sell_btn.setStyleSheet("""
             QPushButton {
                 background-color: #e74c3c;
                 color: white;
                 font-weight: bold;
                 border-radius: 4px;
-                padding: 5px 12px;
-                min-width: 85px;
+                padding: 4px 10px;
+                min-width: 60px;
             }
             QPushButton:hover {
                 background-color: #c0392b;
@@ -2404,17 +2457,17 @@ class TradingApp(QMainWindow):
             }
         """)
         self.sell_btn.clicked.connect(self.handle_manual_sell)
-        row2_layout.addWidget(self.sell_btn)
+        row_layout.addWidget(self.sell_btn)
 
-        self.hold_btn = QPushButton("Toggle HOLD")
+        self.hold_btn = QPushButton("Hold")
         self.hold_btn.setStyleSheet("""
             QPushButton {
                 background-color: #f1c40f;
                 color: black;
                 font-weight: bold;
                 border-radius: 4px;
-                padding: 5px 12px;
-                min-width: 85px;
+                padding: 4px 10px;
+                min-width: 60px;
             }
             QPushButton:hover {
                 background-color: #f39c12;
@@ -2424,9 +2477,9 @@ class TradingApp(QMainWindow):
             }
         """)
         self.hold_btn.clicked.connect(self.handle_manual_hold)
-        row2_layout.addWidget(self.hold_btn)
+        row_layout.addWidget(self.hold_btn)
 
-        input_main_layout.addLayout(row2_layout)
+        input_main_layout.addLayout(row_layout)
         input_frame.setLayout(input_main_layout)
         layout.addWidget(input_frame)
 
@@ -2442,15 +2495,49 @@ class TradingApp(QMainWindow):
         selected_rows = self.table.selectionModel().selectedRows()
         if selected_rows:
             selected_row = selected_rows[0].row()
-            # Apply custom highlight to the entire row
+            
+            # Toggle selection: if user clicked the same row again, clear selection to deselect it
+            if hasattr(self, "_prev_selected_row") and self._prev_selected_row == selected_row:
+                self.table.clearSelection()
+                self._prev_selected_row = -1
+                return
+                
+            self._prev_selected_row = selected_row
+            # Apply premium slate-blue highlight to the entire row (transparent-friendly)
             for col in range(self.table.columnCount()):
                 item = self.table.item(selected_row, col)
                 if item:
-                    item.setBackground(QColor("yellow"))  # Customize color here (e.g., QColor(255, 255, 0, 100) for semi-transparent yellow)
+                    item.setBackground(QColor("#2a4365"))
+        else:
+            self._prev_selected_row = -1
+
+    def keyPressEvent(self, event):
+        # Clear selection on Escape key press
+        if event.key() == Qt.Key.Key_Escape:
+            self.table.clearSelection()
+            event.accept()
+        else:
+            super().keyPressEvent(event)
 
     def on_header_clicked(self, logical_index):
         self.sort_column = logical_index
         self.sort_order = self.table.horizontalHeader().sortIndicatorOrder()
+
+    def show_header_context_menu(self, pos):
+        menu = QMenu(self)
+        headers = [self.table.horizontalHeaderItem(i).text() for i in range(self.table.columnCount())]
+        
+        for i, header_text in enumerate(headers):
+            action = QAction(header_text, self)
+            action.setCheckable(True)
+            action.setChecked(not self.table.isColumnHidden(i))
+            action.triggered.connect(lambda checked, idx=i: (
+                self.table.setColumnHidden(idx, not checked),
+                self.table.resizeColumnsToContents()
+            ))
+            menu.addAction(action)
+            
+        menu.exec(self.table.horizontalHeader().mapToGlobal(pos))
 
     def load_stocks(self):
         # 1. Get all stocks from the DB
@@ -2641,8 +2728,10 @@ class TradingApp(QMainWindow):
                 if bot.manual_mode:
                     status = "Hold"
 
-                earn_display = bot.next_earnings_date or '--'
-                if earn_display and len(earn_display) == 10 and earn_display[4] == '-' and earn_display[7] == '-':
+                earn_display = bot.next_earnings_date
+                if not earn_display or earn_display == "No payment":
+                    earn_display = '--'
+                elif len(earn_display) == 10 and earn_display[4] == '-' and earn_display[7] == '-':
                     earn_display = earn_display[5:]
 
                 comp_name_display = bot.company_name[:12] + ".." if len(bot.company_name) > 14 else bot.company_name
@@ -2872,6 +2961,37 @@ class TradingApp(QMainWindow):
             for bot in self.bots.values():
                 bot.is_running = True
             threading.Thread(target=self.trading_loop, daemon=True).start()
+
+    def manual_refresh_data(self):
+        # 1. Disable the update button and change text for visual feedback
+        self.update_btn.setEnabled(False)
+        self.update_btn.setText("Updating...")
+
+        # 2. Reset indicator caches and trigger manual fetches
+        for sid, bot in self.bots.items():
+            bot.last_yf_fetch = 0
+            bot.last_indicators_fetch = 0
+            bot.calculate_technical_indicators(force=True)
+            bot.get_market_value()
+            bot.get_bank_note(run_async=True, force=True)
+
+        # 3. Request fresh values from IBKR if connected
+        if self.connected and self.ibapi:
+            try:
+                self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,AvailableFunds")
+                self.ibapi.reqPositions()
+            except Exception as e:
+                logger.error(f"Error requesting manual update from IBKR: {e}")
+
+        # 4. Trigger a GUI table refresh immediately
+        self.update_display()
+
+        # 5. Restore the button state after 1.5 seconds
+        QTimer.singleShot(1500, self.reset_update_btn)
+
+    def reset_update_btn(self):
+        self.update_btn.setEnabled(True)
+        self.update_btn.setText("Update")
 
     def trading_loop(self):
         while self.auto_trading:
