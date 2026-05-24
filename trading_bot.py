@@ -159,6 +159,7 @@ class TradingBot:
         except:
             return False
 
+    @staticmethod
     def calculate_rsi(close: pd.Series, period: int = 14) -> float:
         delta = close.diff()
         gain = delta.where(delta > 0, 0)

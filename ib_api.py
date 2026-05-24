@@ -20,6 +20,7 @@ class IBApi(EWrapper, EClient):
         self.last_cash_fetch = 0
         self.cash_fetch_interval = 20      # seconds
         self.max_cash_cache_age = 10800
+        self.last_ibkr_update = 0
 
     def nextValidId(self, orderId: int):
         self.next_order_id = orderId
@@ -38,6 +39,7 @@ class IBApi(EWrapper, EClient):
         
     def accountSummary(self, reqId: int, account: str, tag: str, value: str, currency: str):
             with self.data_lock:
+                self.last_ibkr_update = time.time()
                 if tag == "NetLiquidation":
                     self.net_liquidation = float(value)
                 elif tag == "TotalCashValue":
@@ -47,11 +49,13 @@ class IBApi(EWrapper, EClient):
 
     def accountSummaryEnd(self, reqId: int):
         with self.data_lock:
+            self.last_ibkr_update = time.time()
             self.portfolio_value = self.net_liquidation - self.total_cash
         self.cash_ready_event.set()
 
     def position(self, account: str, contract: Contract, position: float, avgCost: float):
         with self.data_lock:
+            self.last_ibkr_update = time.time()
             key = contract.symbol
             if key not in self.positions:
                 self.positions[key] = {}
@@ -66,6 +70,7 @@ class IBApi(EWrapper, EClient):
                         marketValue: float, averageCost: float, unrealizedPNL: float,
                         realizedPNL: float, accountName: str):
         with self.data_lock:
+            self.last_ibkr_update = time.time()
             key = contract.symbol
             if key not in self.positions:
                 self.positions[key] = {}
@@ -85,6 +90,7 @@ class IBApi(EWrapper, EClient):
                     avgFillPrice: float, permId: int, parentId: int, lastFillPrice: float,
                     clientId: int, whyHeld: str, mktCapPrice: float):
         with self.data_lock:
+            self.last_ibkr_update = time.time()
             self.order_status[orderId] = {
                 'status': status,
                 'filled': filled,

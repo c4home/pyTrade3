@@ -281,6 +281,11 @@ class TradingApp(QMainWindow):
         self.update_btn.setStyleSheet(common_button_style)
         self.update_btn.clicked.connect(self.manual_refresh_data)
         conn_row_layout.addWidget(self.update_btn)
+
+        self.update_time_label = QLabel("Last Fetch<br/>YF  : --<br/>IBKR: --")
+        self.update_time_label.setFont(QFont("Courier New", 10))
+        self.update_time_label.setStyleSheet("color: #bdc3c7; font-weight: normal; margin-left: 5px; font-family: 'Courier New', Courier, Monaco, monospace; font-size: 10px;")
+        conn_row_layout.addWidget(self.update_time_label)
         
         conn_row_layout.addStretch()
                 
@@ -859,6 +864,19 @@ class TradingApp(QMainWindow):
 
             self.table.verticalScrollBar().setValue(v_scroll)
             self.table.horizontalScrollBar().setValue(h_scroll)
+
+            # 1. Yahoo Finance last fetch time
+            last_yf_times = [bot.last_yf_fetch for bot in self.bots.values() if bot.last_yf_fetch > 0]
+            yf_time_str = datetime.fromtimestamp(max(last_yf_times)).strftime("%H:%M:%S %d/%m/%Y") if last_yf_times else "--"
+
+            # 2. IBKR last update time
+            ibkr_time_str = datetime.fromtimestamp(self.ibapi.last_ibkr_update).strftime("%H:%M:%S %d/%m/%Y") if (self.connected and self.ibapi.last_ibkr_update > 0) else "--"
+
+            self.update_time_label.setText(
+                f"Last Fetch<br/>"
+                f"YF  : {yf_time_str}<br/>"
+                f"IBKR: {ibkr_time_str}"
+            )
         except Exception as e:
             logger.error(f"Error in update_display: {e}")
             raise  # re-raise to see full traceback
