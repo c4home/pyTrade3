@@ -800,6 +800,7 @@ class TradingBot:
         self.manual_mode = manual_mode  # If True, automated signals are ignored
         
         self.target_price = 0
+        self.highest_pnl = 0.0
 
         self.create_yf_ticker()
 
@@ -1043,6 +1044,8 @@ class TradingBot:
 
                     self._cached_ma200 = float(ma200)
                     self._ma200_last_update = time.time()
+                    self._cached_ma50 = float(ma50)
+                    self._ma50_last_update = time.time()
 
                     tr0 = abs(high - low)
                     tr1 = abs(high - close.shift())
@@ -1128,6 +1131,16 @@ class TradingBot:
         if hasattr(self, '_cached_ma200') and now - getattr(self, '_ma200_last_update', 0) < 1800:  # 30 min cache
             return self._cached_ma200
         return getattr(self, '_cached_ma200', self.market_value)
+
+    def get_ma50(self):
+        """
+        Get 50-day Simple Moving Average.
+        Cached for performance.
+        """
+        now = time.time()
+        if hasattr(self, '_cached_ma50') and now - getattr(self, '_ma50_last_update', 0) < 1800:  # 30 min cache
+            return self._cached_ma50
+        return getattr(self, '_cached_ma50', self.market_value)
         
     def get_atr_14(self):
         """
@@ -1219,6 +1232,8 @@ class TradingBot:
             self.bought_price = pos.get('avgCost', 0)
             self.current_value = self.quantity * self.market_value if self.quantity > 0 else 0
             self.pnl_percent = ((self.market_value - self.bought_price) / self.bought_price * 100) if self.bought_price > 0 else 0
+            if self.quantity == 0:
+                self.highest_pnl = 0.0
 
         # Calculate invested in EUR for THIS stock only
         if self.quantity > 0 and self.bought_price > 0:
@@ -1787,9 +1802,12 @@ class TradingBot:
         if "S_BULL" in self.macd_signal: mom_points += 3
         elif "BULL" in self.macd_signal: mom_points += 2
         
-        # 2. ADX (Trend Strength) - Max 2 points
-        if self.adx_value > 25: mom_points += 1
-        if self.adx_value > 35: mom_points += 1
+        # 2. ADX (Trend Strength & Directional Guard) - Max 2 points
+        # Only award points if the stock is in an uptrend (price above 50 SMA)
+        ma50 = self.get_ma50()
+        if self.market_value > ma50:
+            if self.adx_value > 25: mom_points += 1
+            if self.adx_value > 35: mom_points += 1
         
         # 3. Volume Support - Max 2 points
         if self.today_volume > self.avg_volume_14d:
@@ -1891,12 +1909,22 @@ class TradingBot:
 
         # -- SELL LOGIC (Exempt from cooldowns, prioritised) --
         if self.quantity > 0:
-            # 1. Take Profit (Dynamic)
-            if self.pnl_percent >= self.dynamic_profit_target * 100:
-                return 'SELL'
+            if self.pnl_percent > self.highest_pnl:
+                self.highest_pnl = self.pnl_percent
+
+            # 1. Trailing Profit Lock
+            profit_target_pct = self.dynamic_profit_target * 100
+            if self.highest_pnl >= profit_target_pct:
+                trail_activation = self.highest_pnl - 1.5
+                if self.pnl_percent <= trail_activation:
+                    logger.info(f"[{self.stock_id}] Trailing Profit Triggered at {self.pnl_percent:.2f}% (Peak PnL: {self.highest_pnl:.2f}%)")
+                    self.highest_pnl = 0.0
+                    return 'SELL'
+            
             # 2. Dynamic Stop Loss (ATR-based)
             if self.pnl_percent <= self.dynamic_stop_loss:
                 logger.info(f"[{self.stock_id}] ATR Stop Loss Triggered at {self.dynamic_stop_loss:.1f}%")
+                self.highest_pnl = 0.0
                 return 'SELL'
             return None
 
@@ -1926,8 +1954,16 @@ class TradingBot:
         # 1. DIP STRATEGY TRIGGER
         if current_strategy == "DIP" and self.smart_score >= 7:
             daily_drop = (self.market_value - self.previous_close) / self.previous_close
-            if daily_drop < -0.03 and self.rsi_value > 20:
-                return None # Catching a falling knife
+            
+            # Block if the single-day drop is too extreme (e.g., worse than -7%)
+            if daily_drop < -0.07:
+                logger.info(f"[{self.stock_id}] Blocked DIP buy: daily drop ({daily_drop*100:.1f}%) exceeds -7% limit.")
+                return None
+                
+            # Block if the drop is moderate but RSI is still high (not oversold enough)
+            if daily_drop < -0.03 and self.rsi_value > 30:
+                logger.info(f"[{self.stock_id}] Blocked DIP buy: catching a falling knife (RSI: {self.rsi_value:.1f})")
+                return None
             
             self.score_reason += " (Dip Entry)"
             return 'BUY'
