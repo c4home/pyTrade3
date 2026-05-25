@@ -37,6 +37,14 @@ class IBApi(EWrapper, EClient):
         if errorCode in [2104, 2106, 2158, 502, 504]: return
         logger.error(f"Error {reqId}: {errorCode} - {errorString}")
         
+        # Automatically cancel order if an error/warning occurs for an active order we placed
+        if hasattr(self, 'order_callbacks') and reqId in self.order_callbacks:
+            logger.warning(f"Automatically cancelling order {reqId} due to error/warning {errorCode}: {errorString}")
+            try:
+                self.cancelOrder(reqId)
+            except Exception as e:
+                logger.error(f"Failed to send cancel request for order {reqId}: {e}")
+        
     def accountSummary(self, reqId: int, account: str, tag: str, value: str, currency: str):
             with self.data_lock:
                 self.last_ibkr_update = time.time()

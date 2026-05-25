@@ -199,8 +199,10 @@ class TradingApp(QMainWindow):
                 server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
 
             logger.info(f"EMAIL SENT -> {action} {symbol} {quantity} @ ${price:.2f}")
+            return True
         except Exception as e:
             logger.error(f"[EMAIL ERROR] {e}")
+            return False
         
     def init_ui(self):
         central = QWidget()
@@ -546,13 +548,15 @@ class TradingApp(QMainWindow):
             maxa = row[1]
             prof = row[2]
             drop = row[3]
-            m_mode = bool(row[-1])
+            m_mode = bool(row[4])
+            last_rej = row[5] if (len(row) > 5 and row[5] is not None) else 0
             
             # 3. Create the bot with the saved manual_mode state
             bot = TradingBot(
                 self.ibapi, sid, maxa, prof, drop, m_mode,
                 self.db_manager, self.csv_manager, self.exchange_manager, self
             )
+            bot.last_rejection_time = last_rej
             
             self.bots[sid] = bot
             bot.create_yf_ticker()

@@ -51,9 +51,14 @@ class DatabaseManager:
                     drop_threshold REAL NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    manual_mode INTEGER DEFAULT 0
+                    manual_mode INTEGER DEFAULT 0,
+                    last_rejection_time REAL DEFAULT 0
                 )
             """)
+            try:
+                cursor.execute("ALTER TABLE stocks ADD COLUMN last_rejection_time REAL DEFAULT 0")
+            except sqlite3.OperationalError:
+                pass  # column already exists
 
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS trading_history (
@@ -328,16 +333,24 @@ class DatabaseManager:
         """Add or update stock in watchlist"""
         with self.get_cursor() as cursor:
             cursor.execute(
-                """INSERT OR REPLACE INTO stocks (stock_id, max_amount, profit_target, drop_threshold, manual_mode, updated_at)
-                   VALUES (?, ?, ?, ?, 0, CURRENT_TIMESTAMP)""",
+                """INSERT OR REPLACE INTO stocks (stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time, updated_at)
+                   VALUES (?, ?, ?, ?, 0, 0, CURRENT_TIMESTAMP)""",
                 (stock_id, max_amount, profit_target, drop_threshold)
             )
 
     def get_all_stocks(self):
         """Get all stocks in watchlist"""
         with self.get_cursor() as cursor:
-            cursor.execute("SELECT stock_id, max_amount, profit_target, drop_threshold, manual_mode FROM stocks")
+            cursor.execute("SELECT stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time FROM stocks")
             return cursor.fetchall()
+
+    def update_last_rejection_time(self, stock_id, timestamp):
+        """Update last rejection time for a stock"""
+        with self.get_cursor() as cursor:
+            cursor.execute(
+                "UPDATE stocks SET last_rejection_time = ? WHERE stock_id = ?",
+                (timestamp, stock_id)
+            )
 
     def remove_stock(self, stock_id):
         """Remove stock from watchlist"""

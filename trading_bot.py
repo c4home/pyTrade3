@@ -100,6 +100,7 @@ class TradingBot:
         
         self.target_price = 0
         self.highest_pnl = 0.0
+        self.last_rejection_time = 0
 
         self.create_yf_ticker()
 
@@ -604,7 +605,7 @@ class TradingBot:
             # Only send email if FILLED
             if self.app:
                 actual_price = avg_fill_price if avg_fill_price > 0 else price
-                self.app.send_trade_email(
+                email_success = self.app.send_trade_email(
                     symbol=self.stock_id,
                     action=action,
                     quantity=int(filled),
@@ -613,7 +614,10 @@ class TradingBot:
                     reason=reason,
                     bot=self
                 )
-                logger.info(f"Email sent: {action} {int(filled)} @ {actual_price:.2f}")
+                if email_success:
+                    logger.info(f"Email sent: {action} {int(filled)} @ {actual_price:.2f}")
+                else:
+                    logger.warning(f"Email failed to send: {action} {int(filled)} @ {actual_price:.2f}")
 
             # Update CSV status to FILLED
             if self.csv_manager:
@@ -631,11 +635,17 @@ class TradingBot:
 
         elif status == "Cancelled":
             logger.warning(f"Order {order_id} was cancelled")
+            self.last_rejection_time = time.time()
+            if self.db_manager:
+                self.db_manager.update_last_rejection_time(self.stock_id, self.last_rejection_time)
             if self.csv_manager:
                 self.csv_manager.update_order_status(order_id, "CANCELLED")
 
         elif status == "Inactive":
             logger.error(f"Order {order_id} rejected/inactive")
+            self.last_rejection_time = time.time()
+            if self.db_manager:
+                self.db_manager.update_last_rejection_time(self.stock_id, self.last_rejection_time)
             if self.csv_manager:
                 self.csv_manager.update_order_status(order_id, "REJECTED")
 
@@ -1222,7 +1232,13 @@ class TradingBot:
         return cls._macro_cache
          
     def check_trading_conditions(self):
-        
+        # Skip automated trading if an order was rejected/inactive earlier today
+        last_rej = getattr(self, 'last_rejection_time', 0) or 0
+        if last_rej > 0:
+            rejection_date = datetime.fromtimestamp(last_rej).date()
+            if rejection_date == datetime.now().date():
+                return None
+
         self.update_analyst_data(run_async=True)
         if self.manual_mode:
             return None # Skip all automated logic
