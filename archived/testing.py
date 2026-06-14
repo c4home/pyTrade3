@@ -996,13 +996,12 @@ class TradingBot:
 
             def fetch_task():
                 try:
-                    data = yf.download(
-                        self.stock_id, 
+                    ticker_obj = yf.Ticker(self.stock_id)
+                    data = ticker_obj.history(
                         period="1y", 
                         interval="1d", 
-                        progress=False,
                         auto_adjust=False,
-                        multi_level_index=False
+                        actions=False
                     )
                     
                     if data.empty or len(data) < 200:
@@ -1099,7 +1098,7 @@ class TradingBot:
                     self.today_volume = float(volume.iat[-1])
                     self.avg_volume_14d = float(volume.rolling(14).mean().iat[-1])
          
-                    ticker_obj = yf.Ticker(self.stock_id)
+                    # Reusing ticker_obj defined above
                     self.next_earnings_date = self.fetch_next_event_date(ticker_obj)
                     
                     self.target_price = ticker_obj.info.get('targetMeanPrice', 0)
@@ -3056,7 +3055,6 @@ class TradingApp(QMainWindow):
                             if bot.place_sell_order():
                                 self.order_cooldown[sid] = time.time()
                                 time.sleep(30)
-
             time.sleep(15)
 
     def add_stock(self):

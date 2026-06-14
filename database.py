@@ -44,6 +44,12 @@ class DatabaseManager:
         """Initialize database tables - only called once at startup"""
         with self.get_cursor() as cursor:
             cursor.execute("""
+                CREATE TABLE IF NOT EXISTS settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT
+                )
+            """)
+            cursor.execute("""
                 CREATE TABLE IF NOT EXISTS stocks (
                     stock_id TEXT PRIMARY KEY,
                     max_amount REAL NOT NULL,
@@ -438,6 +444,25 @@ class DatabaseManager:
                     logger.error(f"Error parsing last sell time: {e}")
 
             return last_buy_time, last_sell_time
+
+    def get_setting(self, key, default=None):
+        """Get a global setting value from the database"""
+        try:
+            with self.get_cursor() as cursor:
+                cursor.execute("SELECT value FROM settings WHERE key=?", (key,))
+                row = cursor.fetchone()
+                return row[0] if row else default
+        except Exception as e:
+            logger.error(f"Error getting setting {key}: {e}")
+            return default
+
+    def set_setting(self, key, value):
+        """Set or update a global setting value in the database"""
+        try:
+            with self.get_cursor() as cursor:
+                cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, str(value)))
+        except Exception as e:
+            logger.error(f"Error setting {key}: {e}")
 
 # ==================== CSV MANAGER ====================
 class CSVManager:

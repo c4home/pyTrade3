@@ -93,6 +93,7 @@ class TradingBot:
         self.avg_volume_14d = 0
         
         self.previous_close = 0
+        self.close_3d_ago = 0.0
         
         self.last_bank_update = None
         
@@ -103,6 +104,13 @@ class TradingBot:
         self.last_rejection_time = 0
 
         self.create_yf_ticker()
+
+    @property
+    def min_cash(self):
+        """Get the global minimum cash setting from the main app."""
+        if self.app:
+            return getattr(self.app, 'min_cash', 0.0)
+        return 0.0
 
     def create_yf_ticker(self):
         info_dict = self.db_manager.get_company_info(self.stock_id)
@@ -296,13 +304,12 @@ class TradingBot:
 
             def fetch_task():
                 try:
-                    data = yf.download(
-                        self.stock_id, 
+                    ticker_obj = yf.Ticker(self.stock_id)
+                    data = ticker_obj.history(
                         period="1y", 
                         interval="1d", 
-                        progress=False,
                         auto_adjust=False,
-                        multi_level_index=False
+                        actions=False
                     )
                     
                     if data.empty or len(data) < 200:
@@ -322,6 +329,8 @@ class TradingBot:
                     
                     if len(close) >= 2:
                         self.previous_close = float(close.iat[-2])
+                    if len(close) >= 4:
+                        self.close_3d_ago = float(close.iat[-4])
          
                     self.fourteen_day_high = float(high.rolling(14).max().iat[-1])
                     self.fourteen_day_low  = float(low.rolling(14).min().iat[-1])
@@ -399,12 +408,17 @@ class TradingBot:
                     self.today_volume = float(volume.iat[-1])
                     self.avg_volume_14d = float(volume.rolling(14).mean().iat[-1])
          
-                    ticker_obj = yf.Ticker(self.stock_id)
+                    # Reusing ticker_obj defined above
                     self.next_earnings_date = self.fetch_next_event_date(ticker_obj)
                     
-                    self.target_price = ticker_obj.info.get('targetMeanPrice', 0)
-                    self.previous_close = ticker_obj.info.get('previousClose', 0)
-                    self.num_analysts = ticker_obj.info.get('numberOfAnalystOpinions', 0)
+                    try:
+                        self.target_price = ticker_obj.info.get('targetMeanPrice', 0)
+                        self.num_analysts = ticker_obj.info.get('numberOfAnalystOpinions', 0)
+                        info_prev = ticker_obj.info.get('previousClose', 0)
+                        if info_prev and info_prev > 0:
+                            self.previous_close = info_prev
+                    except Exception as info_err:
+                        logger.warning(f"Failed to fetch yfinance .info for {self.stock_id}: {info_err}")
                     
                     self.db_manager.update_cached_indicators(
                         self.stock_id, self.fourteen_day_high, self.fourteen_day_low,
@@ -675,7 +689,8 @@ class TradingBot:
             return "USD", "NASDAQ"       # US stocks (default)
         
     def place_buy_order(self):
-        if not self.is_market_open() or self.has_pending_order() or min(self.cash_left,self.ibapi.available_cash) < self.MIN_CASH_FOR_BUY:
+        usable_cash = self.ibapi.available_cash - self.min_cash
+        if not self.is_market_open() or self.has_pending_order() or min(self.cash_left, usable_cash) < self.MIN_CASH_FOR_BUY:
             return False
         
         if not self.app.pdt_protector.can_trade():
@@ -707,8 +722,9 @@ class TradingBot:
         if native_currency != "EUR":
             total_cost_eur = total_cost_eur / rate
 
-        # Use the MINIMUM of max_amount and available cash
-        effective_limit = min(self.max_amount, self.cash_left, self.ibapi.available_cash) * self.CASH_BUFFER_MULTIPLIER
+        # Use the MINIMUM of max_amount, cash_left, and usable cash
+        usable_cash_clamped = max(0.0, usable_cash)
+        effective_limit = min(self.max_amount, self.cash_left, usable_cash_clamped) * self.CASH_BUFFER_MULTIPLIER
 
         if total_cost_eur > effective_limit:
             # Recalculate to stay under BOTH max_amount AND available cash
@@ -1301,8 +1317,28 @@ class TradingBot:
             if -2 <= days <= 3:
                 earnings_ok = False
 
-        if not self.is_market_open() or min(self.cash_left, self.ibapi.available_cash) < self.MIN_CASH_FOR_BUY or not earnings_ok:
+        usable_cash = self.ibapi.available_cash - self.min_cash
+        if not self.is_market_open() or min(self.cash_left, usable_cash) < self.MIN_CASH_FOR_BUY or not earnings_ok:
             return None
+
+        # 3. Daily growth check (block buy if stock rose more than 5% today)
+        if self.previous_close > 0:
+            daily_change = (self.market_value - self.previous_close) / self.previous_close
+            if daily_change > 0.05:
+                logger.info(f"[{self.stock_id}] Blocked buy: daily rise ({daily_change*100:.1f}%) exceeds 5% limit.")
+                return None
+
+        # 4. RSI Overbought check (block buy if stock is overbought)
+        if self.rsi_value >= 70:
+            logger.info(f"[{self.stock_id}] Blocked buy: RSI ({self.rsi_value:.1f}) is in the overbought zone (>= 70).")
+            return None
+
+        # 5. Cumulative 3-day rise check (block buy if stock rose more than 15% in 3 days)
+        if getattr(self, 'close_3d_ago', 0) > 0:
+            three_day_change = (self.market_value - self.close_3d_ago) / self.close_3d_ago
+            if three_day_change > 0.15:
+                logger.info(f"[{self.stock_id}] Blocked buy: 3-day cumulative rise ({three_day_change*100:.1f}%) exceeds 15% limit.")
+                return None
         
         current_strategy = "DIP" if "DIP" in self.score_reason else "MOMENTUM"
         

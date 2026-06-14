@@ -29,8 +29,18 @@ class TradingApp(QMainWindow):
         self.sort_column = self.DEFAULT_SORT_COLUMN  # Earning Date
         self.sort_order = self.DEFAULT_SORT_ORDER
 
+        self.min_cash = 0.0
         self.init_ui()
         self.load_stocks()
+        
+        # Load min cash setting
+        saved_min_cash = self.db_manager.get_setting("min_cash", "0")
+        try:
+            self.min_cash = float(saved_min_cash)
+        except ValueError:
+            self.min_cash = 0.0
+        self.min_cash_edit.setText(saved_min_cash)
+        self.min_cash_edit.editingFinished.connect(self.save_min_cash)
         
         self._default_sort_applied = False
         self._user_clicked_header = False
@@ -307,6 +317,23 @@ class TradingApp(QMainWindow):
         
         dash_row_layout.addStretch()
         
+        dash_row_layout.addWidget(QLabel("Min Cash (€):"))
+        self.min_cash_edit = QLineEdit("0")
+        self.min_cash_edit.setFixedWidth(70)
+        self.min_cash_edit.setStyleSheet("""
+            QLineEdit {
+                background-color: #1a1a1a;
+                color: #ffffff;
+                border: 1px solid #2c3e50;
+                border-radius: 3px;
+                padding: 2px;
+                font-weight: bold;
+            }
+        """)
+        dash_row_layout.addWidget(self.min_cash_edit)
+        
+        dash_row_layout.addSpacing(15)
+        
         self.rate_label = QLabel("EUR/USD: --")
         self.rate_label.setStyleSheet("font-size: 13px; font-weight: bold; color: #3498db;")
         dash_row_layout.addWidget(self.rate_label)
@@ -482,6 +509,21 @@ class TradingApp(QMainWindow):
         input_frame.setLayout(input_main_layout)
         layout.addWidget(input_frame)
 
+    def save_min_cash(self):
+        val = self.min_cash_edit.text().strip()
+        try:
+            float_val = float(val) if val else 0.0
+            if float_val < 0:
+                float_val = 0.0
+                self.min_cash_edit.setText("0")
+            self.min_cash = float_val
+            self.db_manager.set_setting("min_cash", str(float_val))
+        except ValueError:
+            self.min_cash = 0.0
+            self.min_cash_edit.setText("0")
+            self.db_manager.set_setting("min_cash", "0.0")
+        logger.info(f"Minimum cash updated to: €{self.min_cash:,.2f}")
+
     def highlight_selected_row(self):
         # Clear previous highlights (reset all rows to default background)
         for row in range(self.table.rowCount()):
@@ -619,8 +661,14 @@ class TradingApp(QMainWindow):
             self.status_label.setStyleSheet(f"color: {conn_color}; font-weight: bold;")
 
             if self.connected:
+                if getattr(self, 'min_cash', 0.0) > 0:
+                    usable_val = max(0.0, cash_val - self.min_cash)
+                    usable_str = f"{usable_val:,.0f}"
+                    cash_display = f"Cash: <b>€{cash_str}</b> (Usable: <b>€{usable_str}</b>)"
+                else:
+                    cash_display = f"Cash: <b>€{cash_str}</b>"
                 self.portfolio_label.setText(
-                    f"Total Value: <b>€{total_str}</b>  |  Cash: <b>€{cash_str}</b>  |  "
+                    f"Total Value: <b>€{total_str}</b>  |  {cash_display}  |  "
                     f"Portfolio: <b>€{port_str}</b>  |  Allocation: <b>{comp_str}</b>"
                 )
             else:
@@ -1014,26 +1062,57 @@ class TradingApp(QMainWindow):
                 self.ibapi.reqPositions()
                 time.sleep(3)
 
+                # 1. Evaluate and Execute Sell Orders Immediately (First Priority)
                 for sid, bot in self.bots.items():
                     if (bot.is_running and 
                         not bot.has_pending_order() and 
                         bot.is_market_open() and
-                        bot.get_market_value() > 0):
+                        bot.get_market_value() > 0 and
+                        bot.quantity > 0):
 
-                        # 5-minute cooldown per symbol
+                        # Respect order cooldown for this symbol
+                        last_order = self.order_cooldown.get(sid, 0)
+                        if time.time() - last_order < 300:
+                            continue
+
+                        action = bot.check_trading_conditions()
+                        if action == 'SELL':
+                            if bot.place_sell_order():
+                                self.order_cooldown[sid] = time.time()
+                                time.sleep(30)  # Wait for position & cash updates to process
+
+                # 2. Collect Eligible Buy Candidates
+                buy_candidates = []
+                for sid, bot in self.bots.items():
+                    if (bot.is_running and 
+                        not bot.has_pending_order() and 
+                        bot.is_market_open() and
+                        bot.get_market_value() > 0 and
+                        bot.quantity <= 0):
+
+                        # Respect order cooldown for this symbol
                         last_order = self.order_cooldown.get(sid, 0)
                         if time.time() - last_order < 300:
                             continue
 
                         action = bot.check_trading_conditions()
                         if action == 'BUY':
-                            if bot.place_buy_order():
-                                self.order_cooldown[sid] = time.time()
-                                time.sleep(30)
-                        elif action == 'SELL':
-                            if bot.place_sell_order():
-                                self.order_cooldown[sid] = time.time()
-                                time.sleep(30)
+                            buy_candidates.append(bot)
+
+                # 3. Sort Candidates by Smart Score in descending order
+                buy_candidates.sort(key=lambda b: b.smart_score, reverse=True)
+
+                # 4. Execute Buy Orders Sequentially
+                for bot in buy_candidates:
+                    # Re-verify cash limits before placing each order since preceding buys consume cash
+                    usable_cash = bot.ibapi.available_cash - getattr(self, 'min_cash', 0.0)
+                    if min(bot.cash_left, usable_cash) < bot.MIN_CASH_FOR_BUY:
+                        logger.info(f"[{bot.stock_id}] Skipping buy candidate: remaining cash is insufficient (usable cash: €{usable_cash:,.2f}).")
+                        continue
+
+                    if bot.place_buy_order():
+                        self.order_cooldown[bot.stock_id] = time.time()
+                        time.sleep(30)  # Wait 30 seconds for cash balance updates to process
 
             time.sleep(15)
 
