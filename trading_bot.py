@@ -139,8 +139,8 @@ class TradingBot:
             self.next_earnings_date = cached_ind["next_earnings_date"]
             self.today_volume = cached_ind["today_volume"]
             self.avg_volume_14d = cached_ind["avg_volume_14d"]
-            self.previous_close = cached_ind.get("prev_close")
-            self.target_price = cached_ind.get("target_mean_price")
+            self.previous_close = cached_ind.get("prev_close") or 0.0
+            self.target_price = cached_ind.get("target_mean_price") or 0.0
             self.last_indicators_fetch = cached_ind["fetched_at"]
         else:
             self.last_indicators_fetch = 0
@@ -328,9 +328,12 @@ class TradingBot:
                     volume= data['Volume'].iloc[:, 0] if isinstance(data['Volume'], pd.DataFrame) else data['Volume']
                     
                     if len(close) >= 2:
-                        self.previous_close = float(close.iat[-2])
-                    if len(close) >= 4:
-                        self.close_3d_ago = float(close.iat[-4])
+                        idx = -2 if self.is_market_open() else -1
+                        self.previous_close = float(close.iat[idx])
+                        if len(close) >= abs(idx) + 1:
+                            self.day_before_yesterday_close = float(close.iat[idx - 1])
+                        else:
+                            self.day_before_yesterday_close = self.previous_close
          
                     self.fourteen_day_high = float(high.rolling(14).max().iat[-1])
                     self.fourteen_day_low  = float(low.rolling(14).min().iat[-1])
@@ -414,9 +417,11 @@ class TradingBot:
                     try:
                         self.target_price = ticker_obj.info.get('targetMeanPrice', 0)
                         self.num_analysts = ticker_obj.info.get('numberOfAnalystOpinions', 0)
-                        info_prev = ticker_obj.info.get('previousClose', 0)
-                        if info_prev and info_prev > 0:
-                            self.previous_close = info_prev
+                        # We prefer our history-based previous close calculation over .info
+                        # as .info can be delayed or missing.
+                        # info_prev = ticker_obj.info.get('previousClose', 0)
+                        # if info_prev and info_prev > 0:
+                        #     self.previous_close = info_prev
                     except Exception as info_err:
                         logger.warning(f"Failed to fetch yfinance .info for {self.stock_id}: {info_err}")
                     
@@ -562,7 +567,10 @@ class TradingBot:
                     self.current_value = self.current_value / 100.0
                 self.pnl_percent = ((self.market_value - comp_bought_price) / comp_bought_price * 100) if comp_bought_price > 0 else 0
             if self.quantity == 0:
-                self.highest_pnl = 0.0
+                if self.highest_pnl != 0.0:
+                    self.highest_pnl = 0.0
+                    if self.db_manager:
+                        self.db_manager.update_highest_pnl(self.stock_id, 0.0)
 
         # Calculate invested in EUR for THIS stock only
         if self.quantity > 0 and self.bought_price > 0:
@@ -1217,6 +1225,11 @@ class TradingBot:
         # --- FINAL SCORE CALCULATION ---
         self.smart_score = self.base_score + analyst_mod + target_bonus
 
+        # Boost ETF/ETC score since they lack analyst targets
+        if "ETF" in self.asset_type or "ETC" in self.asset_type:
+            self.smart_score += 2
+            self.score_reason += " [ETF/ETC Baseline: +2]"
+
         # Cap limits
         self.smart_score = max(0, min(12, int(self.smart_score)))
         
@@ -1248,11 +1261,10 @@ class TradingBot:
         return cls._macro_cache
          
     def check_trading_conditions(self):
-        # Skip automated trading if an order was rejected/inactive earlier today
+        # Skip automated trading if an order was rejected/inactive recently (1 hour cooldown)
         last_rej = getattr(self, 'last_rejection_time', 0) or 0
         if last_rej > 0:
-            rejection_date = datetime.fromtimestamp(last_rej).date()
-            if rejection_date == datetime.now().date():
+            if time.time() - last_rej < 3600:
                 return None
 
         self.update_analyst_data(run_async=True)
@@ -1280,22 +1292,30 @@ class TradingBot:
         if self.quantity > 0:
             if self.pnl_percent > self.highest_pnl:
                 self.highest_pnl = self.pnl_percent
+                if getattr(self, 'db_manager', None):
+                    self.db_manager.update_highest_pnl(self.stock_id, self.highest_pnl)
 
             # 1. Dynamic ATR Trailing Profit Lock
             profit_target_pct = self.dynamic_profit_target * 100
+            current_atr_pct = (self.get_atr_14() / self.market_value) * 100 if self.market_value > 0 else 0
+            dynamic_trail_drop = max(0.5, min(current_atr_pct * 0.5, 3.0))
+
             if self.highest_pnl >= profit_target_pct:
-                current_atr_pct = (self.get_atr_14() / self.market_value) * 100 if self.market_value > 0 else 0
-                dynamic_trail_drop = max(0.5, min(current_atr_pct * 0.5, 3.0))
                 trail_activation = self.highest_pnl - dynamic_trail_drop
                 if self.pnl_percent <= trail_activation:
                     logger.info(f"[{self.stock_id}] Trailing Profit Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: {dynamic_trail_drop:.2f}%)")
-                    self.highest_pnl = 0.0
+                    return 'SELL'
+                    
+            # 1.5 Protective Trailing Stop (Before profit target is hit, lock in gains > 4%)
+            elif self.highest_pnl >= 4.0:
+                protective_trail = self.highest_pnl - 3.0
+                if self.pnl_percent <= protective_trail:
+                    logger.info(f"[{self.stock_id}] Protective Stop Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: 3.0%)")
                     return 'SELL'
             
             # 2. Dynamic Stop Loss (ATR-based)
             if self.pnl_percent <= self.dynamic_stop_loss:
                 logger.info(f"[{self.stock_id}] ATR Stop Loss Triggered at {self.dynamic_stop_loss:.1f}%")
-                self.highest_pnl = 0.0
                 return 'SELL'
             return None
 
@@ -1339,6 +1359,13 @@ class TradingBot:
             if three_day_change > 0.15:
                 logger.info(f"[{self.stock_id}] Blocked buy: 3-day cumulative rise ({three_day_change*100:.1f}%) exceeds 15% limit.")
                 return None
+                
+        # Check if we are the highest score in the portfolio among available stocks
+        if hasattr(self, 'gui') and self.gui and hasattr(self.gui, 'bots'):
+            highest_score = max([b.smart_score for b in self.gui.bots.values() if b.quantity <= 0], default=0)
+            if self.smart_score < highest_score:
+                # Do not log continuously to avoid spam, just return None silently
+                return None
         
         current_strategy = "DIP" if "DIP" in self.score_reason else "MOMENTUM"
         
@@ -1365,8 +1392,27 @@ class TradingBot:
             self.score_reason += " (Dip Entry)"
             return 'BUY'
 
+        # --- FAST RISING / OVERBOUGHT CHECKS ---
+        daily_change = 0
+        if self.previous_close > 0:
+            daily_change = (self.market_value - self.previous_close) / self.previous_close
+
+        yesterday_change = 0
+        if getattr(self, 'day_before_yesterday_close', 0) > 0 and self.previous_close > 0:
+            yesterday_change = (self.previous_close - self.day_before_yesterday_close) / self.day_before_yesterday_close
+
+        is_fast_rising = daily_change > 0.05 or yesterday_change > 0.15
+        is_overbought = getattr(self, 'rsi_value', 50) > 70
+
         # 2. MOMENTUM STRATEGY TRIGGER
         if current_strategy == "MOMENTUM" and self.smart_score >= 8:
+            if is_fast_rising:
+                logger.info(f"[{self.stock_id}] Blocked MOMENTUM buy: Fast-rising stock (daily: {daily_change*100:.1f}%, yest: {yesterday_change*100:.1f}%)")
+                return None
+            if is_overbought:
+                logger.info(f"[{self.stock_id}] Blocked MOMENTUM buy: RSI is overbought ({self.rsi_value:.1f})")
+                return None
+                
             self.score_reason += " (Momentum Entry)"
             return 'BUY'
         return None

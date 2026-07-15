@@ -592,6 +592,7 @@ class TradingApp(QMainWindow):
             drop = row[3]
             m_mode = bool(row[4])
             last_rej = row[5] if (len(row) > 5 and row[5] is not None) else 0
+            highest_pnl = row[6] if (len(row) > 6 and row[6] is not None) else 0.0
             
             # 3. Create the bot with the saved manual_mode state
             bot = TradingBot(
@@ -599,6 +600,7 @@ class TradingApp(QMainWindow):
                 self.db_manager, self.csv_manager, self.exchange_manager, self
             )
             bot.last_rejection_time = last_rej
+            bot.highest_pnl = highest_pnl
             
             self.bots[sid] = bot
             bot.create_yf_ticker()
@@ -969,9 +971,8 @@ class TradingApp(QMainWindow):
                         self.connected = True
                         try:
                             self.ibapi.reqPositions()
-                            self.ibapi.reqAccountUpdates(True, "")
                         except Exception as e:
-                            logger.error(f"Error requesting positions/portfolio: {e}")
+                            logger.error(f"Error requesting positions: {e}")
                         
                         try:
                             # ---- INITIAL CASH ----

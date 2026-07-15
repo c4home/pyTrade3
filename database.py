@@ -66,6 +66,11 @@ class DatabaseManager:
             except sqlite3.OperationalError:
                 pass  # column already exists
 
+            try:
+                cursor.execute("ALTER TABLE stocks ADD COLUMN highest_pnl REAL DEFAULT 0.0")
+            except sqlite3.OperationalError:
+                pass
+
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS trading_history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -339,16 +344,24 @@ class DatabaseManager:
         """Add or update stock in watchlist"""
         with self.get_cursor() as cursor:
             cursor.execute(
-                """INSERT OR REPLACE INTO stocks (stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time, updated_at)
-                   VALUES (?, ?, ?, ?, 0, 0, CURRENT_TIMESTAMP)""",
+                """INSERT OR REPLACE INTO stocks (stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time, highest_pnl, updated_at)
+                   VALUES (?, ?, ?, ?, 0, 0, 0.0, CURRENT_TIMESTAMP)""",
                 (stock_id, max_amount, profit_target, drop_threshold)
             )
 
     def get_all_stocks(self):
         """Get all stocks in watchlist"""
         with self.get_cursor() as cursor:
-            cursor.execute("SELECT stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time FROM stocks")
+            cursor.execute("SELECT stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time, highest_pnl FROM stocks")
             return cursor.fetchall()
+
+    def update_highest_pnl(self, stock_id, pnl):
+        """Update highest PnL for trailing stop lock"""
+        with self.get_cursor() as cursor:
+            cursor.execute(
+                "UPDATE stocks SET highest_pnl = ? WHERE stock_id = ?",
+                (pnl, stock_id)
+            )
 
     def update_last_rejection_time(self, stock_id, timestamp):
         """Update last rejection time for a stock"""
