@@ -692,7 +692,6 @@ class TradingApp(QMainWindow):
                 bot.update_position()
                 bot.calculate_technical_indicators()
                 bot.check_trading_conditions()
-                bot.calculate_score()
                 
                 status = bot.get_status()
                 volume_display = f"{bot.today_volume / 1e6:.1f}"

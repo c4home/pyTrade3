@@ -66,6 +66,7 @@ class TradingBot:
         self.adx_value = 0   
         self.ma_signal = ""
         self.macd_signal = ""
+        self.prev_macd_signal = ""  # Track MACD transitions for crossover detection
 
         self.next_earnings_date = None
         
@@ -75,13 +76,13 @@ class TradingBot:
         self.cooldown_warning_interval = 7200  # Log once per hour (in seconds)
 
         # ---- Dynamic Profit Target ----        
-        self.atr_multiplier = 1.18  # Tune this (1-2x for conservative/aggressive)
+        self.atr_multiplier = 1.5  # Tune this (1-2x for conservative/aggressive)
         self.min_profit_pct = profit_target   # Floor to avoid tiny targets
         self.max_profit_pct = 15.0  # Cap to limit hold time/risk
         self.dynamic_profit_target = self.profit_target  # Start with DB value, override dynamically
 
         # ---- Dynamic Stop Loss ----     
-        self.stop_multiplier = 1.5  # Common ATR multiplier is 1.5 to 3.0
+        self.stop_multiplier = 1.2  # Common ATR multiplier is 1.5 to 3.0
         self.max_stop_loss = -15.0  # Hard floor (maximum loss allowed)
         self.min_stop_loss = -3.0   # Hard ceiling (minimum stop to avoid "noise" exits)
         self.dynamic_stop_loss = self.drop_threshold # Starting default value
@@ -102,6 +103,7 @@ class TradingBot:
         self.target_price = 0
         self.highest_pnl = 0.0
         self.last_rejection_time = 0
+        self._last_sell_log = {}  # Throttle sell-condition log messages {reason_key: timestamp}
 
         self.create_yf_ticker()
 
@@ -334,6 +336,10 @@ class TradingBot:
                             self.day_before_yesterday_close = float(close.iat[idx - 1])
                         else:
                             self.day_before_yesterday_close = self.previous_close
+                        if len(close) >= abs(idx) + 3:
+                            self.close_3d_ago = float(close.iat[idx - 3])
+                        else:
+                            self.close_3d_ago = self.previous_close
          
                     self.fourteen_day_high = float(high.rolling(14).max().iat[-1])
                     self.fourteen_day_low  = float(low.rolling(14).min().iat[-1])
@@ -1289,6 +1295,13 @@ class TradingBot:
         self.calculate_score()
 
         # -- SELL LOGIC (Exempt from cooldowns, prioritised) --
+        def _throttled_sell_log(key, msg, interval=300):
+            """Log sell condition at most once per `interval` seconds per key."""
+            now = time.time()
+            if now - self._last_sell_log.get(key, 0) >= interval:
+                logger.info(msg)
+                self._last_sell_log[key] = now
+
         if self.quantity > 0:
             if self.pnl_percent > self.highest_pnl:
                 self.highest_pnl = self.pnl_percent
@@ -1298,25 +1311,73 @@ class TradingBot:
             # 1. Dynamic ATR Trailing Profit Lock
             profit_target_pct = self.dynamic_profit_target * 100
             current_atr_pct = (self.get_atr_14() / self.market_value) * 100 if self.market_value > 0 else 0
-            dynamic_trail_drop = max(0.5, min(current_atr_pct * 0.5, 3.0))
+            dynamic_trail_drop = max(1.0, min(current_atr_pct * 1.0, 3.0))
 
             if self.highest_pnl >= profit_target_pct:
                 trail_activation = self.highest_pnl - dynamic_trail_drop
                 if self.pnl_percent <= trail_activation:
-                    logger.info(f"[{self.stock_id}] Trailing Profit Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: {dynamic_trail_drop:.2f}%)")
+                    _throttled_sell_log("trailing_profit", f"[{self.stock_id}] Trailing Profit Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: {dynamic_trail_drop:.2f}%)")
                     return 'SELL'
                     
-            # 1.5 Protective Trailing Stop (Before profit target is hit, lock in gains > 4%)
-            elif self.highest_pnl >= 4.0:
-                protective_trail = self.highest_pnl - 3.0
-                if self.pnl_percent <= protective_trail:
-                    logger.info(f"[{self.stock_id}] Protective Stop Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: 3.0%)")
+            # 1.5 Proportional Protective Trailing Stop (lock in gains once > 2%)
+            elif self.highest_pnl >= 2.0:
+                # Give back at most 50% of peak gains (e.g. peak 4% → sell at 2%, peak 6% → sell at 3%)
+                protective_trail_drop = self.highest_pnl * 0.5
+                protective_floor = self.highest_pnl - protective_trail_drop
+                if self.pnl_percent <= protective_floor:
+                    _throttled_sell_log("protective_stop", f"[{self.stock_id}] Protective Stop Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: {protective_trail_drop:.2f}%)")
                     return 'SELL'
             
             # 2. Dynamic Stop Loss (ATR-based)
             if self.pnl_percent <= self.dynamic_stop_loss:
-                logger.info(f"[{self.stock_id}] ATR Stop Loss Triggered at {self.dynamic_stop_loss:.1f}%")
+                _throttled_sell_log("atr_stop_loss", f"[{self.stock_id}] ATR Stop Loss Triggered at {self.dynamic_stop_loss:.1f}%")
                 return 'SELL'
+
+            # 3. RSI Overbought Exit (only sell when in profit to avoid false signals)
+            if self.rsi_value >= 80 and self.pnl_percent > 1.0:
+                _throttled_sell_log("rsi_overbought", f"[{self.stock_id}] RSI Overbought Exit at RSI {self.rsi_value:.0f} (PnL: {self.pnl_percent:.2f}%)")
+                return 'SELL'
+
+            # 4. MACD Bearish Crossover (only on fresh bullish → bearish transition)
+            if (self.macd_signal in ("S_BEAR", "BEAR") and
+                    self.prev_macd_signal in ("S_BULL", "BULL") and
+                    self.pnl_percent > 1.0):
+                _throttled_sell_log("macd_crossover", f"[{self.stock_id}] MACD Bearish Crossover Exit ({self.prev_macd_signal} → {self.macd_signal}, PnL: {self.pnl_percent:.2f}%)")
+                self.prev_macd_signal = self.macd_signal
+                return 'SELL'
+
+            # 5. Analyst Downgrade / Target Cut Below Current Price
+            if self.pnl_percent > 0.5:
+                analyst_target = None
+                bank_data = self.db_manager.get_cached_bank_note(self.stock_id) if self.db_manager else None
+                if bank_data and bank_data[0] and bank_data[0] > 0:
+                    analyst_target = bank_data[0]
+                elif self.target_price and self.target_price > 0:
+                    analyst_target = self.target_price
+
+                if analyst_target and self.market_value > 0:
+                    # Normalize GBp targets if needed
+                    temp_target = analyst_target
+                    if self.stock_id.upper().endswith(".L") and self.market_value > temp_target * 10:
+                        temp_target = temp_target * 100
+                    elif self.market_value > 10 and temp_target < 10:
+                        temp_target = temp_target * 100
+
+                    if self.market_value >= temp_target * 1.10:  # Price is 10%+ above analyst target
+                        _throttled_sell_log("analyst_target", f"[{self.stock_id}] Analyst Target Exit: price {self.market_value:.2f} is 10%+ above target {temp_target:.2f} (PnL: {self.pnl_percent:.2f}%)")
+                        return 'SELL'
+
+            # 6. Volume Distribution Exit (volume dried up to <50% of average while in profit)
+            if (self.avg_volume_14d > 0 and self.today_volume > 0 and
+                    self.today_volume < self.avg_volume_14d * 0.5 and
+                    self.pnl_percent > 2.0 and
+                    self.macd_signal in ("S_BEAR", "BEAR", "NEUTRAL")):
+                _throttled_sell_log("volume_dist", f"[{self.stock_id}] Volume Distribution Exit: vol {self.today_volume/1e6:.1f}M vs avg {self.avg_volume_14d/1e6:.1f}M ({self.macd_signal}, PnL: {self.pnl_percent:.2f}%)")
+                return 'SELL'
+
+            # Update MACD transition tracker
+            if self.macd_signal != self.prev_macd_signal:
+                self.prev_macd_signal = self.macd_signal
             return None
 
         # -- BUY LOGIC --
@@ -1385,7 +1446,7 @@ class TradingBot:
                 return None
                 
             # Block if the drop is moderate but RSI is still high (not oversold enough)
-            if daily_drop < -0.03 and self.rsi_value > 30:
+            if daily_drop < -0.03 and self.rsi_value > 45:
                 logger.info(f"[{self.stock_id}] Blocked DIP buy: catching a falling knife (RSI: {self.rsi_value:.1f})")
                 return None
             
