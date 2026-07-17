@@ -82,7 +82,7 @@ class TradingBot:
         self.dynamic_profit_target = self.profit_target  # Start with DB value, override dynamically
 
         # ---- Dynamic Stop Loss ----     
-        self.stop_multiplier = 1.2  # Common ATR multiplier is 1.5 to 3.0
+        self.stop_multiplier = 2.5  # Common ATR multiplier is 1.5 to 3.0
         self.max_stop_loss = -15.0  # Hard floor (maximum loss allowed)
         self.min_stop_loss = -3.0   # Hard ceiling (minimum stop to avoid "noise" exits)
         self.dynamic_stop_loss = self.drop_threshold # Starting default value
@@ -330,14 +330,13 @@ class TradingBot:
                     volume= data['Volume'].iloc[:, 0] if isinstance(data['Volume'], pd.DataFrame) else data['Volume']
                     
                     if len(close) >= 2:
-                        idx = -2 if self.is_market_open() else -1
-                        self.previous_close = float(close.iat[idx])
-                        if len(close) >= abs(idx) + 1:
-                            self.day_before_yesterday_close = float(close.iat[idx - 1])
+                        self.previous_close = float(close.iat[-2])
+                        if len(close) >= 3:
+                            self.day_before_yesterday_close = float(close.iat[-3])
                         else:
                             self.day_before_yesterday_close = self.previous_close
-                        if len(close) >= abs(idx) + 3:
-                            self.close_3d_ago = float(close.iat[idx - 3])
+                        if len(close) >= 5:
+                            self.close_3d_ago = float(close.iat[-5])
                         else:
                             self.close_3d_ago = self.previous_close
          
@@ -749,12 +748,15 @@ class TradingBot:
                 return False
 
         # === 6. BUILD REASON ===
-        drop_pct = (self.fourteen_day_high - self.market_value) / self.fourteen_day_high * 100
-        reason = f"Score:{self.smart_score} | Drop:{drop_pct:.1f}% | RSI:{self.rsi_value:.0f} | Vol:{self.today_volume/1e6:.1f}M"
-        if self.score_reason:
-            reason += f" | {self.score_reason}"
-        if self.stock_id in self.PRIORITY_BUY_LIST:
-            reason = "PRIORITY BUY - VIP LIST ★ " + reason
+        if hasattr(self, 'last_trade_reason') and self.last_trade_reason:
+            reason = self.last_trade_reason
+        else:
+            drop_pct = (self.fourteen_day_high - self.market_value) / self.fourteen_day_high * 100
+            reason = f"Score:{self.smart_score} | Drop:{drop_pct:.1f}% | RSI:{self.rsi_value:.0f} | Vol:{self.today_volume/1e6:.1f}M"
+            if self.score_reason:
+                reason += f" | {self.score_reason}"
+            if self.stock_id in self.PRIORITY_BUY_LIST:
+                reason = "PRIORITY BUY - VIP LIST ★ " + reason
 
         # === 7. BUILD PERFECT CONTRACT ===
         contract = Contract()
@@ -824,7 +826,10 @@ class TradingBot:
 
         native_currency, primary_exchange = self.get_native_currency_and_exchange()
 
-        reason = f"PROFIT {self.pnl_percent:.1f}% | Score:{self.smart_score} | RSI:{self.rsi_value:.0f}"
+        if hasattr(self, 'last_trade_reason') and self.last_trade_reason:
+            reason = self.last_trade_reason
+        else:
+            reason = f"PROFIT {self.pnl_percent:.1f}% | Score:{self.smart_score} | RSI:{self.rsi_value:.0f}"
 
         # === 1. BUILD CONTRACT ===
         contract = Contract()
@@ -1316,34 +1321,44 @@ class TradingBot:
             if self.highest_pnl >= profit_target_pct:
                 trail_activation = self.highest_pnl - dynamic_trail_drop
                 if self.pnl_percent <= trail_activation:
-                    _throttled_sell_log("trailing_profit", f"[{self.stock_id}] Trailing Profit Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: {dynamic_trail_drop:.2f}%)")
+                    reason_msg = f"Trailing Profit Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: {dynamic_trail_drop:.2f}%)"
+                    _throttled_sell_log("trailing_profit", f"[{self.stock_id}] {reason_msg}")
+                    self.last_trade_reason = reason_msg
                     return 'SELL'
                     
-            # 1.5 Proportional Protective Trailing Stop (lock in gains once > 2%)
-            elif self.highest_pnl >= 2.0:
+            # 1.5 Proportional Protective Trailing Stop (lock in gains once > 5%)
+            elif self.highest_pnl >= 5.0:
                 # Give back at most 50% of peak gains (e.g. peak 4% → sell at 2%, peak 6% → sell at 3%)
                 protective_trail_drop = self.highest_pnl * 0.5
                 protective_floor = self.highest_pnl - protective_trail_drop
                 if self.pnl_percent <= protective_floor:
-                    _throttled_sell_log("protective_stop", f"[{self.stock_id}] Protective Stop Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: {protective_trail_drop:.2f}%)")
+                    reason_msg = f"Protective Stop Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: {protective_trail_drop:.2f}%)"
+                    _throttled_sell_log("protective_stop", f"[{self.stock_id}] {reason_msg}")
+                    self.last_trade_reason = reason_msg
                     return 'SELL'
             
             # 2. Dynamic Stop Loss (ATR-based)
             if self.pnl_percent <= self.dynamic_stop_loss:
-                _throttled_sell_log("atr_stop_loss", f"[{self.stock_id}] ATR Stop Loss Triggered at {self.dynamic_stop_loss:.1f}%")
+                reason_msg = f"ATR Stop Loss Triggered at {self.dynamic_stop_loss:.1f}%"
+                _throttled_sell_log("atr_stop_loss", f"[{self.stock_id}] {reason_msg}")
+                self.last_trade_reason = reason_msg
                 return 'SELL'
 
             # 3. RSI Overbought Exit (only sell when in profit to avoid false signals)
-            if self.rsi_value >= 80 and self.pnl_percent > 1.0:
-                _throttled_sell_log("rsi_overbought", f"[{self.stock_id}] RSI Overbought Exit at RSI {self.rsi_value:.0f} (PnL: {self.pnl_percent:.2f}%)")
+            if self.rsi_value >= 75 and self.pnl_percent > 1.0:
+                reason_msg = f"RSI Overbought Exit at RSI {self.rsi_value:.0f} (PnL: {self.pnl_percent:.2f}%)"
+                _throttled_sell_log("rsi_overbought", f"[{self.stock_id}] {reason_msg}")
+                self.last_trade_reason = reason_msg
                 return 'SELL'
 
             # 4. MACD Bearish Crossover (only on fresh bullish → bearish transition)
             if (self.macd_signal in ("S_BEAR", "BEAR") and
                     self.prev_macd_signal in ("S_BULL", "BULL") and
                     self.pnl_percent > 1.0):
-                _throttled_sell_log("macd_crossover", f"[{self.stock_id}] MACD Bearish Crossover Exit ({self.prev_macd_signal} → {self.macd_signal}, PnL: {self.pnl_percent:.2f}%)")
+                reason_msg = f"MACD Bearish Crossover Exit ({self.prev_macd_signal} → {self.macd_signal}, PnL: {self.pnl_percent:.2f}%)"
+                _throttled_sell_log("macd_crossover", f"[{self.stock_id}] {reason_msg}")
                 self.prev_macd_signal = self.macd_signal
+                self.last_trade_reason = reason_msg
                 return 'SELL'
 
             # 5. Analyst Downgrade / Target Cut Below Current Price
@@ -1364,7 +1379,9 @@ class TradingBot:
                         temp_target = temp_target * 100
 
                     if self.market_value >= temp_target * 1.10:  # Price is 10%+ above analyst target
-                        _throttled_sell_log("analyst_target", f"[{self.stock_id}] Analyst Target Exit: price {self.market_value:.2f} is 10%+ above target {temp_target:.2f} (PnL: {self.pnl_percent:.2f}%)")
+                        reason_msg = f"Analyst Target Exit: price {self.market_value:.2f} is 10%+ above target {temp_target:.2f} (PnL: {self.pnl_percent:.2f}%)"
+                        _throttled_sell_log("analyst_target", f"[{self.stock_id}] {reason_msg}")
+                        self.last_trade_reason = reason_msg
                         return 'SELL'
 
             # 6. Volume Distribution Exit (volume dried up to <50% of average while in profit)
@@ -1372,7 +1389,9 @@ class TradingBot:
                     self.today_volume < self.avg_volume_14d * 0.5 and
                     self.pnl_percent > 2.0 and
                     self.macd_signal in ("S_BEAR", "BEAR", "NEUTRAL")):
-                _throttled_sell_log("volume_dist", f"[{self.stock_id}] Volume Distribution Exit: vol {self.today_volume/1e6:.1f}M vs avg {self.avg_volume_14d/1e6:.1f}M ({self.macd_signal}, PnL: {self.pnl_percent:.2f}%)")
+                reason_msg = f"Volume Distribution Exit: vol {self.today_volume/1e6:.1f}M vs avg {self.avg_volume_14d/1e6:.1f}M ({self.macd_signal}, PnL: {self.pnl_percent:.2f}%)"
+                _throttled_sell_log("volume_dist", f"[{self.stock_id}] {reason_msg}")
+                self.last_trade_reason = reason_msg
                 return 'SELL'
 
             # Update MACD transition tracker
@@ -1384,7 +1403,7 @@ class TradingBot:
         
         # 1. Cooldown checks for BUY
         now = time.time()
-        if now - self.last_buy_time < 172800 or now - self.last_sell_time < 172800:  # 48 hours
+        if now - self.last_buy_time < 86400 or now - self.last_sell_time < 86400:  # 24 hours (1 trading day)
             return None
 
         if self.quantity > 0 and now - self.last_buy_time < 1800:  # Min 30 min hold
@@ -1451,6 +1470,7 @@ class TradingBot:
                 return None
             
             self.score_reason += " (Dip Entry)"
+            self.last_trade_reason = f"DIP ENTRY | {self.score_reason} | RSI:{self.rsi_value:.1f} | Drop:{daily_drop*100:.1f}%"
             return 'BUY'
 
         # --- FAST RISING / OVERBOUGHT CHECKS ---
@@ -1475,6 +1495,7 @@ class TradingBot:
                 return None
                 
             self.score_reason += " (Momentum Entry)"
+            self.last_trade_reason = f"MOMENTUM ENTRY | {self.score_reason} | MACD:{self.macd_signal} | RSI:{self.rsi_value:.1f}"
             return 'BUY'
         return None
 
