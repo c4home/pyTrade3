@@ -810,13 +810,18 @@ class TradingApp(QMainWindow):
 
                 strategy_arrow = " ↘" if getattr(bot, 'current_strategy', '') == "DIP" else (" ↗" if getattr(bot, 'current_strategy', '') == "MOMENTUM" else "")
 
+                if bot.smart_score == 0 and "Insufficient Data" in bot.score_reason:
+                    score_display = "⚠️ Data"
+                else:
+                    score_display = f"{bot.smart_score}{strategy_arrow}"
+
                 items = [
                     comp_name_display, sid, bot.asset_type, bot.sector,
                     f"{bot.currency_symbol}{bot.market_value:.2f}",  
                     f"{price_pct:+.2f}%",
                     t_price_display,
                     bank_note,
-                    f"{bot.smart_score}{strategy_arrow}", 
+                    score_display, 
                     f"{bot.currency_symbol}{bot.fourteen_day_high:.2f}",
                     f"{bot.currency_symbol}{bot.fourteen_day_low:.2f}",
                     f"{bot.rsi_value:.0f}", 
@@ -870,7 +875,10 @@ class TradingApp(QMainWindow):
                     elif col == 8:
                         try:
                             score = bot.smart_score
-                            if score >= 8:
+                            if score == 0 and "Insufficient Data" in getattr(bot, 'score_reason', ''):
+                                item.setBackground(QColor(180, 0, 0))      # Dark Red background for error
+                                item.setForeground(QColor("white"))
+                            elif score >= 8:
                                 item.setBackground(QColor(0, 180, 0))      # Green
                                 item.setForeground(QColor("white"))
                             elif score >= 6:

@@ -445,6 +445,7 @@ class TradingBot:
                     )
                     
                     self.update_analyst_data(run_async=False)
+                    self.last_indicators_fetch = time.time()
                     
                 except Exception as e:
                     logger.error(f"Indicators background error for {self.stock_id}: {e}")
@@ -1027,7 +1028,8 @@ class TradingBot:
             'BARC.L': 'https://research.ibb.ubs.com/openaccess/compliance/77048_1_new.html',
             'AIR.PA': 'https://research.ibb.ubs.com/openaccess/compliance/330733_1_new.html',
             'HO.PA': 'https://research.ibb.ubs.com/openaccess/compliance/91575_1_new.html',
-            'SAF.PA': 'https://research.ibb.ubs.com/openaccess/compliance/90758_1_new.html'
+            'SAF.PA': 'https://research.ibb.ubs.com/openaccess/compliance/90758_1_new.html',
+            'AC.PA': 'https://research.ibb.ubs.com/openaccess/compliance/91149_1_new.html'
         }
 
         url = ubs_url_map.get(symbol)
@@ -1325,6 +1327,16 @@ class TradingBot:
         self.update_analyst_data(run_async=True)
         if self.manual_mode:
             return None # Skip all automated logic
+            
+        # Ensure we wait for any background data fetches to finish to guarantee perfectly fresh data
+        wait_start = time.time()
+        while (getattr(self, '_fetching_market_value', False) or 
+               getattr(self, '_fetching_indicators', False) or 
+               getattr(self, '_fetching_bank_note', False)):
+            time.sleep(0.1)
+            if time.time() - wait_start > 15:
+                logger.warning(f"[{self.stock_id}] Timed out waiting for background data fetches (15s).")
+                break
         
         # Safety guards
         if self.fourteen_day_high <= 0 or self.market_value <= 0:
@@ -1496,9 +1508,18 @@ class TradingBot:
         # Check if we are the highest score in the portfolio among available stocks
         if hasattr(self, 'gui') and self.gui and hasattr(self.gui, 'bots'):
             highest_score = max([b.smart_score for b in self.gui.bots.values() if b.quantity <= 0], default=0)
+            
             if self.smart_score < highest_score:
                 # Do not log continuously to avoid spam, just return None silently
                 return None
+                
+            # User Feature Request: If we have the highest score, but another stock tied for the highest
+            # score has a closed market, we must WAIT for it to open before buying, to give it priority.
+            if self.smart_score == highest_score and self.is_market_open():
+                for b in self.gui.bots.values():
+                    if b.quantity <= 0 and b.smart_score == highest_score and not b.is_market_open():
+                        # Another top-scoring stock is closed. Wait for it to open.
+                        return None
         
         current_strategy = "DIP" if "DIP" in self.score_reason else "MOMENTUM"
         
