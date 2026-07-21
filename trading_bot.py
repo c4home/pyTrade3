@@ -67,6 +67,7 @@ class TradingBot:
         self.ma_signal = ""
         self.macd_signal = ""
         self.prev_macd_signal = ""  # Track MACD transitions for crossover detection
+        self.prev_ma_signal = ""    # Track MA transitions
 
         self.next_earnings_date = None
         
@@ -169,6 +170,42 @@ class TradingBot:
             return market_open <= current_time <= market_close
         except:
             return False
+            
+    def get_projected_volume(self):
+        """Estimates the final daily volume based on how much time has passed since market open."""
+        if self.today_volume <= 0:
+            return 0
+            
+        try:
+            tz = ZoneInfo(self.exchange_tz_name)
+            now = datetime.now(tz)
+            
+            if now.weekday() >= 5:
+                return self.today_volume
+                
+            current_time = now.time()
+            if 'America/New_York' in self.exchange_tz_name:
+                market_open = dtime(9, 30)
+                market_close = dtime(16, 0)
+            else:
+                market_open = dtime(9, 0)
+                market_close = dtime(17, 30)
+
+            # If market hasn't opened yet, or has already closed, use today_volume directly
+            if current_time < market_open or current_time > market_close:
+                return self.today_volume
+                
+            total_minutes = (market_close.hour * 60 + market_close.minute) - (market_open.hour * 60 + market_open.minute)
+            elapsed_minutes = (current_time.hour * 60 + current_time.minute) - (market_open.hour * 60 + market_open.minute)
+            
+            if elapsed_minutes <= 0:
+                return self.today_volume
+                
+            # Floor to 30 mins to avoid crazy spikes right at 9:31 AM
+            effective_elapsed = max(30, elapsed_minutes)
+            return self.today_volume * (total_minutes / effective_elapsed)
+        except:
+            return self.today_volume
 
     @staticmethod
     def calculate_rsi(close: pd.Series, period: int = 14) -> float:
@@ -379,18 +416,24 @@ class TradingBot:
                     self._cached_atr_14 = float(atr)
                     self._atr_last_update = time.time()
          
+                    new_ma_signal = ""
                     if price > ma20 > ma50 > ma200:
-                        self.ma_signal = "S_BULL"
+                        new_ma_signal = "S_BULL"
                     elif price > ma20 and ma20 > ma50:
-                        self.ma_signal = "BULL"
+                        new_ma_signal = "BULL"
                     elif price > ma50:
-                        self.ma_signal = "N_BULL"
+                        new_ma_signal = "N_BULL"
                     elif price < ma20 and ma20 < ma50:
-                        self.ma_signal = "BEAR"
+                        new_ma_signal = "BEAR"
                     elif price < ma50:
-                        self.ma_signal = "N_BEAR"
+                        new_ma_signal = "N_BEAR"
                     else:
-                        self.ma_signal = "NEUTRAL"
+                        new_ma_signal = "NEUTRAL"
+                        
+                    # Track actual transitions for email notifications
+                    if getattr(self, 'ma_signal', '') and self.ma_signal != new_ma_signal:
+                        self.prev_ma_signal = self.ma_signal
+                    self.ma_signal = new_ma_signal
          
                     ema12 = close.ewm(span=12, adjust=False).mean()
                     ema26 = close.ewm(span=26, adjust=False).mean()
@@ -1181,48 +1224,78 @@ class TradingBot:
         
         # --- STRATEGY A: DIP BUYER (Reversion to Mean) ---
         dip_points = 0
+        dip_details = []
         
         # 1. RSI (Oscillator) - Max 4 points
-        if self.rsi_value < 25: dip_points += 4
-        elif self.rsi_value < 30: dip_points += 3
-        elif self.rsi_value < 40: dip_points += 2
+        if self.rsi_value < 25: 
+            dip_points += 4
+            dip_details.append("RSI<25: +4")
+        elif self.rsi_value < 30: 
+            dip_points += 3
+            dip_details.append("RSI<30: +3")
+        elif self.rsi_value < 40: 
+            dip_points += 2
+            dip_details.append("RSI<40: +2")
         
         # 2. Bollinger Bands (Volatility) - Max 3 points
         if hasattr(self, 'bb_pct_b'):
-            if self.bb_pct_b < 0:      dip_points += 3  # Below Lower Band (Extreme)
-            elif self.bb_pct_b < 0.1:  dip_points += 2  # Touching Lower Band
-            elif self.bb_pct_b < 0.2:  dip_points += 1  # Near Lower Band
+            if self.bb_pct_b < 0:      
+                dip_points += 3
+                dip_details.append("BB<0: +3")
+            elif self.bb_pct_b < 0.1:  
+                dip_points += 2
+                dip_details.append("BB<0.1: +2")
+            elif self.bb_pct_b < 0.2:  
+                dip_points += 1
+                dip_details.append("BB<0.2: +1")
             
         # 3. Context (Trend) - Max 3 points
-        dip_points += trend_score  # We prefer buying dips in uptrends
+        dip_points += trend_score  
+        if trend_score > 0:
+            dip_details.append(f"Trend: +{trend_score}")
         
         # Total Dip Score = RSI(4) + BB(3) + Trend(3) = 10 max
         
         # --- STRATEGY B: MOMENTUM (Breakout) ---
         mom_points = 0
+        mom_details = []
         
         # 1. MACD & Signal - Max 3 points
-        if "S_BULL" in self.macd_signal: mom_points += 3
-        elif "BULL" in self.macd_signal: mom_points += 2
+        if "S_BULL" in self.macd_signal: 
+            mom_points += 3
+            mom_details.append("MACD(S_BULL): +3")
+        elif "BULL" in self.macd_signal: 
+            mom_points += 2
+            mom_details.append("MACD(BULL): +2")
         
         # 2. ADX (Trend Strength & Directional Guard) - Max 2 points
         # Only award points if the stock is in an uptrend (price above 50 SMA)
         ma50 = self.get_ma50()
         if self.market_value > ma50:
-            if self.adx_value > 25: mom_points += 1
-            if self.adx_value > 35: mom_points += 1
+            if self.adx_value > 35: 
+                mom_points += 2
+                mom_details.append("ADX>35: +2")
+            elif self.adx_value > 25: 
+                mom_points += 1
+                mom_details.append("ADX>25: +1")
         
         # 3. Volume Support - Max 2 points
-        if self.today_volume > self.avg_volume_14d:
+        projected_vol = self.get_projected_volume()
+        
+        if projected_vol > self.avg_volume_14d * 1.5:
+            mom_points += 2
+            mom_details.append("ProjVol>1.5x: +2")
+        elif projected_vol > self.avg_volume_14d:
             mom_points += 1
-        if self.today_volume > self.avg_volume_14d * 1.5:
-            mom_points += 1
+            mom_details.append("ProjVol>Avg: +1")
             
         # 4. RSI Sweet Spot (Not too high) - Max 3 points
         if 50 <= self.rsi_value <= 70:
             mom_points += 3
+            mom_details.append("RSI(50-70): +3")
         elif 40 <= self.rsi_value <= 50:
             mom_points += 1 # Weak momentum
+            mom_details.append("RSI(40-50): +1")
             
         # Total Momentum Score = MACD(3) + ADX(2) + Vol(2) + RSI(3) = 10 max
 
@@ -1231,10 +1304,12 @@ class TradingBot:
             self.base_score = dip_points
             current_strategy = "DIP"
             self.current_strategy = "DIP"
+            base_details = ", ".join(dip_details)
         else:
             self.base_score = mom_points
             current_strategy = "MOMENTUM"
             self.current_strategy = "MOMENTUM"
+            base_details = ", ".join(mom_details)
             
         # --- ANALYST MODIFIER (-2 to +2) ---
         analyst_mod, analyst_note = self.calculate_analyst_modifier()
@@ -1260,24 +1335,24 @@ class TradingBot:
             # CASE A: Price is LOWER than Target (Undervalued)
             if self.market_value <= (temp_target * 0.80):
                 target_bonus = 3
-                self.score_reason += f" [Bank Target: +3 (20%+ Upside vs {final_target})]"
+                self.score_reason += f" | Bank Target: +3 (20%+ Upside vs {final_target})"
             elif self.market_value <= (temp_target * 0.90):
                 target_bonus = 2
-                self.score_reason += f" [Bank Target: +2 (10%+ Upside vs {final_target})]"
+                self.score_reason += f" | Bank Target: +2 (10%+ Upside vs {final_target})"
             elif self.market_value < temp_target:
                 target_bonus = 1
-                self.score_reason += " [Bank Target: +1 (Below Target)]"
+                self.score_reason += " | Bank Target: +1 (Below Target)"
 
             # CASE B: Price is HIGHER than Target (Overvalued)
             elif self.market_value >= (temp_target * 1.20):
                 target_bonus = -3
-                self.score_reason += f" [Bank Target: -3 (20%+ Overvalued vs {final_target})]"
+                self.score_reason += f" | Bank Target: -3 (20%+ Overvalued vs {final_target})"
             elif self.market_value >= (temp_target * 1.10):
                 target_bonus = -2
-                self.score_reason += f" [Bank Target: -2 (10%+ Overvalued vs {final_target})]"
+                self.score_reason += f" | Bank Target: -2 (10%+ Overvalued vs {final_target})"
             elif self.market_value > temp_target:
                 target_bonus = -1
-                self.score_reason += " [Bank Target: -1 (Above Target)]"
+                self.score_reason += " | Bank Target: -1 (Above Target)"
 
         # --- FINAL SCORE CALCULATION ---
         self.smart_score = self.base_score + analyst_mod + target_bonus
@@ -1285,13 +1360,14 @@ class TradingBot:
         # Boost ETF/ETC score since they lack analyst targets
         if "ETF" in self.asset_type or "ETC" in self.asset_type:
             self.smart_score += 2
-            self.score_reason += " [ETF/ETC Baseline: +2]"
+            self.score_reason += " | ETF/ETC Baseline: +2"
 
         # Cap limits
         self.smart_score = max(0, min(12, int(self.smart_score)))
         
         bonus_reason = self.score_reason
-        self.score_reason = f"[{current_strategy}] Base:{self.base_score} {analyst_note}{bonus_reason}".strip()
+        base_breakdown = f"[{base_details}]" if base_details else ""
+        self.score_reason = f"[{current_strategy}] Score: {self.smart_score}/12 (Base: {self.base_score} {base_breakdown}{analyst_note}{bonus_reason})".strip()
         return self.smart_score
 
     @classmethod

@@ -118772,3 +118772,17 @@
 2026-07-21 13:59:27 - config - INFO - Attempting web scrape for EBAY...
 2026-07-21 13:59:27 - config - INFO - Fetching fresh analyst targets for DELL...
 2026-07-21 13:59:27 - config - INFO - Attempting web scrape for DELL...
+2026-07-21 14:04:28 - config - INFO - [INTC] Analyst Target Exit: price 97.09 is 10%+ above target 75.00 (PnL: 5.60%)
+2026-07-21 14:04:30 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 14:09:29 - config - INFO - [INTC] Analyst Target Exit: price 97.09 is 10%+ above target 75.00 (PnL: 5.60%)
+2026-07-21 14:09:31 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 14:14:34 - config - INFO - [INTC] Analyst Target Exit: price 97.09 is 10%+ above target 75.00 (PnL: 5.60%)
+2026-07-21 14:14:35 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 14:19:39 - config - INFO - [INTC] Analyst Target Exit: price 97.09 is 10%+ above target 75.00 (PnL: 5.60%)
+2026-07-21 14:19:41 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 14:24:44 - config - INFO - [INTC] Analyst Target Exit: price 97.09 is 10%+ above target 75.00 (PnL: 5.60%)
+2026-07-21 14:24:46 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 14:29:49 - config - INFO - [INTC] Analyst Target Exit: price 97.09 is 10%+ above target 75.00 (PnL: 5.60%)
+2026-07-21 14:29:50 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 14:34:54 - config - INFO - [INTC] Analyst Target Exit: price 97.09 is 10%+ above target 75.00 (PnL: 5.60%)
+2026-07-21 14:34:55 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.

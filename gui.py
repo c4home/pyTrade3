@@ -169,13 +169,32 @@ class TradingApp(QMainWindow):
                 rsi = f"{bot.rsi_value:.1f}"
                 drop_pct = ((bot.fourteen_day_high - bot.market_value) / bot.fourteen_day_high * 100) if bot.fourteen_day_high > 0 else 0
                 drop = f"{drop_pct:.1f}%"
-                volume = f"{bot.today_volume/1e6:.1f}M (vs {bot.avg_volume_14d/1e6:.1f}M)"
-                ma = bot.ma_signal
-                macd = bot.macd_signal
+                
+                projected_vol = bot.get_projected_volume()
+                volume = f"Proj {projected_vol/1e6:.1f}M (Act: {bot.today_volume/1e6:.1f}M vs Avg: {bot.avg_volume_14d/1e6:.1f}M)"
+                
+                prev_ma = getattr(bot, 'prev_ma_signal', '')
+                ma = f"{prev_ma} → {bot.ma_signal}" if prev_ma and prev_ma != bot.ma_signal else bot.ma_signal
+                
+                prev_macd = getattr(bot, 'prev_macd_signal', '')
+                macd = f"{prev_macd} → {bot.macd_signal}" if prev_macd and prev_macd != bot.macd_signal else bot.macd_signal
+                
                 earnings = bot.next_earnings_date or "None"
                 
             # 1. Currency symbol ($, €, £ …)
             curr_symbol = self.exchange_manager.get_currency_symbol(native_currency)
+            
+            pnl_info = ""
+            if action == "SELL" and bot and getattr(bot, 'bought_price', 0) > 0:
+                comp_bought = bot.bought_price
+                if bot.currency == "GBp":
+                    comp_bought = bot.bought_price * 100.0
+                
+                pnl_amount = (price - comp_bought) * quantity
+                if bot.currency == "GBp":
+                    pnl_amount = pnl_amount / 100.0
+                    
+                pnl_info = f"Realised P/L : {curr_symbol}{pnl_amount:+.2f} ({bot.pnl_percent:+.2f}%)\n            "
 
             subject = f"{action} {symbol} - {quantity} @ {curr_symbol}{price:.2f}"
 
@@ -187,13 +206,13 @@ class TradingApp(QMainWindow):
             Quantity   : {quantity}
             Price      : {curr_symbol}{price:.2f}
             Total      : {curr_symbol}{quantity * price:.2f}
-            Time       : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} (CET)
+            {pnl_info}Time       : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} (CET)
 
             REASON:
             {reason}
 
             TECHNICALS:
-            Score      : {score}/22
+            Score      : {score}/12
             RSI        : {rsi}
             14d Drop   : {drop}
             Volume     : {volume}
