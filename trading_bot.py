@@ -1361,10 +1361,10 @@ class TradingBot:
         # --- FINAL SCORE CALCULATION ---
         self.smart_score = self.base_score + analyst_mod + target_bonus
 
-        # Boost ETF/ETC score since they lack analyst targets
-        if "ETF" in self.asset_type or "ETC" in self.asset_type:
-            self.smart_score += 2
-            self.score_reason += " | ETF/ETC Baseline: +2"
+        # Boost ETF/ETC score to offset lack of volatility and analyst targets
+        if hasattr(self, 'asset_type') and self.asset_type in ["ETF", "ETC"]:
+            self.smart_score += 6
+            self.score_reason += " | ETF/ETC Baseline: +6"
 
         # Cap limits
         self.smart_score = max(0, min(12, int(self.smart_score)))
