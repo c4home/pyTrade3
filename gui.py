@@ -1140,7 +1140,7 @@ class TradingApp(QMainWindow):
                         not bot.has_pending_order() and 
                         bot.is_market_open() and
                         bot.get_market_value() > 0 and
-                        bot.quantity <= 0):
+                        bot.cash_left >= getattr(bot, 'MIN_CASH_FOR_BUY', 500)):
 
                         # Respect order cooldown for this symbol
                         last_order = self.order_cooldown.get(sid, 0)
@@ -1151,8 +1151,11 @@ class TradingApp(QMainWindow):
                         if action == 'BUY':
                             buy_candidates.append(bot)
 
-                # 3. Sort Candidates by Smart Score in descending order
-                buy_candidates.sort(key=lambda b: b.smart_score, reverse=True)
+                # 3. Sort Candidates by Smart Score (Tie-break by highest analyst target upside percentage)
+                def sort_key(b):
+                    return (b.smart_score, getattr(b, 'target_upside_pct', 0.0))
+                    
+                buy_candidates.sort(key=sort_key, reverse=True)
 
                 # 4. Execute Buy Orders Sequentially
                 for bot in buy_candidates:

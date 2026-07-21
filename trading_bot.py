@@ -1209,9 +1209,11 @@ class TradingBot:
         if self.fourteen_day_high <= 0 or self.market_value <= 0:
             self.smart_score = 0
             self.score_reason = "Insufficient Data"
+            self.target_upside_pct = 0.0
             return
 
         self.score_reason = ""
+        self.target_upside_pct = 0.0
         ma200 = self.get_ma200()
         
         # --- FACTOR 1: MARKET STRUCTURE (Trend) ---
@@ -1329,6 +1331,8 @@ class TradingBot:
                 temp_target = temp_target * 100
             elif self.market_value > 10 and temp_target < 10:
                 temp_target = temp_target * 100
+
+            self.target_upside_pct = (temp_target - self.market_value) / self.market_value
 
             # --- COMBINED UNDER/OVERVALUATION LOGIC ---
             
@@ -1583,7 +1587,7 @@ class TradingBot:
                 
         # Check if we are the highest score in the portfolio among available stocks
         if hasattr(self, 'gui') and self.gui and hasattr(self.gui, 'bots'):
-            highest_score = max([b.smart_score for b in self.gui.bots.values() if b.quantity <= 0], default=0)
+            highest_score = max([b.smart_score for b in self.gui.bots.values() if b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500)], default=0)
             
             if self.smart_score < highest_score:
                 # Do not log continuously to avoid spam, just return None silently
@@ -1593,7 +1597,7 @@ class TradingBot:
             # score has a closed market, we must WAIT for it to open before buying, to give it priority.
             if self.smart_score == highest_score and self.is_market_open():
                 for b in self.gui.bots.values():
-                    if b.quantity <= 0 and b.smart_score == highest_score and not b.is_market_open():
+                    if b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500) and b.smart_score == highest_score and not b.is_market_open():
                         # Another top-scoring stock is closed. Wait for it to open.
                         return None
         
