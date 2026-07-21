@@ -9,7 +9,7 @@ from pdt_protector import PDTProtector
 # ==================== MAIN GUI ====================
 class TradingApp(QMainWindow):
     instance = None  # <-- ADD THIS
-    DEFAULT_SORT_COLUMN = 26
+    DEFAULT_SORT_COLUMN = 27
     DEFAULT_SORT_ORDER  = Qt.SortOrder.AscendingOrder
     def __init__(self):
         super().__init__()
@@ -56,6 +56,9 @@ class TradingApp(QMainWindow):
         
         # 2. try auto‑connect (after 500 ms – table is already built)
         QTimer.singleShot(500, self._auto_connect)
+        
+        # 3. auto-refresh data
+        QTimer.singleShot(1500, self.manual_refresh_data)
         
     def _auto_connect(self):
         # Called once at start‑up – only if the checkbox is checked.
@@ -140,6 +143,9 @@ class TradingApp(QMainWindow):
                 f"EUR/USD: {self.exchange_manager.get_eur_usd_rate():.3f}  "
                 f"Cash: {self.ibapi.currency_symbol}{self.ibapi.available_cash:,.0f}"
             )
+            if hasattr(self.ibapi, 'net_liquidation') and self.ibapi.net_liquidation > 0:
+                if hasattr(self, 'db_manager'):
+                    self.db_manager.set_setting("global_account_value", str(self.ibapi.net_liquidation))
     
     def send_trade_email(self, symbol, action, quantity, price, native_currency, reason="", bot=None):
         try:
@@ -317,10 +323,28 @@ class TradingApp(QMainWindow):
         
         dash_row_layout.addStretch()
         
+        # --- GLOBAL RISK SETTINGS ---
+        saved_account = "14000"
+        saved_risk = "1.0"
+        if hasattr(self, 'db_manager'):
+            saved_account = self.db_manager.get_setting("global_account_value", "14000")
+            saved_risk = self.db_manager.get_setting("risk_per_trade_pct", "1.0")
+
+        self.risk_pct_edit = QLineEdit(saved_risk)
+        self.risk_pct_edit.setFixedWidth(40)
+        self.risk_pct_edit.editingFinished.connect(self.save_global_risk)
+        dash_row_layout.addWidget(QLabel("Risk (%):"))
+        dash_row_layout.addWidget(self.risk_pct_edit)
+        
+        dash_row_layout.addSpacing(15)
+        # ---------------------------
+        
         dash_row_layout.addWidget(QLabel("Min Cash (€):"))
         self.min_cash_edit = QLineEdit("0")
         self.min_cash_edit.setFixedWidth(70)
-        self.min_cash_edit.setStyleSheet("""
+        
+        # Set same stylesheet for the new edits
+        style = """
             QLineEdit {
                 background-color: #1a1a1a;
                 color: #ffffff;
@@ -329,7 +353,9 @@ class TradingApp(QMainWindow):
                 padding: 2px;
                 font-weight: bold;
             }
-        """)
+        """
+        self.min_cash_edit.setStyleSheet(style)
+        self.risk_pct_edit.setStyleSheet(style)
         dash_row_layout.addWidget(self.min_cash_edit)
         
         dash_row_layout.addSpacing(15)
@@ -343,7 +369,7 @@ class TradingApp(QMainWindow):
         layout.addWidget(conn_frame)
 
         self.table = QTableWidget()
-        self.table.setColumnCount(28)
+        self.table.setColumnCount(29)
         self.table.setWordWrap(True)                 
         self.table.setStyleSheet("""
             QTableWidget {
@@ -367,7 +393,7 @@ class TradingApp(QMainWindow):
         headers = [
             "Company", "Sym", "Type", "Sector",
             "Price", "Chg%", "Target", "Bank Target", "Score", "14H", "14L", "RSI", "ADX", "MA", "MACD", "Vol(M)",
-            "Qty", "Buy@", "Value", "P&L%", "Left", "Max", "TP%", "DynTP", "SL%", "DynSL", "Earn", "Status"
+            "Qty", "Buy@", "Value", "P&L%", "Left", "Max", "DynMax", "TP%", "DynTP", "SL%", "DynSL", "Earn", "Status"
         ]
 
         self.table.setHorizontalHeaderLabels(headers)
@@ -379,6 +405,9 @@ class TradingApp(QMainWindow):
         self.table.setColumnHidden(2, True)   # Hide Type
         self.table.setColumnHidden(3, True)   # Hide Sector
         self.table.setColumnHidden(20, True)  # Hide Left
+        self.table.setColumnHidden(21, True)  # Hide Max
+        self.table.setColumnHidden(23, True)  # Hide TP%
+        self.table.setColumnHidden(25, True)  # Hide SL%
 
         # Enable context menu on the horizontal header to show/hide any column they want
         self.table.horizontalHeader().setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -388,7 +417,7 @@ class TradingApp(QMainWindow):
         self.table.horizontalHeader().sectionClicked.connect(self.on_header_clicked)
         self.table.itemSelectionChanged.connect(self.highlight_selected_row)
 
-        column_widths = [110, 42, 50, 80, 46, 46, 46, 105, 32, 45, 45, 25, 25, 45, 45, 40, 30, 45, 45, 48, 45, 45, 40, 40, 35, 40, 68, 52]
+        column_widths = [110, 42, 50, 80, 46, 46, 46, 105, 32, 45, 45, 25, 25, 45, 45, 40, 30, 45, 45, 48, 45, 45, 45, 40, 40, 35, 40, 68, 52]
         for i, w in enumerate(column_widths):
             if w:
                 self.table.setColumnWidth(i, w)
@@ -408,35 +437,12 @@ class TradingApp(QMainWindow):
         self.sym_edit.setPlaceholderText("Sym")
         row_layout.addWidget(self.sym_edit)
         
-        row_layout.addWidget(QLabel("MaxEUR:"))
-        self.max_edit = QLineEdit("0")
-        self.max_edit.setFixedWidth(65)
-        self.max_edit.setPlaceholderText("Max")
-        row_layout.addWidget(self.max_edit)
-        
-        row_layout.addWidget(QLabel("Profit%: "))
-        self.profit_edit = QLineEdit("5")
-        self.profit_edit.setFixedWidth(35)
-        self.profit_edit.setPlaceholderText("%")
-        row_layout.addWidget(self.profit_edit)
-        
-        row_layout.addWidget(QLabel("Drop%: "))
-        self.drop_edit = QLineEdit("5")
-        self.drop_edit.setFixedWidth(35)
-        self.drop_edit.setPlaceholderText("%")
-        row_layout.addWidget(self.drop_edit)
-        
         row_layout.addSpacing(10)
         
         self.add_btn = QPushButton("Add Stock")
         self.add_btn.setStyleSheet(common_button_style)
         self.add_btn.clicked.connect(self.add_stock)
         row_layout.addWidget(self.add_btn)
-        
-        self.apply_btn = QPushButton("Apply Settings")
-        self.apply_btn.setStyleSheet(common_button_style)
-        self.apply_btn.clicked.connect(self.apply_changes)
-        row_layout.addWidget(self.apply_btn)
         
         self.remove_btn = QPushButton("Remove Stock")
         self.remove_btn.setStyleSheet(common_button_style)
@@ -523,6 +529,15 @@ class TradingApp(QMainWindow):
             self.min_cash_edit.setText("0")
             self.db_manager.set_setting("min_cash", "0.0")
         logger.info(f"Minimum cash updated to: €{self.min_cash:,.2f}")
+
+    def save_global_risk(self):
+        try:
+            risk_pct = float(self.risk_pct_edit.text().strip())
+            if hasattr(self, 'db_manager'):
+                self.db_manager.set_setting("risk_per_trade_pct", str(risk_pct))
+            logger.info(f"Updated Global Risk Settings: Risk={risk_pct}%")
+        except ValueError as e:
+            logger.error(f"Invalid Global Risk values: {e}")
 
     def highlight_selected_row(self):
         # Clear previous highlights (reset all rows to default background)
@@ -772,6 +787,13 @@ class TradingApp(QMainWindow):
                 # Calcul de la variation journalière
                 if bot.previous_close > 0:
                     price_pct = ((bot.market_value - bot.previous_close) / bot.previous_close) * 100
+                    
+                    # If the market is closed, overnight pre-market changes are tiny.
+                    # Show the performance of the last completed session instead to match user expectations.
+                    if getattr(bot, 'is_market_open', None) and not bot.is_market_open():
+                        db_close = getattr(bot, 'day_before_yesterday_close', 0)
+                        if db_close > 0:
+                            price_pct = ((bot.previous_close - db_close) / db_close) * 100
                 else:
                     price_pct = 0.0
                     
@@ -786,13 +808,15 @@ class TradingApp(QMainWindow):
 
                 comp_name_display = bot.company_name[:12] + ".." if len(bot.company_name) > 14 else bot.company_name
 
+                strategy_arrow = " ↘" if getattr(bot, 'current_strategy', '') == "DIP" else (" ↗" if getattr(bot, 'current_strategy', '') == "MOMENTUM" else "")
+
                 items = [
                     comp_name_display, sid, bot.asset_type, bot.sector,
                     f"{bot.currency_symbol}{bot.market_value:.2f}",  
                     f"{price_pct:+.2f}%",
                     t_price_display,
                     bank_note,
-                    str(bot.smart_score), 
+                    f"{bot.smart_score}{strategy_arrow}", 
                     f"{bot.currency_symbol}{bot.fourteen_day_high:.2f}",
                     f"{bot.currency_symbol}{bot.fourteen_day_low:.2f}",
                     f"{bot.rsi_value:.0f}", 
@@ -806,6 +830,7 @@ class TradingApp(QMainWindow):
                     f"{bot.pnl_percent:+.1f}%",
                     format_currency_short(bot.cash_left, "€"),
                     format_currency_short(bot.max_amount, "€"),
+                    format_currency_short(getattr(bot, 'current_max_investment', bot.max_amount), "€"),
                     f"{bot.profit_target*100:.1f}%",
                     f"{bot.dynamic_profit_target*100:.1f}%",
                     f"{bot.drop_threshold*100:.1f}%",
@@ -844,7 +869,7 @@ class TradingApp(QMainWindow):
                             item.setForeground(QColor("red"))
                     elif col == 8:
                         try:
-                            score = int(text)
+                            score = bot.smart_score
                             if score >= 8:
                                 item.setBackground(QColor(0, 180, 0))      # Green
                                 item.setForeground(QColor("white"))
@@ -876,7 +901,7 @@ class TradingApp(QMainWindow):
                             item.setForeground(QColor("green"))
                         elif bot.pnl_percent < 0:
                             item.setForeground(QColor("red"))
-                    elif col == 26:  # Earnings column
+                    elif col == 27:  # Earnings column
                         if bot.next_earnings_date:
                             try:
                                 earn_date = datetime.strptime(bot.next_earnings_date, "%Y-%m-%d").date()
@@ -1122,9 +1147,10 @@ class TradingApp(QMainWindow):
             QMessageBox.warning(self, "Error", "Invalid or duplicate")
             return
         try:
-            max_amt = float(self.max_edit.text())
-            prof = float(self.profit_edit.text())
-            drop = float(self.drop_edit.text())
+            # Hardcode dummy defaults since these are now dynamically calculated
+            max_amt = 1000.0
+            prof = 5.0
+            drop = 5.0
 
             self.db_manager.add_stock(sid, max_amt, prof, drop)
             
@@ -1145,22 +1171,7 @@ class TradingApp(QMainWindow):
         except:
             QMessageBox.warning(self, "Error", "Invalid numbers")
 
-    def apply_changes(self):
-        sel = self.table.selectedItems()
-        if not sel:
-            QMessageBox.warning(self, "Warning", "Select a row!")
-            return
-        row = sel[0].row()
-        sid = self.table.item(row, 1).text()
-        try:
-            max_amt = float(self.max_edit.text())
-            prof = float(self.profit_edit.text())
-            drop = float(self.drop_edit.text())
-            self.db_manager.update_stock(sid, max_amt, prof, drop)
-            self.bots[sid].update_parameters(max_amt, prof, drop)
-            self.update_display()
-        except:
-            QMessageBox.warning(self, "Error", "Invalid input")
+
 
     def remove_stock(self):
         sel = self.table.selectedItems()

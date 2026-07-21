@@ -82,8 +82,8 @@ class TradingBot:
         self.dynamic_profit_target = self.profit_target  # Start with DB value, override dynamically
 
         # ---- Dynamic Stop Loss ----     
-        self.stop_multiplier = 2.5  # Common ATR multiplier is 1.5 to 3.0
-        self.max_stop_loss = -15.0  # Hard floor (maximum loss allowed)
+        self.stop_multiplier = 2.3  # Optimized from 2.5
+        self.max_stop_loss = -12.0  # Optimized from -15.0
         self.min_stop_loss = -3.0   # Hard ceiling (minimum stop to avoid "noise" exits)
         self.dynamic_stop_loss = self.drop_threshold # Starting default value
 
@@ -330,13 +330,19 @@ class TradingBot:
                     volume= data['Volume'].iloc[:, 0] if isinstance(data['Volume'], pd.DataFrame) else data['Volume']
                     
                     if len(close) >= 2:
-                        self.previous_close = float(close.iat[-2])
-                        if len(close) >= 3:
-                            self.day_before_yesterday_close = float(close.iat[-3])
+                        last_date = close.index[-1].date()
+                        today = pd.Timestamp.now(tz=close.index.tz).date()
+                        idx = -2 if last_date == today else -1
+                        
+                        self.previous_close = float(close.iat[idx])
+                        
+                        if len(close) >= abs(idx) + 1:
+                            self.day_before_yesterday_close = float(close.iat[idx - 1])
                         else:
                             self.day_before_yesterday_close = self.previous_close
-                        if len(close) >= 5:
-                            self.close_3d_ago = float(close.iat[-5])
+                            
+                        if len(close) >= abs(idx) + 3:
+                            self.close_3d_ago = float(close.iat[idx - 3])
                         else:
                             self.close_3d_ago = self.previous_close
          
@@ -550,6 +556,43 @@ class TradingBot:
         executor.submit(fetch)
         return self.market_value
 
+    def _calculate_dynamic_max_amount(self):
+        if not getattr(self, 'db_manager', None):
+            return self.max_amount
+            
+        global_acc_str = self.db_manager.get_setting("global_account_value", "14000")
+        risk_pct_str = self.db_manager.get_setting("risk_per_trade_pct", "1.0")
+        
+        try:
+            global_acc = float(global_acc_str)
+            risk_pct = float(risk_pct_str)
+        except ValueError:
+            global_acc = 14000.0
+            risk_pct = 1.0
+            
+        if risk_pct <= 0:
+            return self.max_amount
+            
+        risk_euro = global_acc * (risk_pct / 100.0)
+        
+        stop_loss_dist = abs(self.dynamic_stop_loss) / 100.0
+        if stop_loss_dist < 0.01:
+            stop_loss_dist = 0.01
+            
+        dynamic_max = risk_euro / stop_loss_dist
+        
+        # Different caps based on asset type
+        if hasattr(self, 'asset_type') and self.asset_type.upper() in ["ETF", "ETC"]:
+            max_cap_pct = 0.35
+        else:
+            max_cap_pct = 0.18
+            
+        cap_limit = global_acc * max_cap_pct
+        if dynamic_max > cap_limit:
+            dynamic_max = cap_limit
+            
+        return dynamic_max
+
     def update_position(self):
         with self.ibapi.data_lock:
             pos = self.ibapi.positions.get(self.ibkr_symbol, {})
@@ -586,7 +629,8 @@ class TradingBot:
         else:
             eur_invested = 0.0
 
-        self.cash_left = self.max_amount - eur_invested
+        self.current_max_investment = self._calculate_dynamic_max_amount()
+        self.cash_left = self.current_max_investment - eur_invested
         if self.cash_left < 0:
             self.cash_left = 0.0
 
@@ -706,9 +750,7 @@ class TradingBot:
         if not self.is_market_open() or self.has_pending_order() or min(self.cash_left, usable_cash) < self.MIN_CASH_FOR_BUY:
             return False
         
-        if not self.app.pdt_protector.can_trade():
-            logger.warning(f"PDT protection blocked BUY {self.stock_id}")
-            return False
+        # PDT check removed from buys to allow overnight positions
 
         # === 1. DETERMINE NATIVE CURRENCY + EXCHANGE ===
         native_currency, primary_exchange = self.get_native_currency_and_exchange()
@@ -1186,9 +1228,11 @@ class TradingBot:
         if dip_points >= mom_points:
             self.base_score = dip_points
             current_strategy = "DIP"
+            self.current_strategy = "DIP"
         else:
             self.base_score = mom_points
             current_strategy = "MOMENTUM"
+            self.current_strategy = "MOMENTUM"
             
         # --- ANALYST MODIFIER (-2 to +2) ---
         analyst_mod, analyst_note = self.calculate_analyst_modifier()
@@ -1313,6 +1357,23 @@ class TradingBot:
                 if getattr(self, 'db_manager', None):
                     self.db_manager.update_highest_pnl(self.stock_id, self.highest_pnl)
 
+            # ----- PDT SELL PROTECTION -----
+            is_day_trade = False
+            if self.last_buy_time > 0:
+                last_buy_date = datetime.fromtimestamp(self.last_buy_time).date()
+                if last_buy_date == datetime.now().date():
+                    is_day_trade = True
+
+            if is_day_trade and self.app and hasattr(self.app, 'pdt_protector'):
+                if not self.app.pdt_protector.can_trade():
+                    # Check if we should log (only log once per minute to avoid spam)
+                    _throttled_sell_log("pdt_block", f"[{self.stock_id}] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.")
+                    
+                    # Still update MACD tracker before returning None
+                    if self.macd_signal != self.prev_macd_signal:
+                        self.prev_macd_signal = self.macd_signal
+                    return None
+
             # 1. Dynamic ATR Trailing Profit Lock
             profit_target_pct = self.dynamic_profit_target * 100
             current_atr_pct = (self.get_atr_14() / self.market_value) * 100 if self.market_value > 0 else 0
@@ -1345,7 +1406,7 @@ class TradingBot:
                 return 'SELL'
 
             # 3. RSI Overbought Exit (only sell when in profit to avoid false signals)
-            if self.rsi_value >= 75 and self.pnl_percent > 1.0:
+            if self.rsi_value >= 80 and self.pnl_percent > 1.0:
                 reason_msg = f"RSI Overbought Exit at RSI {self.rsi_value:.0f} (PnL: {self.pnl_percent:.2f}%)"
                 _throttled_sell_log("rsi_overbought", f"[{self.stock_id}] {reason_msg}")
                 self.last_trade_reason = reason_msg
@@ -1384,15 +1445,7 @@ class TradingBot:
                         self.last_trade_reason = reason_msg
                         return 'SELL'
 
-            # 6. Volume Distribution Exit (volume dried up to <50% of average while in profit)
-            if (self.avg_volume_14d > 0 and self.today_volume > 0 and
-                    self.today_volume < self.avg_volume_14d * 0.5 and
-                    self.pnl_percent > 2.0 and
-                    self.macd_signal in ("S_BEAR", "BEAR", "NEUTRAL")):
-                reason_msg = f"Volume Distribution Exit: vol {self.today_volume/1e6:.1f}M vs avg {self.avg_volume_14d/1e6:.1f}M ({self.macd_signal}, PnL: {self.pnl_percent:.2f}%)"
-                _throttled_sell_log("volume_dist", f"[{self.stock_id}] {reason_msg}")
-                self.last_trade_reason = reason_msg
-                return 'SELL'
+
 
             # Update MACD transition tracker
             if self.macd_signal != self.prev_macd_signal:

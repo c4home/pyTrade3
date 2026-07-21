@@ -42,6 +42,5 @@ class PDTProtector:
     def can_trade(self):
         count = self.count_day_trades_5d()
         if count >= 3:
-            logger.error(f"PDT LIMIT REACHED ({count}/3) ALL TRADES BLOCKED")
             return False
         return True
