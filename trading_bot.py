@@ -369,7 +369,8 @@ class TradingBot:
                     if len(close) >= 2:
                         last_date = close.index[-1].date()
                         today = pd.Timestamp.now(tz=close.index.tz).date()
-                        idx = -2 if last_date == today else -1
+                        self.is_last_date_today = (last_date == today)
+                        idx = -2 if self.is_last_date_today else -1
                         
                         self.previous_close = float(close.iat[idx])
                         
@@ -624,6 +625,17 @@ class TradingBot:
             stop_loss_dist = 0.01
             
         dynamic_max = risk_euro / stop_loss_dist
+        
+        # Ensure we can always afford at least 1 share
+        if hasattr(self, 'get_native_currency_and_exchange') and self.market_value > 0:
+            try:
+                native_currency, _ = self.get_native_currency_and_exchange()
+                rate = self.exchange_manager.get_rate(native_currency)
+                market_val_eur = self.market_value / rate if rate > 0 else self.market_value
+                if dynamic_max < market_val_eur:
+                    dynamic_max = market_val_eur
+            except Exception:
+                pass
         
         # Different caps based on asset type
         if hasattr(self, 'asset_type') and self.asset_type.upper() in ["ETF", "ETC"]:
@@ -1414,15 +1426,11 @@ class TradingBot:
         if self.manual_mode:
             return None # Skip all automated logic
             
-        # Ensure we wait for any background data fetches to finish to guarantee perfectly fresh data
-        wait_start = time.time()
-        while (getattr(self, '_fetching_market_value', False) or 
-               getattr(self, '_fetching_indicators', False) or 
-               getattr(self, '_fetching_bank_note', False)):
-            time.sleep(0.1)
-            if time.time() - wait_start > 15:
-                logger.warning(f"[{self.stock_id}] Timed out waiting for background data fetches (15s).")
-                break
+        # If background data fetches are still running, skip trading logic this tick to avoid blocking the UI
+        if (getattr(self, '_fetching_market_value', False) or 
+            getattr(self, '_fetching_indicators', False) or 
+            getattr(self, '_fetching_bank_note', False)):
+            return None
         
         # Safety guards
         if self.fourteen_day_high <= 0 or self.market_value <= 0:
@@ -1642,7 +1650,16 @@ class TradingBot:
         if getattr(self, 'day_before_yesterday_close', 0) > 0 and self.previous_close > 0:
             yesterday_change = (self.previous_close - self.day_before_yesterday_close) / self.day_before_yesterday_close
 
-        is_fast_rising = daily_change > 0.05 or yesterday_change > 0.15
+        # Dynamic Volatility Thresholds using Average True Range (ATR)
+        # Instead of fixed 5% or 8%, we scale it to the stock's normal daily range.
+        atr = getattr(self, '_cached_atr_14', 0)
+        atr_pct = (atr / self.previous_close) if self.previous_close > 0 else 0.025
+        
+        # A parabolic move is defined as 2x its normal daily range (min 3%, max 8%)
+        daily_threshold = min(0.08, max(0.03, atr_pct * 2.0)) 
+        yesterday_threshold = min(0.08, max(0.05, atr_pct * 2.5))
+
+        is_fast_rising = daily_change > daily_threshold or yesterday_change > yesterday_threshold
         is_overbought = getattr(self, 'rsi_value', 50) > 70
 
         # 2. MOMENTUM STRATEGY TRIGGER
@@ -1666,6 +1683,15 @@ class TradingBot:
             return self.STATUS_HOLDING
         if self.has_pending_order():
             return self.STATUS_WAITING_ORDER
+        native_currency, _ = self.get_native_currency_and_exchange()
+        rate = self.exchange_manager.get_rate(native_currency)
+        market_val_eur = self.market_value / rate if rate > 0 else self.market_value
+
+        if self.cash_left < market_val_eur:
+            if self.quantity > 0:
+                return "Full capacity"
+            else:
+                return "Budget too low"
         if self.cash_left < 500:
             return f"Low Cash {self.currency_symbol}{self.cash_left:.0f}"
         if self.is_running:

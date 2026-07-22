@@ -6,11 +6,21 @@ from ib_api import IBApi
 from trading_bot import TradingBot
 from pdt_protector import PDTProtector
 
+class NumericTableWidgetItem(QTableWidgetItem):
+    def __init__(self, text, sort_value):
+        super().__init__(text)
+        self.sort_value = sort_value
+
+    def __lt__(self, other):
+        if hasattr(other, 'sort_value'):
+            return bool(self.sort_value < other.sort_value)
+        return super().__lt__(other)
+
 # ==================== MAIN GUI ====================
 class TradingApp(QMainWindow):
     instance = None  # <-- ADD THIS
-    DEFAULT_SORT_COLUMN = 27
-    DEFAULT_SORT_ORDER  = Qt.SortOrder.AscendingOrder
+    DEFAULT_SORT_COLUMN = 18
+    DEFAULT_SORT_ORDER  = Qt.SortOrder.DescendingOrder
     def __init__(self):
         super().__init__()
         TradingApp.instance = self  # <-- SET INSTANCE
@@ -26,7 +36,7 @@ class TradingApp(QMainWindow):
         self.auto_trading = False
         self.order_cooldown = {}  # Per-symbol cooldown
 
-        self.sort_column = self.DEFAULT_SORT_COLUMN  # Earning Date
+        self.sort_column = self.DEFAULT_SORT_COLUMN  # Value
         self.sort_order = self.DEFAULT_SORT_ORDER
 
         self.min_cash = 0.0
@@ -117,7 +127,7 @@ class TradingApp(QMainWindow):
 
         if not self._default_sort_applied:
             self.sort_column = self.DEFAULT_SORT_COLUMN  
-            self.sort_order = self.DEFAULT_SORT_ORDER   # Ascending
+            self.sort_order = self.DEFAULT_SORT_ORDER
 
             header = self.table.horizontalHeader()
             header.blockSignals(True)  # PREVENT RECURSION
@@ -810,9 +820,10 @@ class TradingApp(QMainWindow):
                     # If the market is closed, overnight pre-market changes are tiny.
                     # Show the performance of the last completed session instead to match user expectations.
                     if getattr(bot, 'is_market_open', None) and not bot.is_market_open():
-                        db_close = getattr(bot, 'day_before_yesterday_close', 0)
-                        if db_close > 0:
-                            price_pct = ((bot.previous_close - db_close) / db_close) * 100
+                        if not getattr(bot, 'is_last_date_today', True):
+                            db_close = getattr(bot, 'day_before_yesterday_close', 0)
+                            if db_close > 0:
+                                price_pct = ((bot.previous_close - db_close) / db_close) * 100
                 else:
                     price_pct = 0.0
                     
@@ -863,8 +874,37 @@ class TradingApp(QMainWindow):
                     status
                 ]
 
+                sort_values = [
+                    comp_name_display, sid, bot.asset_type, bot.sector,
+                    bot.market_value,  
+                    price_pct,
+                    bot.target_price,
+                    bank_target_long,
+                    bot.smart_score, 
+                    bot.fourteen_day_high,
+                    bot.fourteen_day_low,
+                    bot.rsi_value, 
+                    bot.adx_value,
+                    bot.ma_signal, 
+                    bot.macd_signal,
+                    bot.today_volume,
+                    bot.quantity,
+                    bot.bought_price,
+                    bot.current_value,
+                    bot.pnl_percent,
+                    bot.cash_left,
+                    bot.max_amount,
+                    getattr(bot, 'current_max_investment', bot.max_amount),
+                    bot.profit_target,
+                    bot.dynamic_profit_target,
+                    bot.drop_threshold,
+                    bot.dynamic_stop_loss,
+                    earn_display,
+                    status
+                ]
+
                 for col, text in enumerate(items):
-                    item = QTableWidgetItem(text)
+                    item = NumericTableWidgetItem(text, sort_values[col])
                     if col == 11:  # RSI column
                         try:
                             rsi_val = float(text)
@@ -938,6 +978,15 @@ class TradingApp(QMainWindow):
                                     item.setForeground(QColor("green"))  # Warning color
                             except ValueError:
                                 pass  # Invalid date format; skip coloring
+                    elif col == 28:  # Status column
+                        if text == "Hold":
+                            item.setForeground(QColor("red"))
+                        elif text == "Full capacity":
+                            item.setForeground(QColor("green"))
+                        elif text == "Budget too low":
+                            item.setForeground(QColor("red"))
+                        elif "Low Cash" in text:
+                            item.setForeground(QColor("orange"))
                     elif "BUY" in text or "BULL" in text:
                         item.setForeground(QColor("green"))   # Bullish signal, indicating to buy
                     elif "SELL" in text or "BEAR" in text:
