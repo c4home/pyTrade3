@@ -1167,7 +1167,7 @@ class TradingBot:
     def calculate_analyst_modifier(self):
         """Calculates a score modifier (-2 to +2) based on analyst consensus."""
         if not hasattr(self, 'analyst_data') or not self.analyst_data:
-            return 0, "No Data"
+            return 0, ""
 
         total_weight = 0
         weighted_sum = 0
@@ -1198,7 +1198,7 @@ class TradingBot:
                 continue # Skip malformed entries
 
         if total_weight == 0:
-            return 0, "Outdated/No Data"
+            return 0, ""
 
         weighted_target = weighted_sum / total_weight
         upside_pct = (weighted_target - self.market_value) / self.market_value
@@ -1209,13 +1209,13 @@ class TradingBot:
         
         if upside_pct > 0.20: 
             modifier = 3 if total_weight > 2 else 2 # Extra point if high conviction
-            note = "Strong-Upside"
+            note = f", Analyst: {modifier:+d} (Strong-Upside)"
         elif upside_pct > 0.10:
             modifier = 1
-            note = "Fair-Upside"
+            note = f", Analyst: +1 (Fair-Upside)"
         elif upside_pct < -0.05:
             modifier = -2
-            note = "Overvalued"
+            note = f", Analyst: -2 (Overvalued)"
             
         return modifier, note
         
@@ -1357,24 +1357,24 @@ class TradingBot:
             # CASE A: Price is LOWER than Target (Undervalued)
             if self.market_value <= (temp_target * 0.80):
                 target_bonus = 3
-                self.score_reason += f" | Bank Target: +3 (20%+ Upside vs {final_target})"
+                self.score_reason += f", Bank Target: +3 (20%+ Upside vs {final_target})"
             elif self.market_value <= (temp_target * 0.90):
                 target_bonus = 2
-                self.score_reason += f" | Bank Target: +2 (10%+ Upside vs {final_target})"
+                self.score_reason += f", Bank Target: +2 (10%+ Upside vs {final_target})"
             elif self.market_value < temp_target:
                 target_bonus = 1
-                self.score_reason += " | Bank Target: +1 (Below Target)"
+                self.score_reason += ", Bank Target: +1 (Below Target)"
 
             # CASE B: Price is HIGHER than Target (Overvalued)
             elif self.market_value >= (temp_target * 1.20):
                 target_bonus = -3
-                self.score_reason += f" | Bank Target: -3 (20%+ Overvalued vs {final_target})"
+                self.score_reason += f", Bank Target: -3 (20%+ Overvalued vs {final_target})"
             elif self.market_value >= (temp_target * 1.10):
                 target_bonus = -2
-                self.score_reason += f" | Bank Target: -2 (10%+ Overvalued vs {final_target})"
+                self.score_reason += f", Bank Target: -2 (10%+ Overvalued vs {final_target})"
             elif self.market_value > temp_target:
                 target_bonus = -1
-                self.score_reason += " | Bank Target: -1 (Above Target)"
+                self.score_reason += ", Bank Target: -1 (Above Target)"
 
         # --- FINAL SCORE CALCULATION ---
         self.smart_score = self.base_score + analyst_mod + target_bonus
@@ -1382,14 +1382,14 @@ class TradingBot:
         # Boost ETF/ETC score to offset lack of volatility and analyst targets
         if hasattr(self, 'asset_type') and self.asset_type in ["ETF", "ETC"]:
             self.smart_score += 6
-            self.score_reason += " | ETF/ETC Baseline: +6"
+            self.score_reason += ", ETF/ETC Baseline: +6"
 
         # Cap limits
         self.smart_score = max(0, min(12, int(self.smart_score)))
         
         bonus_reason = self.score_reason
-        base_breakdown = f"[{base_details}]" if base_details else ""
-        self.score_reason = f"[{current_strategy}] Score: {self.smart_score}/12 (Base: {self.base_score} {base_breakdown}{analyst_note}{bonus_reason})".strip()
+        base_breakdown = f"{base_details}" if base_details else ""
+        self.score_reason = f"[{current_strategy}] Score: {self.smart_score}/12 {{{base_breakdown}{analyst_note}{bonus_reason}}}".strip()
         return self.smart_score
 
     @classmethod
@@ -1637,8 +1637,7 @@ class TradingBot:
                 logger.info(f"[{self.stock_id}] Blocked DIP buy: catching a falling knife (RSI: {self.rsi_value:.1f})")
                 return None
             
-            self.score_reason += " (Dip Entry)"
-            self.last_trade_reason = f"DIP ENTRY | {self.score_reason} | RSI:{self.rsi_value:.1f} | Drop:{daily_drop*100:.1f}%"
+            self.last_trade_reason = self.score_reason
             return 'BUY'
 
         # --- FAST RISING / OVERBOUGHT CHECKS ---
@@ -1671,8 +1670,7 @@ class TradingBot:
                 logger.info(f"[{self.stock_id}] Blocked MOMENTUM buy: RSI is overbought ({self.rsi_value:.1f})")
                 return None
                 
-            self.score_reason += " (Momentum Entry)"
-            self.last_trade_reason = f"MOMENTUM ENTRY | {self.score_reason} | MACD:{self.macd_signal} | RSI:{self.rsi_value:.1f}"
+            self.last_trade_reason = self.score_reason
             return 'BUY'
         return None
 

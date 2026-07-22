@@ -206,6 +206,65 @@ class TradingApp(QMainWindow):
                     
                 pnl_info = f"Realised P/L : {curr_symbol}{pnl_amount:+.2f} ({bot.pnl_percent:+.2f}%)\n            "
 
+            skipped_text = ""
+            if action == "BUY" and bot:
+                skipped_list = []
+                my_score = bot.smart_score
+                my_upside = getattr(bot, 'target_upside_pct', 0.0)
+                
+                def sort_func(b):
+                    return (b.smart_score, getattr(b, 'target_upside_pct', 0.0))
+                all_bots = sorted(self.bots.values(), key=sort_func, reverse=True)
+                
+                for other in all_bots:
+                    if other.stock_id == symbol:
+                        continue
+                        
+                    other_score = other.smart_score
+                    other_upside = getattr(other, 'target_upside_pct', 0.0)
+                    
+                    if other_score > my_score or (other_score == my_score and other_upside > my_upside):
+                        skip_reason = "unknown"
+                        if other.quantity > 0:
+                            skip_reason = "already in position"
+                        elif getattr(other, 'cash_left', 0) < getattr(other, 'market_value', 100000):
+                            skip_reason = "budget too low for this stock"
+                        elif not other.is_running:
+                            skip_reason = "bot is paused"
+                        elif not getattr(other, 'is_market_open', lambda: False)():
+                            skip_reason = "market is closed"
+                        elif other.has_pending_order():
+                            skip_reason = "pending order exists"
+                        else:
+                            skip_reason = "technical conditions not met for BUY"
+                            
+                        skipped_list.append(f"- {other.stock_id} (Score: {other_score}/12): Skipped because {skip_reason}")
+                        
+                    elif other_score == my_score and other_upside < my_upside:
+                        if other.quantity == 0 and other.is_running:
+                            skip_reason = f"bank target upside is lower ({other_upside:.1f}% vs {symbol} at {my_upside:.1f}%)"
+                            skipped_list.append(f"- {other.stock_id} (Score: {other_score}/12): Skipped because {skip_reason}")
+                            
+                    if len(skipped_list) >= 10:
+                        break
+                        
+                if skipped_list:
+                    skipped_text = "\n            SKIPPED ALTERNATIVES:\n            " + "\n            ".join(skipped_list) + "\n"
+
+            # Format the primary reason block to be multi-line (splitting by |)
+            formatted_reason = reason
+            if "|" in formatted_reason:
+                parts = [p.strip() for p in formatted_reason.split("|") if p.strip()]
+                for i, p in enumerate(parts):
+                    if p.startswith("[") and "Score:" in p and "{" in p:
+                        p = p.replace(" {", "\n              ")
+                        p = p.replace(", ", ",\n              ")
+                        p = p.replace("}", "")
+                        parts[i] = p
+                formatted_reason = "\n            - ".join(parts)
+                if not formatted_reason.startswith("\n"):
+                    formatted_reason = "- " + formatted_reason
+
             subject = f"{action} {symbol} - {quantity} @ {curr_symbol}{price:.2f}"
 
             body = f"""
@@ -219,8 +278,8 @@ class TradingApp(QMainWindow):
             {pnl_info}Time       : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} (CET)
 
             REASON:
-            {reason}
-
+            {formatted_reason}
+            {skipped_text}
             TECHNICALS:
             Score      : {score}/12
             RSI        : {rsi}
