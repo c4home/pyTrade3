@@ -27,6 +27,7 @@ from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract
 from ibapi.order import Order
+from ibapi.tag_value import TagValue
 
 from concurrent.futures import ThreadPoolExecutor
 

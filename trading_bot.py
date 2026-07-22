@@ -857,6 +857,9 @@ class TradingBot:
         order.action = "BUY"
         order.orderType = "MKT"
         order.totalQuantity = quantity
+        order.algoStrategy = "Adaptive"
+        order.algoParams = []
+        order.algoParams.append(TagValue("adaptivePriority", "Normal"))
         order.eTradeOnly = ""
         order.firmQuoteOnly = ""
         order.tif = "DAY"
@@ -930,6 +933,9 @@ class TradingBot:
         order.action = "SELL"
         order.orderType = "MKT"
         order.totalQuantity = self.quantity
+        order.algoStrategy = "Adaptive"
+        order.algoParams = []
+        order.algoParams.append(TagValue("adaptivePriority", "Normal"))
         order.eTradeOnly = ""
         order.firmQuoteOnly = ""
         order.tif = "DAY"

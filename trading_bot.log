@@ -119135,3 +119135,749 @@
 2026-07-21 17:34:14 - config - INFO - Attempting web scrape for EBAY...
 2026-07-21 17:34:14 - config - INFO - Fetching fresh analyst targets for DELL...
 2026-07-21 17:34:14 - config - INFO - Attempting web scrape for DELL...
+2026-07-21 17:39:17 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 17:39:17 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 17:44:21 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 17:44:21 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 17:44:34 - config - INFO - Fetching fresh analyst targets for SPCX...
+2026-07-21 17:44:34 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 17:53:08 - config - WARNING - Insufficient data for AMD: 0 rows
+2026-07-21 17:53:08 - config - WARNING - Insufficient data for TSLA: 0 rows
+2026-07-21 17:53:08 - config - WARNING - Insufficient data for AAPL: 0 rows
+2026-07-21 17:53:08 - config - WARNING - Insufficient data for EGLN.L: 0 rows
+2026-07-21 17:53:08 - config - WARNING - Insufficient data for QCOM: 0 rows
+2026-07-21 17:53:08 - config - WARNING - Insufficient data for TSM: 0 rows
+2026-07-21 17:53:08 - config - WARNING - Insufficient data for MSFT: 0 rows
+2026-07-21 17:53:09 - config - WARNING - Insufficient data for NVDA: 0 rows
+2026-07-21 17:53:09 - config - WARNING - Insufficient data for AMZN: 0 rows
+2026-07-21 17:53:09 - config - WARNING - Insufficient data for GOOG: 0 rows
+2026-07-21 17:53:09 - config - WARNING - Insufficient data for ARM: 0 rows
+2026-07-21 17:53:09 - config - WARNING - Insufficient data for INTC: 0 rows
+2026-07-21 17:53:09 - config - WARNING - Insufficient data for ASML: 0 rows
+2026-07-21 17:53:09 - config - WARNING - Insufficient data for MU: 0 rows
+2026-07-21 17:53:09 - config - WARNING - Insufficient data for MRNA: 0 rows
+2026-07-21 17:53:09 - config - WARNING - Insufficient data for ABT: 0 rows
+2026-07-21 17:53:10 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 17:53:10 - config - WARNING - Insufficient data for BARC.L: 0 rows
+2026-07-21 17:53:10 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 17:53:10 - config - WARNING - Insufficient data for ORCL: 0 rows
+2026-07-21 17:53:10 - config - WARNING - Insufficient data for AVGO: 0 rows
+2026-07-21 17:53:10 - config - WARNING - Insufficient data for JPM: 0 rows
+2026-07-21 17:53:10 - config - WARNING - Insufficient data for IBKR: 0 rows
+2026-07-21 17:53:10 - config - WARNING - Insufficient data for DVA: 0 rows
+2026-07-21 17:53:10 - config - WARNING - Insufficient data for VRT: 0 rows
+2026-07-21 17:53:10 - config - WARNING - Insufficient data for CHRW: 0 rows
+2026-07-21 17:53:10 - config - WARNING - Insufficient data for EBAY: 0 rows
+2026-07-21 17:53:10 - config - WARNING - Insufficient data for DELL: 0 rows
+2026-07-21 17:53:11 - config - WARNING - Insufficient data for SPCX: 0 rows
+2026-07-21 17:53:24 - config - ERROR - Error -1: 2105 - La connexion de données HMDS est rompue:euhmds
+2026-07-21 18:10:29 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarmnj
+2026-07-21 18:10:30 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usopt.nj
+2026-07-21 18:10:31 - config - ERROR - Error -1: 1100 - La connexion entre IBKR et Trader Workstation a été perdue.
+2026-07-21 18:10:32 - config - WARNING - Insufficient data for AMD: 0 rows
+2026-07-21 18:10:32 - config - WARNING - Insufficient data for TSLA: 0 rows
+2026-07-21 18:10:33 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:hfarm
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for AAPL: 0 rows
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for EGLN.L: 0 rows
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for QCOM: 0 rows
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for MSFT: 0 rows
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for TSM: 0 rows
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for NVDA: 0 rows
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for AMZN: 0 rows
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for GOOG: 0 rows
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for ARM: 0 rows
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for INTC: 0 rows
+2026-07-21 18:10:33 - config - WARNING - Insufficient data for ASML: 0 rows
+2026-07-21 18:10:34 - config - WARNING - Insufficient data for MU: 0 rows
+2026-07-21 18:10:34 - config - WARNING - Insufficient data for MRNA: 0 rows
+2026-07-21 18:10:34 - config - WARNING - Insufficient data for ABT: 0 rows
+2026-07-21 18:10:34 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:10:34 - config - WARNING - Insufficient data for BARC.L: 0 rows
+2026-07-21 18:10:34 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:10:34 - config - WARNING - Insufficient data for ORCL: 0 rows
+2026-07-21 18:10:34 - config - WARNING - Insufficient data for AVGO: 0 rows
+2026-07-21 18:10:34 - config - WARNING - Insufficient data for JPM: 0 rows
+2026-07-21 18:10:34 - config - WARNING - Insufficient data for IBKR: 0 rows
+2026-07-21 18:28:25 - config - WARNING - [IBKR] Timed out waiting for background data fetches (15s).
+2026-07-21 18:28:25 - config - WARNING - Insufficient data for DVA: 0 rows
+2026-07-21 18:28:25 - config - WARNING - Insufficient data for VRT: 0 rows
+2026-07-21 18:28:25 - config - WARNING - Insufficient data for CHRW: 0 rows
+2026-07-21 18:28:25 - config - ERROR - Error -1: 2151 - Les infos des positions ne sont pas encore disponibles.
+2026-07-21 18:28:25 - config - WARNING - Insufficient data for EBAY: 0 rows
+2026-07-21 18:28:25 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarm
+2026-07-21 18:28:25 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:cashfarm
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for DELL: 0 rows
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for SPCX: 0 rows
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for AMD: 0 rows
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for TSLA: 0 rows
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for AAPL: 0 rows
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for EGLN.L: 0 rows
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for QCOM: 0 rows
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for MSFT: 0 rows
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for TSM: 0 rows
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for NVDA: 0 rows
+2026-07-21 18:28:26 - config - WARNING - Insufficient data for AMZN: 0 rows
+2026-07-21 18:28:27 - config - WARNING - Insufficient data for GOOG: 0 rows
+2026-07-21 18:28:27 - config - WARNING - Insufficient data for ARM: 0 rows
+2026-07-21 18:28:27 - config - WARNING - Insufficient data for INTC: 0 rows
+2026-07-21 18:28:27 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:28:27 - config - WARNING - Insufficient data for ASML: 0 rows
+2026-07-21 18:28:27 - config - WARNING - Insufficient data for MU: 0 rows
+2026-07-21 18:28:27 - config - WARNING - Insufficient data for MRNA: 0 rows
+2026-07-21 18:28:27 - config - WARNING - Insufficient data for ABT: 0 rows
+2026-07-21 18:28:27 - config - WARNING - Insufficient data for BARC.L: 0 rows
+2026-07-21 18:28:27 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:28:27 - config - WARNING - Insufficient data for ORCL: 0 rows
+2026-07-21 18:28:27 - config - WARNING - Insufficient data for AVGO: 0 rows
+2026-07-21 18:28:28 - config - WARNING - Insufficient data for JPM: 0 rows
+2026-07-21 18:28:28 - config - WARNING - Insufficient data for IBKR: 0 rows
+2026-07-21 18:35:29 - config - WARNING - Insufficient data for AMD: 0 rows
+2026-07-21 18:35:29 - config - WARNING - Insufficient data for TSLA: 0 rows
+2026-07-21 18:35:29 - config - WARNING - Insufficient data for AAPL: 0 rows
+2026-07-21 18:35:29 - config - WARNING - Insufficient data for QCOM: 0 rows
+2026-07-21 18:35:30 - config - WARNING - Insufficient data for TSM: 0 rows
+2026-07-21 18:35:30 - config - WARNING - Insufficient data for MSFT: 0 rows
+2026-07-21 18:35:30 - config - WARNING - Insufficient data for NVDA: 0 rows
+2026-07-21 18:35:30 - config - WARNING - Insufficient data for AMZN: 0 rows
+2026-07-21 18:35:30 - config - WARNING - Insufficient data for GOOG: 0 rows
+2026-07-21 18:35:30 - config - WARNING - Insufficient data for ARM: 0 rows
+2026-07-21 18:35:30 - config - WARNING - Insufficient data for INTC: 0 rows
+2026-07-21 18:35:30 - config - WARNING - Insufficient data for ASML: 0 rows
+2026-07-21 18:35:30 - config - WARNING - Insufficient data for MU: 0 rows
+2026-07-21 18:35:30 - config - WARNING - Insufficient data for MRNA: 0 rows
+2026-07-21 18:35:31 - config - WARNING - Insufficient data for ABT: 0 rows
+2026-07-21 18:35:31 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:35:31 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:35:31 - config - WARNING - Insufficient data for ORCL: 0 rows
+2026-07-21 18:35:31 - config - WARNING - Insufficient data for AVGO: 0 rows
+2026-07-21 18:35:31 - config - WARNING - Insufficient data for JPM: 0 rows
+2026-07-21 18:35:31 - config - WARNING - Insufficient data for IBKR: 0 rows
+2026-07-21 18:35:31 - config - WARNING - Insufficient data for DVA: 0 rows
+2026-07-21 18:35:31 - config - WARNING - Insufficient data for VRT: 0 rows
+2026-07-21 18:35:32 - config - WARNING - Insufficient data for CHRW: 0 rows
+2026-07-21 18:35:32 - config - WARNING - Insufficient data for EBAY: 0 rows
+2026-07-21 18:35:32 - config - WARNING - Insufficient data for DELL: 0 rows
+2026-07-21 18:35:32 - config - WARNING - Insufficient data for SPCX: 0 rows
+2026-07-21 18:35:35 - config - ERROR - Error -1: 2157 - La connexion de data farms Sec-def est interrompue:secdefeu
+2026-07-21 18:36:10 - config - ERROR - Error -1: 2151 - Les infos des positions ne sont pas encore disponibles.
+2026-07-21 18:36:24 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usfarm
+2026-07-21 18:37:08 - config - ERROR - Error -1: 1102 - La connexion entre IBKR et Trader Workstation a été restaurée et les données ont été récupérées. Les batteries de serveurs suivantes sont connectées: hfarm; eufarmnj; cashfarm; usopt.nj; eufarm; usfarm; euhmds; secdefeu. Les batteries de serveurs suivantes ne sont pas connectées: ushmds.
+2026-07-21 18:37:15 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usopt.nj
+2026-07-21 18:40:39 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:40:39 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:40:42 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 18:45:42 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:45:44 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:45:47 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 18:50:49 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:50:49 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:50:52 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 18:55:54 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:55:54 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 18:55:57 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 19:00:59 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 19:00:59 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 19:01:03 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 19:07:40 - config - WARNING - [TSLA] Timed out waiting for background data fetches (15s).
+2026-07-21 19:07:40 - config - WARNING - [QCOM] Timed out waiting for background data fetches (15s).
+2026-07-21 19:07:40 - config - WARNING - [QCOM] Timed out waiting for background data fetches (15s).
+2026-07-21 19:07:40 - config - WARNING - Insufficient data for AAPL: 0 rows
+2026-07-21 19:07:40 - config - WARNING - Insufficient data for QCOM: 0 rows
+2026-07-21 19:07:41 - config - WARNING - Insufficient data for MSFT: 0 rows
+2026-07-21 19:07:41 - config - WARNING - Insufficient data for TSM: 0 rows
+2026-07-21 19:07:41 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 19:07:41 - config - WARNING - Insufficient data for NVDA: 0 rows
+2026-07-21 19:07:41 - config - WARNING - Insufficient data for AMZN: 0 rows
+2026-07-21 19:07:41 - config - WARNING - Insufficient data for GOOG: 0 rows
+2026-07-21 19:07:42 - config - ERROR - Error -1: 1100 - La connexion entre IBKR et Trader Workstation a été perdue.
+2026-07-21 19:07:51 - config - WARNING - Insufficient data for ARM: 0 rows
+2026-07-21 19:07:51 - config - WARNING - Insufficient data for INTC: 0 rows
+2026-07-21 19:07:51 - config - WARNING - Insufficient data for ASML: 0 rows
+2026-07-21 19:07:51 - config - WARNING - Insufficient data for MU: 0 rows
+2026-07-21 19:07:51 - config - WARNING - Insufficient data for MRNA: 0 rows
+2026-07-21 19:07:52 - config - WARNING - Insufficient data for ABT: 0 rows
+2026-07-21 19:07:52 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 19:07:52 - config - WARNING - Insufficient data for ORCL: 0 rows
+2026-07-21 19:07:52 - config - WARNING - Insufficient data for AVGO: 0 rows
+2026-07-21 19:07:53 - config - WARNING - Insufficient data for JPM: 0 rows
+2026-07-21 19:07:53 - config - WARNING - Insufficient data for IBKR: 0 rows
+2026-07-21 19:07:53 - config - WARNING - Insufficient data for DVA: 0 rows
+2026-07-21 19:07:53 - config - WARNING - Insufficient data for VRT: 0 rows
+2026-07-21 19:07:53 - config - WARNING - Insufficient data for CHRW: 0 rows
+2026-07-21 19:07:53 - config - WARNING - Insufficient data for EBAY: 0 rows
+2026-07-21 19:07:53 - config - WARNING - Insufficient data for DELL: 0 rows
+2026-07-21 19:07:53 - config - WARNING - Insufficient data for SPCX: 0 rows
+2026-07-21 19:07:53 - config - WARNING - Insufficient data for AMD: 0 rows
+2026-07-21 19:07:54 - config - WARNING - Insufficient data for TSLA: 0 rows
+2026-07-21 19:07:59 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usopt.nj
+2026-07-21 19:08:02 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarm
+2026-07-21 19:08:23 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:cashfarm
+2026-07-21 19:08:23 - config - ERROR - Error -1: 2105 - La connexion de données HMDS est rompue:euhmds
+2026-07-21 19:08:23 - config - ERROR - Error -1: 2157 - La connexion de data farms Sec-def est interrompue:secdefeu
+2026-07-21 19:08:24 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usfarm
+2026-07-21 19:08:24 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarmnj
+2026-07-21 19:08:25 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:hfarm
+2026-07-21 19:08:57 - config - ERROR - Error -1: 1102 - La connexion entre IBKR et Trader Workstation a été restaurée et les données ont été récupérées. Les batteries de serveurs suivantes sont connectées: hfarm; eufarmnj; cashfarm; usopt.nj; eufarm; usfarm; euhmds; secdefeu. Les batteries de serveurs suivantes ne sont pas connectées: ushmds.
+2026-07-21 19:12:56 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 19:12:56 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 19:13:06 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 19:32:57 - config - WARNING - [JPM] Timed out waiting for background data fetches (15s).
+2026-07-21 19:32:57 - config - WARNING - [JPM] Timed out waiting for background data fetches (15s).
+2026-07-21 19:32:57 - config - WARNING - [JPM] Timed out waiting for background data fetches (15s).
+2026-07-21 19:32:58 - config - WARNING - Insufficient data for IBKR: 0 rows
+2026-07-21 19:32:58 - config - WARNING - Insufficient data for DVA: 0 rows
+2026-07-21 19:32:58 - config - WARNING - Insufficient data for VRT: 0 rows
+2026-07-21 19:32:58 - config - WARNING - Insufficient data for CHRW: 0 rows
+2026-07-21 19:32:58 - config - WARNING - Insufficient data for EBAY: 0 rows
+2026-07-21 19:33:57 - config - WARNING - [EBAY] Timed out waiting for background data fetches (15s).
+2026-07-21 19:33:57 - config - WARNING - [EBAY] Timed out waiting for background data fetches (15s).
+2026-07-21 19:33:57 - config - WARNING - [EBAY] Timed out waiting for background data fetches (15s).
+2026-07-21 19:33:57 - config - WARNING - Insufficient data for DELL: 0 rows
+2026-07-21 19:33:57 - config - WARNING - Insufficient data for SPCX: 0 rows
+2026-07-21 19:33:57 - config - WARNING - Insufficient data for AMD: 0 rows
+2026-07-21 19:33:58 - config - WARNING - Insufficient data for TSLA: 0 rows
+2026-07-21 19:33:58 - config - WARNING - Insufficient data for AAPL: 0 rows
+2026-07-21 19:33:58 - config - WARNING - Insufficient data for QCOM: 0 rows
+2026-07-21 19:33:58 - config - WARNING - Insufficient data for TSM: 0 rows
+2026-07-21 19:34:08 - config - WARNING - Insufficient data for MSFT: 0 rows
+2026-07-21 19:49:20 - config - WARNING - [ARM] Timed out waiting for background data fetches (15s).
+2026-07-21 19:49:23 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 19:49:24 - config - ERROR - Error -1: 1100 - La connexion entre IBKR et Trader Workstation a été perdue.
+2026-07-21 19:49:24 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:05:16 - config - WARNING - [JPM] Timed out waiting for background data fetches (15s).
+2026-07-21 20:05:16 - config - WARNING - [QCOM] Timed out waiting for background data fetches (15s).
+2026-07-21 20:05:16 - config - WARNING - [QCOM] Timed out waiting for background data fetches (15s).
+2026-07-21 20:05:17 - config - WARNING - Failed to fetch yfinance .info for JPM: Failed to perform, curl: (28) Operation timed out after 951640 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-07-21 20:05:18 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:05:19 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:hfarm
+2026-07-21 20:05:19 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarmnj
+2026-07-21 20:05:19 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:cashfarm
+2026-07-21 20:05:19 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usopt.nj
+2026-07-21 20:05:19 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarm
+2026-07-21 20:05:19 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usfarm
+2026-07-21 20:05:19 - config - ERROR - Error -1: 2157 - La connexion de data farms Sec-def est interrompue:secdefeu
+2026-07-21 20:05:19 - config - ERROR - Error -1: 2105 - La connexion de données HMDS est rompue:euhmds
+2026-07-21 20:05:21 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 20:11:21 - config - WARNING - [TSLA] Timed out waiting for background data fetches (15s).
+2026-07-21 20:11:22 - config - ERROR - Error -1: 1102 - La connexion entre IBKR et Trader Workstation a été restaurée et les données ont été récupérées. Les batteries de serveurs suivantes sont connectées: hfarm; eufarmnj; cashfarm; usopt.nj; eufarm; usfarm; euhmds; secdefeu. Les batteries de serveurs suivantes ne sont pas connectées: ushmds.
+2026-07-21 20:11:22 - config - WARNING - Failed to fetch yfinance .info for TSLA: Failed to perform, curl: (28) Operation timed out after 360740 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+2026-07-21 20:11:22 - config - ERROR - Error -1: 2105 - La connexion de données HMDS est rompue:euhmds
+2026-07-21 20:11:22 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:cashfarm
+2026-07-21 20:11:22 - config - ERROR - Error -1: 1100 - La connexion entre IBKR et Trader Workstation a été perdue.
+2026-07-21 20:11:22 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarm
+2026-07-21 20:11:23 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:hfarm
+2026-07-21 20:11:25 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usfarm
+2026-07-21 20:11:25 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarmnj
+2026-07-21 20:11:25 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:cashfarm
+2026-07-21 20:11:25 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usopt.nj
+2026-07-21 20:11:25 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarm
+2026-07-21 20:11:25 - config - ERROR - Error -1: 2157 - La connexion de data farms Sec-def est interrompue:secdefeu
+2026-07-21 20:11:25 - config - ERROR - Error -1: 2105 - La connexion de données HMDS est rompue:euhmds
+2026-07-21 20:11:30 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:11:30 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:11:33 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 20:11:55 - config - ERROR - Error -1: 1102 - La connexion entre IBKR et Trader Workstation a été restaurée et les données ont été récupérées. Les batteries de serveurs suivantes sont connectées: hfarm; eufarmnj; cashfarm; usopt.nj; eufarm; usfarm; euhmds; secdefeu. Les batteries de serveurs suivantes ne sont pas connectées: ushmds.
+2026-07-21 20:16:31 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:16:31 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:16:37 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 20:18:45 - config - INFO - [AMD] Blocked buy: daily rise (7.6%) exceeds 5% limit.
+2026-07-21 20:18:45 - config - INFO - [ARM] Blocked buy: daily rise (8.3%) exceeds 5% limit.
+2026-07-21 20:18:46 - config - INFO - [AMD] Blocked buy: daily rise (7.6%) exceeds 5% limit.
+2026-07-21 20:18:46 - config - INFO - [ARM] Blocked buy: daily rise (8.3%) exceeds 5% limit.
+2026-07-21 20:18:46 - config - INFO - [MU] Blocked buy: daily rise (12.8%) exceeds 5% limit.
+2026-07-21 20:18:46 - config - INFO - [MU] Blocked buy: daily rise (12.8%) exceeds 5% limit.
+2026-07-21 20:18:46 - config - INFO - [DVA] Blocked buy: RSI (70.2) is in the overbought zone (>= 70).
+2026-07-21 20:18:46 - config - INFO - [DVA] Blocked buy: RSI (70.2) is in the overbought zone (>= 70).
+2026-07-21 20:18:46 - config - INFO - [CHRW] Blocked buy: RSI (70.4) is in the overbought zone (>= 70).
+2026-07-21 20:18:46 - config - INFO - [CHRW] Blocked buy: RSI (70.4) is in the overbought zone (>= 70).
+2026-07-21 20:18:46 - config - INFO - [DELL] Blocked buy: daily rise (5.6%) exceeds 5% limit.
+2026-07-21 20:18:46 - config - INFO - [DELL] Blocked buy: daily rise (5.6%) exceeds 5% limit.
+2026-07-21 20:18:46 - config - INFO - BUY 5 NVDA @ 206.15 USD (€1626 used, €102 left)
+2026-07-21 20:18:46 - config - INFO - BUY 5 NVDA @ 206.15 USD (€1626 used, €102 left)
+2026-07-21 20:18:46 - config - INFO - Order 225 -> Filled
+2026-07-21 20:18:46 - config - INFO - [NVDA] Order 225 completed with status: Filled
+2026-07-21 20:18:46 - config - INFO - Logged to database: BUY 5 @ 206.08
+2026-07-21 20:18:47 - config - INFO - [AMD] Blocked buy: daily rise (7.6%) exceeds 5% limit.
+2026-07-21 20:18:47 - config - INFO - [NVDA] ORDER FILLED! 0 -> 5
+2026-07-21 20:18:47 - config - INFO - [ARM] Blocked buy: daily rise (8.3%) exceeds 5% limit.
+2026-07-21 20:18:47 - config - INFO - [MU] Blocked buy: daily rise (12.8%) exceeds 5% limit.
+2026-07-21 20:18:47 - config - INFO - [DVA] Blocked buy: RSI (70.2) is in the overbought zone (>= 70).
+2026-07-21 20:18:47 - config - INFO - [CHRW] Blocked buy: RSI (70.4) is in the overbought zone (>= 70).
+2026-07-21 20:18:47 - config - INFO - [DELL] Blocked buy: daily rise (5.6%) exceeds 5% limit.
+2026-07-21 20:18:48 - config - INFO - EMAIL SENT -> BUY NVDA 5 @ $206.08
+2026-07-21 20:18:48 - config - INFO - Email sent: BUY 5 @ 206.08
+2026-07-21 20:18:48 - config - INFO - PDT Protector: Loaded 3 day trades from the last 7 days.
+2026-07-21 20:18:48 - config - INFO - Order 226 -> Inactive
+2026-07-21 20:18:48 - config - INFO - [NVDA] Order 226 completed with status: Inactive
+2026-07-21 20:18:48 - config - ERROR - Order 226 rejected/inactive
+2026-07-21 20:18:48 - config - INFO - Order 225 -> Filled
+2026-07-21 20:18:48 - config - ERROR - Error 226: 201 - Ordre rejeté - Raison :Disponible pour convertir en devise de base: 1507.85 EUR espèces requises pour cet ordre et d'autres ordres en<br> cours : 1919.14 EUR
+2026-07-21 20:18:48 - config - INFO - Order 226 -> Inactive
+2026-07-21 20:18:52 - config - INFO - [AMD] Blocked buy: daily rise (7.6%) exceeds 5% limit.
+2026-07-21 20:18:54 - config - INFO - [ARM] Blocked buy: daily rise (8.2%) exceeds 5% limit.
+2026-07-21 20:18:55 - config - INFO - [MU] Blocked buy: daily rise (12.8%) exceeds 5% limit.
+2026-07-21 20:18:57 - config - INFO - [DVA] Blocked buy: RSI (70.2) is in the overbought zone (>= 70).
+2026-07-21 20:18:57 - config - INFO - [CHRW] Blocked buy: RSI (70.4) is in the overbought zone (>= 70).
+2026-07-21 20:18:57 - config - INFO - [DELL] Blocked buy: daily rise (5.6%) exceeds 5% limit.
+2026-07-21 20:18:58 - config - INFO - [AMD] Blocked buy: daily rise (7.6%) exceeds 5% limit.
+2026-07-21 20:18:58 - config - INFO - [ARM] Blocked buy: daily rise (8.2%) exceeds 5% limit.
+2026-07-21 20:18:58 - config - INFO - [MU] Blocked buy: daily rise (12.8%) exceeds 5% limit.
+2026-07-21 20:18:58 - config - INFO - [DVA] Blocked buy: RSI (70.2) is in the overbought zone (>= 70).
+2026-07-21 20:18:58 - config - INFO - [CHRW] Blocked buy: RSI (70.4) is in the overbought zone (>= 70).
+2026-07-21 20:18:58 - config - INFO - [DELL] Blocked buy: daily rise (5.6%) exceeds 5% limit.
+2026-07-21 20:19:02 - config - INFO - [AMD] Blocked buy: daily rise (7.6%) exceeds 5% limit.
+2026-07-21 20:19:02 - config - INFO - [ARM] Blocked buy: daily rise (8.2%) exceeds 5% limit.
+2026-07-21 20:19:02 - config - INFO - [MU] Blocked buy: daily rise (12.8%) exceeds 5% limit.
+2026-07-21 20:19:02 - config - INFO - [DVA] Blocked buy: RSI (70.2) is in the overbought zone (>= 70).
+2026-07-21 20:19:02 - config - INFO - [CHRW] Blocked buy: RSI (70.4) is in the overbought zone (>= 70).
+2026-07-21 20:19:02 - config - INFO - [DELL] Blocked buy: daily rise (5.6%) exceeds 5% limit.
+2026-07-21 20:19:07 - config - INFO - [AMD] Blocked buy: daily rise (7.6%) exceeds 5% limit.
+2026-07-21 20:19:07 - config - INFO - [ARM] Blocked buy: daily rise (8.2%) exceeds 5% limit.
+2026-07-21 20:19:07 - config - INFO - [MU] Blocked buy: daily rise (12.8%) exceeds 5% limit.
+2026-07-21 20:19:07 - config - INFO - [DVA] Blocked buy: RSI (70.2) is in the overbought zone (>= 70).
+2026-07-21 20:19:07 - config - INFO - [CHRW] Blocked buy: RSI (70.4) is in the overbought zone (>= 70).
+2026-07-21 20:19:07 - config - INFO - [DELL] Blocked buy: daily rise (5.6%) exceeds 5% limit.
+2026-07-21 20:19:12 - config - INFO - [AMD] Blocked buy: daily rise (7.6%) exceeds 5% limit.
+2026-07-21 20:19:12 - config - INFO - [ARM] Blocked buy: daily rise (8.2%) exceeds 5% limit.
+2026-07-21 20:19:12 - config - INFO - [MU] Blocked buy: daily rise (12.8%) exceeds 5% limit.
+2026-07-21 20:19:12 - config - INFO - [DVA] Blocked buy: RSI (70.2) is in the overbought zone (>= 70).
+2026-07-21 20:19:12 - config - INFO - [CHRW] Blocked buy: RSI (70.4) is in the overbought zone (>= 70).
+2026-07-21 20:19:12 - config - INFO - [DELL] Blocked buy: daily rise (5.6%) exceeds 5% limit.
+2026-07-21 20:19:16 - config - INFO - BUY 2 AMZN @ 248.49 USD (€2178 used, €93 left)
+2026-07-21 20:19:16 - config - INFO - BUY 2 AMZN @ 248.49 USD (€2178 used, €93 left)
+2026-07-21 20:19:16 - config - INFO - Order 228 -> Inactive
+2026-07-21 20:19:16 - config - INFO - [AMZN] Order 228 completed with status: Inactive
+2026-07-21 20:19:16 - config - ERROR - Order 228 rejected/inactive
+2026-07-21 20:19:16 - config - ERROR - Error 228: 201 - Ordre rejeté - Raison :Disponible pour convertir en devise de base: 602.86 EUR espèces requises pour cet ordre et d'autres ordres en <br>cours : 926.82 EUR
+2026-07-21 20:19:16 - config - INFO - Order 228 -> Inactive
+2026-07-21 20:19:16 - config - INFO - Order 227 -> Filled
+2026-07-21 20:19:16 - config - INFO - [AMZN] Order 227 completed with status: Filled
+2026-07-21 20:19:16 - config - INFO - Logged to database: BUY 2 @ 248.55
+2026-07-21 20:19:17 - config - INFO - [AMD] Blocked buy: daily rise (7.6%) exceeds 5% limit.
+2026-07-21 20:19:17 - config - INFO - EMAIL SENT -> BUY AMZN 2 @ $248.55
+2026-07-21 20:19:17 - config - INFO - Email sent: BUY 2 @ 248.55
+2026-07-21 20:19:17 - config - INFO - PDT Protector: Loaded 3 day trades from the last 7 days.
+2026-07-21 20:19:17 - config - INFO - Order 227 -> Filled
+2026-07-21 20:19:46 - config - INFO - [ORCL] Skipping buy candidate: remaining cash is insufficient (usable cash: €165.78).
+2026-07-21 20:19:46 - config - INFO - [VRT] Skipping buy candidate: remaining cash is insufficient (usable cash: €165.78).
+2026-07-21 20:19:46 - config - INFO - [AVGO] Skipping buy candidate: remaining cash is insufficient (usable cash: €165.78).
+2026-07-21 20:19:46 - config - INFO - [ASML] Skipping buy candidate: remaining cash is insufficient (usable cash: €165.78).
+2026-07-21 20:19:46 - config - INFO - [AAPL] Skipping buy candidate: remaining cash is insufficient (usable cash: €165.78).
+2026-07-21 20:19:46 - config - INFO - [ORCL] Skipping buy candidate: remaining cash is insufficient (usable cash: €165.78).
+2026-07-21 20:19:46 - config - INFO - [VRT] Skipping buy candidate: remaining cash is insufficient (usable cash: €165.78).
+2026-07-21 20:19:46 - config - INFO - [AVGO] Skipping buy candidate: remaining cash is insufficient (usable cash: €165.78).
+2026-07-21 20:19:46 - config - INFO - [ASML] Skipping buy candidate: remaining cash is insufficient (usable cash: €165.78).
+2026-07-21 20:19:46 - config - INFO - [AAPL] Skipping buy candidate: remaining cash is insufficient (usable cash: €165.78).
+2026-07-21 20:21:34 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:21:34 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:21:37 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 20:26:36 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:26:36 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:26:40 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 20:31:43 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:31:45 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:31:50 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 20:36:14 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:hfarm
+2026-07-21 20:36:43 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:36:47 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:hfarm
+2026-07-21 20:36:48 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:36:54 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 20:41:52 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:41:52 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:41:58 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 20:46:54 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:46:54 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:46:56 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:47:02 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 20:52:00 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:52:00 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:52:05 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 20:52:20 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:hfarm
+2026-07-21 20:57:02 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:57:02 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 20:57:07 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:02:04 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:02:05 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:02:10 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:07:09 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:07:09 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:07:15 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:12:10 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:12:10 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:12:16 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:17:12 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:17:12 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:17:18 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:18:48 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:19:20 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:22:17 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:22:17 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:22:20 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:23:51 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:24:25 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:27:23 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:27:23 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:27:28 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:28:53 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:29:28 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:32:28 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:32:28 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:32:33 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:33:53 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:34:28 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:37:30 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:37:30 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:37:35 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:38:55 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:39:32 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:42:36 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:42:36 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:42:41 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:43:56 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:44:36 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:47:37 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:47:37 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:47:42 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:48:58 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:49:36 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:52:37 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:52:41 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:52:46 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:54:01 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:54:37 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:57:43 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:57:47 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:57:51 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-21 21:59:02 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 21:59:38 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:02:46 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:02:51 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:04:06 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:04:41 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:07:51 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:07:51 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:09:11 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:09:46 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:12:56 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:12:56 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:14:11 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:14:46 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:18:01 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:18:01 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:19:11 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:19:46 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:23:01 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:23:01 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:24:16 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:24:51 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:28:06 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:28:06 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:29:16 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:29:51 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:33:06 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:33:06 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:34:16 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:34:51 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:38:06 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:38:06 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:39:16 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:39:56 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:43:06 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:43:11 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:44:16 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:44:56 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:48:11 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:48:11 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:49:21 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:50:01 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:53:16 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:53:16 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:54:21 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:55:01 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:58:21 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:58:21 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 22:59:21 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:00:01 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:03:05 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:cashfarm
+2026-07-21 23:03:26 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:03:26 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:04:26 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:05:06 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:06:04 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:cashfarm
+2026-07-21 23:08:26 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:08:26 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:09:26 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:10:11 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:13:31 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:13:31 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:14:26 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:15:11 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:18:36 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:18:36 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:19:26 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:20:16 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:23:36 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:23:36 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:24:31 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:25:21 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:28:36 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:28:36 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:29:31 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:30:21 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:33:36 - config - INFO - [ABT] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:33:36 - config - INFO - [SAF.PA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:34:31 - config - INFO - [NVDA] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:35:26 - config - INFO - [AMZN] PDT LIMIT: Holding day-trade SELL to avoid 90-day lock.
+2026-07-21 23:37:10 - config - INFO - Shutting down application...
+2026-07-22 09:08:38 - config - INFO - PDT Protector: Loaded 3 day trades from the last 7 days.
+2026-07-22 09:08:40 - config - INFO - Fetching fresh analyst targets for AMD...
+2026-07-22 09:08:40 - config - INFO - Fetching fresh analyst targets for TSLA...
+2026-07-22 09:08:40 - config - INFO - Fetching fresh analyst targets for AAPL...
+2026-07-22 09:08:40 - config - INFO - Fetching fresh analyst targets for EGLN.L...
+2026-07-22 09:08:41 - config - INFO - Attempting web scrape for AAPL...
+2026-07-22 09:08:41 - config - INFO - [SUCCESS] ASML Target: 296.00 (Date: 2026-04-30)
+2026-07-22 09:08:41 - config - INFO - Fetching fresh analyst targets for ESE.PA...
+2026-07-22 09:08:41 - config - INFO - Fetching fresh analyst targets for QCOM...
+2026-07-22 09:08:41 - config - INFO - Attempting web scrape for EGLN.L...
+2026-07-22 09:08:41 - config - INFO - Attempting web scrape for ESE.PA...
+2026-07-22 09:08:42 - config - INFO - Fetching fresh analyst targets for TSM...
+2026-07-22 09:08:42 - config - INFO - API fetch failed. Using stale fallback for EGLN.L.
+2026-07-22 09:08:42 - config - INFO - API fetch failed. Using stale fallback for ESE.PA.
+2026-07-22 09:08:42 - config - INFO - Attempting web scrape for TSM...
+2026-07-22 09:08:42 - config - INFO - Fetching fresh analyst targets for MSFT...
+2026-07-22 09:08:42 - config - INFO - Fetching fresh analyst targets for NVDA...
+2026-07-22 09:08:42 - config - INFO - Attempting web scrape for MSFT...
+2026-07-22 09:08:42 - config - INFO - Attempting web scrape for NVDA...
+2026-07-22 09:08:42 - config - INFO - [SUCCESS] ASML Target: 510.00 (Date: 2026-03-24)
+2026-07-22 09:08:42 - config - INFO - Fetching fresh analyst targets for AMZN...
+2026-07-22 09:08:42 - config - INFO - [SUCCESS] ASML Target: 280.00 (Date: 2026-05-21)
+2026-07-22 09:08:42 - config - INFO - Attempting web scrape for AMZN...
+2026-07-22 09:08:42 - config - INFO - Fetching fresh analyst targets for GOOG...
+2026-07-22 09:08:43 - config - INFO - [SUCCESS] ASML Target: 333.00 (Date: 2026-04-30)
+2026-07-22 09:08:43 - config - INFO - Attempting web scrape for GOOG...
+2026-07-22 09:08:43 - config - INFO - [SUCCESS] ASML Target: 400.00 (Date: 2026-07-13)
+2026-07-22 09:08:43 - config - INFO - Fetching fresh analyst targets for ARM...
+2026-07-22 09:08:43 - config - INFO - Fetching fresh analyst targets for INTC...
+2026-07-22 09:08:43 - config - INFO - Fetching fresh analyst targets for ASML...
+2026-07-22 09:08:43 - config - INFO - Attempting web scrape for ASML...
+2026-07-22 09:08:44 - config - INFO - Fetching fresh analyst targets for MU...
+2026-07-22 09:08:44 - config - INFO - [SUCCESS] ASML Target: 2250.00 (Date: 2026-07-15)
+2026-07-22 09:08:44 - config - INFO - Attempting web scrape for MU...
+2026-07-22 09:08:44 - config - INFO - Fetching fresh analyst targets for MRNA...
+2026-07-22 09:08:44 - config - INFO - [SUCCESS] ASML Target: 1625.00 (Date: 2026-05-26)
+2026-07-22 09:08:44 - config - INFO - Attempting web scrape for MRNA...
+2026-07-22 09:08:44 - config - INFO - Fetching fresh analyst targets for ABT...
+2026-07-22 09:08:44 - config - INFO - [SUCCESS] ASML Target: 45.00 (Date: 2026-05-03)
+2026-07-22 09:08:44 - config - INFO - Fetching fresh analyst targets for BARC.L...
+2026-07-22 09:08:44 - config - INFO - Attempting web scrape for ABT...
+2026-07-22 09:08:44 - config - INFO - Fetching fresh analyst targets for AIR.PA...
+2026-07-22 09:08:45 - config - INFO - Attempting web scrape for BARC.L...
+2026-07-22 09:08:45 - config - INFO - Fetching fresh analyst targets for HO.PA...
+2026-07-22 09:08:45 - config - INFO - [SUCCESS] ASML Target: 590 (Date: 2026-07-14)
+2026-07-22 09:08:45 - config - INFO - Attempting web scrape for AIR.PA...
+2026-07-22 09:08:45 - config - INFO - [SUCCESS] ASML Target: 236.00 (Date: 2026-07-09)
+2026-07-22 09:08:45 - config - INFO - Fetching fresh analyst targets for SAF.PA...
+2026-07-22 09:08:45 - config - INFO - Attempting web scrape for HO.PA...
+2026-07-22 09:08:46 - config - INFO - Fetching fresh analyst targets for ORCL...
+2026-07-22 09:08:46 - config - INFO - [SUCCESS] ASML Target: 330.00 (Date: 2026-07-09)
+2026-07-22 09:08:46 - config - INFO - Fetching fresh analyst targets for AVGO...
+2026-07-22 09:08:46 - config - INFO - Attempting web scrape for ORCL...
+2026-07-22 09:08:46 - config - INFO - Attempting web scrape for SAF.PA...
+2026-07-22 09:08:46 - config - INFO - Attempting web scrape for AVGO...
+2026-07-22 09:08:46 - config - INFO - Fetching fresh analyst targets for JPM...
+2026-07-22 09:08:46 - config - INFO - [SUCCESS] ASML Target: 360.00 (Date: 2026-07-09)
+2026-07-22 09:08:47 - config - INFO - Fetching fresh analyst targets for IBKR...
+2026-07-22 09:08:47 - config - INFO - Fetching fresh analyst targets for DVA...
+2026-07-22 09:08:47 - config - INFO - Attempting web scrape for IBKR...
+2026-07-22 09:08:47 - config - INFO - Fetching fresh analyst targets for VRT...
+2026-07-22 09:08:47 - config - INFO - Attempting web scrape for VRT...
+2026-07-22 09:08:47 - config - INFO - Fetching fresh analyst targets for CHRW...
+2026-07-22 09:08:47 - config - INFO - Attempting web scrape for CHRW...
+2026-07-22 09:08:47 - config - INFO - Fetching fresh analyst targets for EBAY...
+2026-07-22 09:08:47 - config - INFO - Attempting web scrape for EBAY...
+2026-07-22 09:08:47 - config - INFO - Fetching fresh analyst targets for DELL...
+2026-07-22 09:08:48 - config - INFO - Attempting web scrape for DELL...
+2026-07-22 09:08:48 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-22 09:08:48 - config - INFO - Fetching fresh analyst targets for SPCX...
+2026-07-22 09:09:52 - config - INFO - Shutting down application...
+2026-07-22 09:09:57 - config - INFO - PDT Protector: Loaded 3 day trades from the last 7 days.
+2026-07-22 09:09:58 - config - INFO - Fetching fresh analyst targets for AMD...
+2026-07-22 09:09:58 - config - INFO - Fetching fresh analyst targets for TSLA...
+2026-07-22 09:09:59 - config - INFO - Fetching fresh analyst targets for AAPL...
+2026-07-22 09:09:59 - config - INFO - Fetching fresh analyst targets for EGLN.L...
+2026-07-22 09:09:59 - config - INFO - Attempting web scrape for AAPL...
+2026-07-22 09:09:59 - config - INFO - Fetching fresh analyst targets for ESE.PA...
+2026-07-22 09:09:59 - config - INFO - [SUCCESS] ASML Target: 296.00 (Date: 2026-04-30)
+2026-07-22 09:09:59 - config - INFO - Attempting web scrape for EGLN.L...
+2026-07-22 09:10:00 - config - INFO - API fetch failed. Using stale fallback for EGLN.L.
+2026-07-22 09:10:00 - config - INFO - Fetching fresh analyst targets for QCOM...
+2026-07-22 09:10:00 - config - INFO - Attempting web scrape for ESE.PA...
+2026-07-22 09:10:00 - config - INFO - API fetch failed. Using stale fallback for ESE.PA.
+2026-07-22 09:10:00 - config - INFO - Fetching fresh analyst targets for TSM...
+2026-07-22 09:10:00 - config - INFO - Attempting web scrape for TSM...
+2026-07-22 09:10:00 - config - INFO - Fetching fresh analyst targets for MSFT...
+2026-07-22 09:10:00 - config - INFO - Attempting web scrape for MSFT...
+2026-07-22 09:10:00 - config - INFO - Fetching fresh analyst targets for NVDA...
+2026-07-22 09:10:00 - config - INFO - [SUCCESS] ASML Target: 510.00 (Date: 2026-03-24)
+2026-07-22 09:10:00 - config - INFO - Attempting web scrape for NVDA...
+2026-07-22 09:10:01 - config - INFO - Fetching fresh analyst targets for AMZN...
+2026-07-22 09:10:01 - config - INFO - Attempting web scrape for AMZN...
+2026-07-22 09:10:01 - config - INFO - [SUCCESS] ASML Target: 280.00 (Date: 2026-05-21)
+2026-07-22 09:10:01 - config - INFO - [SUCCESS] ASML Target: 333.00 (Date: 2026-04-30)
+2026-07-22 09:10:01 - config - INFO - Fetching fresh analyst targets for GOOG...
+2026-07-22 09:10:01 - config - INFO - Attempting web scrape for GOOG...
+2026-07-22 09:10:01 - config - INFO - [SUCCESS] ASML Target: 400.00 (Date: 2026-07-13)
+2026-07-22 09:10:01 - config - INFO - Fetching fresh analyst targets for ARM...
+2026-07-22 09:10:01 - config - INFO - Fetching fresh analyst targets for INTC...
+2026-07-22 09:10:01 - config - INFO - Fetching fresh analyst targets for ASML...
+2026-07-22 09:10:02 - config - INFO - Fetching fresh analyst targets for MU...
+2026-07-22 09:10:02 - config - INFO - Attempting web scrape for ASML...
+2026-07-22 09:10:02 - config - INFO - Attempting web scrape for MU...
+2026-07-22 09:10:02 - config - INFO - [SUCCESS] ASML Target: 2250.00 (Date: 2026-07-15)
+2026-07-22 09:10:02 - config - INFO - [SUCCESS] ASML Target: 1625.00 (Date: 2026-05-26)
+2026-07-22 09:10:02 - config - INFO - Fetching fresh analyst targets for MRNA...
+2026-07-22 09:10:02 - config - INFO - Attempting web scrape for MRNA...
+2026-07-22 09:10:02 - config - INFO - [SUCCESS] ASML Target: 45.00 (Date: 2026-05-03)
+2026-07-22 09:10:02 - config - INFO - Fetching fresh analyst targets for ABT...
+2026-07-22 09:10:02 - config - INFO - Attempting web scrape for ABT...
+2026-07-22 09:10:02 - config - INFO - Fetching fresh analyst targets for BARC.L...
+2026-07-22 09:10:03 - config - INFO - Fetching fresh analyst targets for AIR.PA...
+2026-07-22 09:10:03 - config - INFO - Attempting web scrape for BARC.L...
+2026-07-22 09:10:03 - config - INFO - Fetching fresh analyst targets for HO.PA...
+2026-07-22 09:10:03 - config - INFO - [SUCCESS] ASML Target: 590 (Date: 2026-07-14)
+2026-07-22 09:10:03 - config - INFO - Attempting web scrape for AIR.PA...
+2026-07-22 09:10:03 - config - INFO - [SUCCESS] ASML Target: 236.00 (Date: 2026-07-09)
+2026-07-22 09:10:04 - config - INFO - Attempting web scrape for HO.PA...
+2026-07-22 09:10:04 - config - INFO - Fetching fresh analyst targets for SAF.PA...
+2026-07-22 09:10:04 - config - INFO - [SUCCESS] ASML Target: 330.00 (Date: 2026-07-09)
+2026-07-22 09:10:04 - config - INFO - Fetching fresh analyst targets for ORCL...
+2026-07-22 09:10:04 - config - INFO - Fetching fresh analyst targets for AVGO...
+2026-07-22 09:10:04 - config - INFO - Attempting web scrape for ORCL...
+2026-07-22 09:10:04 - config - INFO - Attempting web scrape for SAF.PA...
+2026-07-22 09:10:04 - config - INFO - Attempting web scrape for AVGO...
+2026-07-22 09:10:04 - config - INFO - Fetching fresh analyst targets for JPM...
+2026-07-22 09:10:05 - config - INFO - [SUCCESS] ASML Target: 360.00 (Date: 2026-07-09)
+2026-07-22 09:10:05 - config - INFO - Fetching fresh analyst targets for IBKR...
+2026-07-22 09:10:05 - config - INFO - Fetching fresh analyst targets for DVA...
+2026-07-22 09:10:05 - config - INFO - Attempting web scrape for IBKR...
+2026-07-22 09:10:05 - config - INFO - Fetching fresh analyst targets for VRT...
+2026-07-22 09:10:05 - config - INFO - Attempting web scrape for VRT...
+2026-07-22 09:10:05 - config - INFO - Fetching fresh analyst targets for CHRW...
+2026-07-22 09:10:05 - config - INFO - Attempting web scrape for CHRW...
+2026-07-22 09:10:06 - config - INFO - Fetching fresh analyst targets for EBAY...
+2026-07-22 09:10:06 - config - INFO - Attempting web scrape for EBAY...
+2026-07-22 09:10:06 - config - INFO - Fetching fresh analyst targets for DELL...
+2026-07-22 09:10:06 - config - INFO - Attempting web scrape for DELL...
+2026-07-22 09:10:06 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-22 09:10:06 - config - INFO - Fetching fresh analyst targets for SPCX...
+2026-07-22 09:36:53 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:cashfarm
+2026-07-22 09:36:54 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarm
+2026-07-22 09:37:15 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usfarm
+2026-07-22 09:37:21 - config - ERROR - Error -1: 2157 - La connexion de data farms Sec-def est interrompue:secdefeu
+2026-07-22 09:37:21 - config - ERROR - Error -1: 2105 - La connexion de données HMDS est rompue:euhmds
+2026-07-22 09:37:25 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarmnj
+2026-07-22 09:37:25 - config - ERROR - Error -1: 2105 - La connexion de données HMDS est rompue:ushmds
+2026-07-22 09:37:26 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usopt.nj
+2026-07-22 09:37:27 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:hfarm
+2026-07-22 09:37:27 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usfarm.nj
+2026-07-22 12:10:14 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-22 12:32:21 - config - WARNING - [HO.PA] Timed out waiting for background data fetches (15s).
+2026-07-22 12:37:21 - config - WARNING - [BARC.L] Timed out waiting for background data fetches (15s).
+2026-07-22 12:37:23 - config - ERROR - Error -1: 1100 - La connexion entre IBKR et Trader Workstation a été perdue.
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usfarm
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usfarm.nj
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:hfarm
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarm
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:usopt.nj
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:cashfarm
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2103 - La connexion de données de marché est rompue:eufarmnj
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2157 - La connexion de data farms Sec-def est interrompue:secdefeu
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2105 - La connexion de données HMDS est rompue:euhmds
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2105 - La connexion de données HMDS est rompue:ushmds
+2026-07-22 12:37:26 - config - ERROR - Error -1: 2108 - La connexion de données de marché est inactive mais disponible sur demande.usfarm.nj
+2026-07-22 12:37:56 - config - ERROR - Error -1: 1102 - La connexion entre IBKR et Trader Workstation a été restaurée et les données ont été récupérées. Les batteries de serveurs suivantes sont connectées: hfarm; eufarm; usopt.nj; cashfarm; eufarmnj; usfarm; euhmds; ushmds; secdefeu. Les batteries de serveurs suivantes ne sont pas connectées: usfarm.nj.
+2026-07-22 15:10:15 - config - WARNING - Insufficient data for SPCX: 26 rows
+2026-07-22 15:30:22 - config - WARNING - Insufficient data for SPCX: 27 rows
+2026-07-22 15:35:27 - config - WARNING - Insufficient data for SPCX: 27 rows
+2026-07-22 15:40:31 - config - WARNING - Insufficient data for SPCX: 27 rows
+2026-07-22 15:46:54 - config - INFO - PDT Protector: Loaded 3 day trades from the last 7 days.
+2026-07-22 15:46:55 - config - INFO - Fetching fresh analyst targets for AMD...
+2026-07-22 15:46:55 - config - INFO - Fetching fresh analyst targets for TSLA...
+2026-07-22 15:46:56 - config - INFO - Fetching fresh analyst targets for AAPL...
+2026-07-22 15:46:56 - config - INFO - Fetching fresh analyst targets for EGLN.L...
+2026-07-22 15:46:56 - config - INFO - Attempting web scrape for AAPL...
+2026-07-22 15:46:56 - config - INFO - Fetching fresh analyst targets for ESE.PA...
+2026-07-22 15:46:56 - config - INFO - Attempting web scrape for EGLN.L...
+2026-07-22 15:46:57 - config - INFO - [SUCCESS] ASML Target: 296.00 (Date: 2026-04-30)
+2026-07-22 15:46:57 - config - INFO - API fetch failed. Using stale fallback for EGLN.L.
+2026-07-22 15:46:57 - config - INFO - Fetching fresh analyst targets for QCOM...
+2026-07-22 15:46:57 - config - INFO - Attempting web scrape for ESE.PA...
+2026-07-22 15:46:57 - config - INFO - Fetching fresh analyst targets for TSM...
+2026-07-22 15:46:57 - config - INFO - API fetch failed. Using stale fallback for ESE.PA.
+2026-07-22 15:46:57 - config - INFO - Fetching fresh analyst targets for MSFT...
+2026-07-22 15:46:58 - config - INFO - Attempting web scrape for TSM...
+2026-07-22 15:46:58 - config - INFO - Fetching fresh analyst targets for NVDA...
+2026-07-22 15:46:58 - config - INFO - Attempting web scrape for MSFT...
+2026-07-22 15:46:58 - config - INFO - Attempting web scrape for NVDA...
+2026-07-22 15:46:58 - config - INFO - Fetching fresh analyst targets for AMZN...
+2026-07-22 15:46:58 - config - INFO - [SUCCESS] ASML Target: 510.00 (Date: 2026-03-24)
+2026-07-22 15:46:58 - config - INFO - [SUCCESS] ASML Target: 280.00 (Date: 2026-05-21)
+2026-07-22 15:46:58 - config - INFO - Attempting web scrape for AMZN...
+2026-07-22 15:46:58 - config - INFO - [SUCCESS] ASML Target: 333.00 (Date: 2026-04-30)
+2026-07-22 15:46:58 - config - INFO - Fetching fresh analyst targets for GOOG...
+2026-07-22 15:46:58 - config - INFO - Attempting web scrape for GOOG...
+2026-07-22 15:46:58 - config - INFO - [SUCCESS] ASML Target: 400.00 (Date: 2026-07-13)
+2026-07-22 15:46:59 - config - INFO - Fetching fresh analyst targets for ARM...
+2026-07-22 15:46:59 - config - INFO - Fetching fresh analyst targets for INTC...
+2026-07-22 15:46:59 - config - INFO - Fetching fresh analyst targets for ASML...
+2026-07-22 15:46:59 - config - INFO - Attempting web scrape for ASML...
+2026-07-22 15:46:59 - config - INFO - Fetching fresh analyst targets for MU...
+2026-07-22 15:46:59 - config - INFO - [SUCCESS] ASML Target: 2250.00 (Date: 2026-07-15)
+2026-07-22 15:46:59 - config - INFO - Attempting web scrape for MU...
+2026-07-22 15:46:59 - config - INFO - [SUCCESS] ASML Target: 1625.00 (Date: 2026-05-26)
+2026-07-22 15:46:59 - config - INFO - Fetching fresh analyst targets for MRNA...
+2026-07-22 15:47:00 - config - INFO - Attempting web scrape for MRNA...
+2026-07-22 15:47:00 - config - INFO - [SUCCESS] ASML Target: 45.00 (Date: 2026-05-03)
+2026-07-22 15:47:00 - config - ERROR - [EARNINGS df] GOOG: ['Earnings Date']
+2026-07-22 15:47:00 - config - INFO - Fetching fresh analyst targets for ABT...
+2026-07-22 15:47:00 - config - INFO - Attempting web scrape for ABT...
+2026-07-22 15:47:00 - config - INFO - Fetching fresh analyst targets for BARC.L...
+2026-07-22 15:47:00 - config - INFO - Fetching fresh analyst targets for AIR.PA...
+2026-07-22 15:47:01 - config - INFO - Fetching fresh analyst targets for HO.PA...
+2026-07-22 15:47:01 - config - INFO - Attempting web scrape for AIR.PA...
+2026-07-22 15:47:01 - config - INFO - Attempting web scrape for BARC.L...
+2026-07-22 15:47:01 - config - INFO - [SUCCESS] ASML Target: 236.00 (Date: 2026-07-09)
+2026-07-22 15:47:01 - config - INFO - [SUCCESS] ASML Target: 590 (Date: 2026-07-14)
+2026-07-22 15:47:01 - config - INFO - Fetching fresh analyst targets for SAF.PA...
+2026-07-22 15:47:01 - config - INFO - Attempting web scrape for HO.PA...
+2026-07-22 15:47:02 - config - INFO - Fetching fresh analyst targets for ORCL...
+2026-07-22 15:47:02 - config - INFO - [SUCCESS] ASML Target: 330.00 (Date: 2026-07-09)
+2026-07-22 15:47:02 - config - INFO - Attempting web scrape for ORCL...
+2026-07-22 15:47:02 - config - INFO - Fetching fresh analyst targets for AVGO...
+2026-07-22 15:47:02 - config - INFO - Fetching fresh analyst targets for JPM...
+2026-07-22 15:47:02 - config - INFO - Attempting web scrape for AVGO...
+2026-07-22 15:47:02 - config - INFO - Attempting web scrape for SAF.PA...
+2026-07-22 15:47:02 - config - INFO - Fetching fresh analyst targets for IBKR...
+2026-07-22 15:47:02 - config - INFO - [SUCCESS] ASML Target: 360.00 (Date: 2026-07-09)
+2026-07-22 15:47:02 - config - INFO - Attempting web scrape for IBKR...
+2026-07-22 15:47:03 - config - INFO - Fetching fresh analyst targets for DVA...
+2026-07-22 15:47:03 - config - INFO - Fetching fresh analyst targets for VRT...
+2026-07-22 15:47:03 - config - INFO - Attempting web scrape for VRT...
+2026-07-22 15:47:03 - config - INFO - Fetching fresh analyst targets for CHRW...
+2026-07-22 15:47:03 - config - INFO - Attempting web scrape for CHRW...
+2026-07-22 15:47:03 - config - INFO - Fetching fresh analyst targets for EBAY...
+2026-07-22 15:47:03 - config - INFO - Attempting web scrape for EBAY...
+2026-07-22 15:47:04 - config - INFO - Fetching fresh analyst targets for DELL...
+2026-07-22 15:47:04 - config - INFO - Attempting web scrape for DELL...
+2026-07-22 15:47:04 - config - WARNING - Insufficient data for SPCX: 27 rows
+2026-07-22 15:47:04 - config - INFO - Fetching fresh analyst targets for SPCX...
+2026-07-22 15:52:04 - config - ERROR - [EARNINGS df] GOOG: ['Earnings Date']
+2026-07-22 15:52:13 - config - WARNING - Insufficient data for SPCX: 27 rows
+2026-07-22 15:57:07 - config - ERROR - [EARNINGS df] GOOG: ['Earnings Date']
+2026-07-22 15:57:15 - config - WARNING - Insufficient data for SPCX: 27 rows
+2026-07-22 15:58:10 - config - INFO - Bot TSM is now in AUTOMATED mode (Saved to DB).
+2026-07-22 16:02:10 - config - ERROR - [EARNINGS df] GOOG: ['Earnings Date']
+2026-07-22 16:02:19 - config - WARNING - Insufficient data for SPCX: 27 rows
+2026-07-22 16:07:14 - config - ERROR - [EARNINGS df] GOOG: ['Earnings Date']
+2026-07-22 16:07:23 - config - WARNING - Insufficient data for SPCX: 27 rows
+2026-07-22 16:07:46 - config - INFO - Shutting down application...

@@ -1287,8 +1287,16 @@ class TradingApp(QMainWindow):
             self.update_display()
             
     def open_csv(self):
-        if os.path.exists("trading_orders_history.csv"):
-            os.startfile("trading_orders_history.csv")
+        import sys
+        import subprocess
+        filename = "trading_orders_history.csv"
+        if os.path.exists(filename):
+            if sys.platform == "win32":
+                os.startfile(filename)
+            elif sys.platform == "darwin":
+                subprocess.run(["open", filename])
+            else:
+                subprocess.run(["xdg-open", filename])
         else:
             QMessageBox.information(self, "Info", "No trades yet.")
     
