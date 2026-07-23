@@ -69,11 +69,15 @@ class MaintenanceRoutineThread(QThread):
             tickers = df['Symbol'].tolist()
             tickers = [t.replace('.', '-') for t in tickers]
             
+            ignored_stocks = self.db_manager.get_ignored_stocks()
+            
             results = []
             total = len(tickers)
             for i, symbol in enumerate(tickers):
                 if self.isInterruptionRequested():
                     return
+                if symbol in ignored_stocks:
+                    continue
                 self.progress.emit(int((i / total) * 100), f"Fetching {symbol} ({i+1}/{total})")
                 try:
                     # Use TradingBot's native fetch so the logic perfectly matches the UI
@@ -165,6 +169,25 @@ class TradingApp(QMainWindow):
         # 3. auto-refresh data
         QTimer.singleShot(1500, self.manual_refresh_data)
         
+        # 4. Auto maintenance chain (check every minute)
+        # It will naturally trigger 60 seconds after startup to avoid rate limiting
+        # with the initial data fetching of the watchlist stocks.
+        self.auto_maint_timer = QTimer()
+        self.auto_maint_timer.timeout.connect(self.run_auto_maintenance_chain)
+        self.auto_maint_timer.start(60000) # 1 minute
+        
+    def run_auto_maintenance_chain(self):
+        import time
+        import logging
+        logger = logging.getLogger(__name__)
+        last_run = self.db_manager.get_setting("last_auto_routine_time")
+        now = time.time()
+        
+        # Run if never run before, or if > 24 hours have passed
+        if last_run is None or (now - float(last_run)) > 86400:
+            logger.info("Triggering automated maintenance and backtest chain.")
+            self.handle_maintenance_routine(silent=True)
+
     def _auto_connect(self):
         # Called once at start‑up – only if the checkbox is checked.
         if not self.auto_connect_cb.isChecked():
@@ -727,6 +750,11 @@ class TradingApp(QMainWindow):
         """)
         self.backtest_btn.clicked.connect(self.handle_backtest)
         row_layout.addWidget(self.backtest_btn)
+        
+        self.auto_status_icon = QLabel("✉")
+        self.auto_status_icon.setStyleSheet("color: #7f8c8d; font-size: 20px;")
+        self.auto_status_icon.setToolTip("Automated Routine Status")
+        row_layout.addWidget(self.auto_status_icon)
 
         input_main_layout.addLayout(row_layout)
         input_frame.setLayout(input_main_layout)
@@ -1438,6 +1466,7 @@ class TradingApp(QMainWindow):
             drop = 5.0
 
             self.db_manager.add_stock(sid, max_amt, prof, drop)
+            self.db_manager.remove_ignored_stock(sid) # Un-ignore if added manually
             
             bot = TradingBot(
                 self.ibapi, sid, max_amt, prof, drop,
@@ -1475,6 +1504,16 @@ class TradingApp(QMainWindow):
         )
 
         if reply == QMessageBox.StandardButton.Yes:
+            ignore_reply = QMessageBox.question(
+                self,
+                "Blacklist Stock",
+                f"Do you want to ignore {sid} in future Maintenance Routines?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.Yes
+            )
+            if ignore_reply == QMessageBox.StandardButton.Yes:
+                self.db_manager.add_ignored_stock(sid)
+                
             # Stop trading for this bot
             bot = self.bots.get(sid)
             if bot:
@@ -1541,38 +1580,50 @@ class TradingApp(QMainWindow):
             logger.info(f"Bot {bot.stock_id} is now in {state} mode (Saved to DB).")
             self.update_display()
             
-    def handle_maintenance_routine(self):
+    def handle_maintenance_routine(self, silent=False):
+        self._maint_silent = silent
         self.maint_btn.setEnabled(False)
-        self.progress_dialog = QProgressDialog("Starting...", "Cancel", 0, 100, self)
-        self.progress_dialog.setWindowTitle("Maintenance Routine")
-        self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        
+        if not silent:
+            self.progress_dialog = QProgressDialog("Starting...", "Cancel", 0, 100, self)
+            self.progress_dialog.setWindowTitle("Maintenance Routine")
+            self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        else:
+            self.progress_dialog = None
         
         self.maint_thread = MaintenanceRoutineThread(self.db_manager)
         self.maint_thread.progress.connect(self.on_maint_progress)
         self.maint_thread.finished_data.connect(self.on_maint_finished)
         self.maint_thread.error.connect(self.on_maint_error)
         
-        self.progress_dialog.canceled.connect(self.maint_thread.requestInterruption)
+        if not silent:
+            self.progress_dialog.canceled.connect(self.maint_thread.requestInterruption)
         self.maint_thread.start()
 
     def on_maint_progress(self, val, text):
-        self.progress_dialog.setValue(val)
-        self.progress_dialog.setLabelText(text)
+        if not getattr(self, '_maint_silent', False) and getattr(self, 'progress_dialog', None):
+            self.progress_dialog.setValue(val)
+            self.progress_dialog.setLabelText(text)
 
     def on_maint_error(self, err):
-        self.progress_dialog.close()
+        if not getattr(self, '_maint_silent', False) and getattr(self, 'progress_dialog', None):
+            self.progress_dialog.close()
         self.maint_btn.setEnabled(True)
         import logging
         logger = logging.getLogger(__name__)
-        logger.error(f"Maintenance Routine failed:\\n{err}")
+        logger.error(f"Maintenance Routine failed:\n{err}")
         print(f"Maintenance Routine error: {err}")
+        if not getattr(self, '_maint_silent', False):
+            QMessageBox.critical(self, "Error", f"Maintenance failed: {err}")
 
     def on_maint_finished(self, top_10):
-        self.progress_dialog.close()
+        if not getattr(self, '_maint_silent', False) and getattr(self, 'progress_dialog', None):
+            self.progress_dialog.close()
         self.maint_btn.setEnabled(True)
         
         if not top_10:
-            QMessageBox.warning(self, "No Results", "Could not fetch any target prices.")
+            if not getattr(self, '_maint_silent', False):
+                QMessageBox.warning(self, "No Results", "Could not fetch any target prices.")
             return
 
         # 1. Identify old auto-watchlist stocks that have NO open positions
@@ -1598,7 +1649,10 @@ class TradingApp(QMainWindow):
                 added_count += 1
                 
         self.load_stocks()
-        QMessageBox.information(self, "Success", f"Maintenance Routine completed!\\nRemoved {len(stocks_to_remove)} old watchlist stocks.\\nAdded {added_count} new stocks with highest upside to the Auto Watchlist.")
+        if not getattr(self, '_maint_silent', False):
+            QMessageBox.information(self, "Success", f"Maintenance Routine completed!\nRemoved {len(stocks_to_remove)} old watchlist stocks.\nAdded {added_count} new stocks with highest upside to the Auto Watchlist.")
+        else:
+            self.handle_backtest(silent=True)
 
     def open_csv(self):
         import sys
@@ -1614,44 +1668,70 @@ class TradingApp(QMainWindow):
         else:
             QMessageBox.information(self, "Info", "No trades yet.")
             
-    def handle_backtest(self):
+    def handle_backtest(self, silent=False):
+        self._backtest_silent = silent
         self.backtest_btn.setEnabled(False)
-        self.progress_dialog = QProgressDialog("Running Backtest on all Database Stocks...", "Cancel", 0, 100, self)
-        self.progress_dialog.setWindowTitle("Backtest")
-        self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
-        self.progress_dialog.setAutoClose(True)
-        self.progress_dialog.setAutoReset(True)
         
+        if not silent:
+            self.progress_dialog = QProgressDialog("Running Backtest on all Database Stocks...", "Cancel", 0, 100, self)
+            self.progress_dialog.setWindowTitle("Backtest")
+            self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+            self.progress_dialog.setAutoClose(True)
+            self.progress_dialog.setAutoReset(True)
+        else:
+            self.progress_dialog = None
+            
         self.backtest_thread = BacktestThread()
-        self.progress_dialog.canceled.connect(self.backtest_thread.requestInterruption)
+        if not silent:
+            self.progress_dialog.canceled.connect(self.backtest_thread.requestInterruption)
         self.backtest_thread.progress.connect(self.on_backtest_progress)
         self.backtest_thread.finished_file.connect(self.on_backtest_finished)
         self.backtest_thread.error.connect(self.on_backtest_error)
         self.backtest_thread.start()
 
     def on_backtest_progress(self, val, msg):
-        if hasattr(self, 'progress_dialog'):
+        if not getattr(self, '_backtest_silent', False) and getattr(self, 'progress_dialog', None):
             self.progress_dialog.setValue(val)
             self.progress_dialog.setLabelText(msg)
 
     def on_backtest_error(self, err):
+        if not getattr(self, '_backtest_silent', False) and getattr(self, 'progress_dialog', None):
+            self.progress_dialog.close()
         self.backtest_btn.setEnabled(True)
-        QMessageBox.critical(self, "Error", f"Backtest failed:\n{err}")
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Backtest Error: {err}")
+        if not getattr(self, '_backtest_silent', False):
+            QMessageBox.critical(self, "Error", f"Backtest failed: {err}")
 
-    def on_backtest_finished(self, filepath):
+    def on_backtest_finished(self, file_path):
         self.backtest_btn.setEnabled(True)
+        
+        if getattr(self, '_backtest_silent', False):
+            import time
+            import logging
+            logger = logging.getLogger(__name__)
+            self.db_manager.set_setting("last_auto_routine_time", time.time())
+            logger.info("Automated chain completed silently. Backtest results saved.")
+            
+            # Update status icon to red to alert the user
+            if hasattr(self, 'auto_status_icon'):
+                self.auto_status_icon.setStyleSheet("color: #e74c3c; font-size: 18px;")
+                self.auto_status_icon.setToolTip("Automated chain completed! Check results.")
+            return
+            
         if hasattr(self, 'progress_dialog'):
             self.progress_dialog.setValue(100)
             
         import sys
         import subprocess
-        if os.path.exists(filepath):
+        if os.path.exists(file_path):
             if sys.platform == "win32":
-                os.startfile(filepath)
+                os.startfile(file_path)
             elif sys.platform == "darwin":
-                subprocess.run(["open", filepath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(["open", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             else:
-                subprocess.run(["xdg-open", filepath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(["xdg-open", file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:
             QMessageBox.warning(self, "Error", "Result file not found.")
     

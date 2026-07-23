@@ -192,7 +192,7 @@ def run_backtest_with_params(symbol, config, data, params):
             prev_macd_class = macd_class
 
             if sell_reason:
-                trades.append({'pnl_pct': pnl_pct, 'pnl_eur': position['qty'] * (price - position['buy_price'])})
+                trades.append({'pnl_pct': pnl_pct, 'pnl_eur': position['qty'] * (price - position['buy_price']), 'sell_date': date})
                 last_sell_day = date
                 position = None
             continue

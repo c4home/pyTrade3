@@ -129,6 +129,12 @@ class DatabaseManager:
                     fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
+            
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS ignored_stocks (
+                    stock_id TEXT PRIMARY KEY
+                )
+            """)
                    
             # Create indexes for faster queries
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_trading_history_stock_id ON trading_history(stock_id)")
@@ -145,6 +151,18 @@ class DatabaseManager:
                             "UPDATE company_data SET company_name=? WHERE symbol=?",
                             (short_name, symbol)
                         )
+            
+    def get_setting(self, key, default=None):
+        with self.get_cursor() as cursor:
+            cursor.execute("SELECT value FROM settings WHERE key=?", (key,))
+            row = cursor.fetchone()
+            if row:
+                return row[0]
+            return default
+
+    def set_setting(self, key, value):
+        with self.get_cursor() as cursor:
+            cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, str(value)))
             
     def get_company_info(self, symbol):
         """Get company information from cache or fetch from yfinance"""
@@ -381,6 +399,19 @@ class DatabaseManager:
         """Remove stock from watchlist"""
         with self.get_cursor() as cursor:
             cursor.execute("DELETE FROM stocks WHERE stock_id = ?", (stock_id,))
+
+    def add_ignored_stock(self, stock_id: str):
+        with self.get_cursor() as cursor:
+            cursor.execute("INSERT OR IGNORE INTO ignored_stocks (stock_id) VALUES (?)", (stock_id,))
+            
+    def remove_ignored_stock(self, stock_id: str):
+        with self.get_cursor() as cursor:
+            cursor.execute("DELETE FROM ignored_stocks WHERE stock_id = ?", (stock_id,))
+            
+    def get_ignored_stocks(self) -> set:
+        with self.get_cursor() as cursor:
+            cursor.execute("SELECT stock_id FROM ignored_stocks")
+            return {row[0] for row in cursor.fetchall()}
 
     def update_stock(self, stock_id, max_amount, profit_target, drop_threshold):
         """Update stock parameters"""

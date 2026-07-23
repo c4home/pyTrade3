@@ -1,83 +1,93 @@
 # BOT PERFORMANCE (64 STOCKS)
-**Total PnL:**   +32919 EUR  
-**Win Rate:** 69.7%  
-**Trades:** 611  
+**Total PnL:**   +33235 EUR  
+**Year 1 PnL (older):**    +3295 EUR (75 trades)  
+**Year 2 PnL (recent):**   +29939 EUR (537 trades)  
+**Win Rate:** 69.8%  
+**Total Trades:** 612  
 
 ## FULL PER STOCK BREAKDOWN
 ```text
-EBAY    : PnL:   +3014 | WR:  93.3% | Trades: 15
-VRT     : PnL:   +2069 | WR:  92.3% | Trades: 13
-DELL    : PnL:   +2034 | WR:  90.0% | Trades: 10
-DVA     : PnL:   +1880 | WR:  83.3% | Trades:  6
-IBKR    : PnL:   +1823 | WR: 100.0% | Trades: 11
-MRK     : PnL:   +1503 | WR:  88.9% | Trades:  9
-MRVL    : PnL:   +1479 | WR:  73.3% | Trades: 15
-NVDA    : PnL:   +1446 | WR: 100.0% | Trades: 12
-TXN     : PnL:   +1432 | WR:  77.8% | Trades:  9
-AMD     : PnL:   +1382 | WR:  80.0% | Trades: 10
-INTC    : PnL:   +1378 | WR:  81.8% | Trades: 11
-CSCO    : PnL:   +1265 | WR:  77.8% | Trades:  9
-BAC     : PnL:   +1137 | WR:  83.3% | Trades: 12
-ESE.PA  : PnL:   +1135 | WR:  87.5% | Trades:  8
-JPM     : PnL:   +1111 | WR:  88.9% | Trades:  9
-AVGO    : PnL:   +1097 | WR: 100.0% | Trades:  9
-MU      : PnL:   +1007 | WR:  77.8% | Trades:  9
-GOOG    : PnL:    +961 | WR:  60.0% | Trades: 10
-ORCL    : PnL:    +927 | WR:  70.0% | Trades: 10
-ASML    : PnL:    +906 | WR:  72.7% | Trades: 11
-AAPL    : PnL:    +882 | WR:  64.3% | Trades: 14
-BARC.L  : PnL:    +859 | WR:  88.9% | Trades:  9
-WFC     : PnL:    +735 | WR:  80.0% | Trades: 10
-CVX     : PnL:    +728 | WR:  85.7% | Trades:  7
-TSM     : PnL:    +700 | WR:  87.5% | Trades:  8
-MRNA    : PnL:    +588 | WR:  75.0% | Trades:  8
-SAF.PA  : PnL:    +539 | WR:  69.2% | Trades: 13
-KO      : PnL:    +496 | WR:  75.0% | Trades: 12
-WMT     : PnL:    +489 | WR:  75.0% | Trades: 12
-ALB     : PnL:    +446 | WR:  77.8% | Trades:  9
-XOM     : PnL:    +441 | WR:  71.4% | Trades: 14
-HAL     : PnL:    +420 | WR:  70.0% | Trades: 10
-TMO     : PnL:    +335 | WR:  66.7% | Trades:  9
-ARM     : PnL:    +325 | WR:  58.3% | Trades: 12
-JNJ     : PnL:    +306 | WR:  62.5% | Trades:  8
-PFE     : PnL:    +267 | WR:  83.3% | Trades:  6
-META    : PnL:    +237 | WR:  46.2% | Trades: 13
-UNH     : PnL:    +227 | WR:  83.3% | Trades:  6
-AIR.PA  : PnL:    +197 | WR:  66.7% | Trades: 12
-PSKY    : PnL:    +193 | WR:  71.4% | Trades:  7
-ABBV    : PnL:    +148 | WR:  60.0% | Trades: 10
-AMZN    : PnL:    +136 | WR:  75.0% | Trades:  8
-IBM     : PnL:    +129 | WR:  66.7% | Trades:  6
-GE      : PnL:     +58 | WR:  60.0% | Trades: 10
-SPCX    : PnL:      +0 | WR:   0.0% | Trades:  0
-EGLN.L  : PnL:      -1 | WR:  70.0% | Trades: 10
-FLEX    : PnL:     -11 | WR:  40.0% | Trades:  5
-APP     : PnL:     -13 | WR:  57.9% | Trades: 19
-QCOM    : PnL:     -16 | WR:  63.6% | Trades: 11
-COP     : PnL:     -28 | WR:  50.0% | Trades:  6
-MCD     : PnL:     -35 | WR:  62.5% | Trades:  8
-HO.PA   : PnL:     -54 | WR:  60.0% | Trades: 10
-LLY     : PnL:    -120 | WR:  60.0% | Trades: 10
-AMGN    : PnL:    -140 | WR:  66.7% | Trades:  9
-ABT     : PnL:    -221 | WR:  55.6% | Trades:  9
-MSFT    : PnL:    -260 | WR:  42.9% | Trades:  7
-V       : PnL:    -338 | WR:  60.0% | Trades: 10
-ISRG    : PnL:    -352 | WR:  37.5% | Trades:  8
-COST    : PnL:    -375 | WR:  42.9% | Trades:  7
-NFLX    : PnL:    -386 | WR:  40.0% | Trades: 10
-MA      : PnL:    -472 | WR:  44.4% | Trades:  9
-BSX     : PnL:    -549 | WR:  28.6% | Trades:  7
-TSLA    : PnL:    -573 | WR:  42.9% | Trades:  7
-TTD     : PnL:   -2002 | WR:  12.5% | Trades:  8
+Symbol   |    Total | Y1 (2024-2025) | Y2 (2025-2026) |     WR | Trades
+---------------------------------------------------------------------
+EBAY     |    +3014 |           +359 |          +2655 |  93.3% |     15
+VRT      |    +2069 |            +64 |          +2004 |  92.3% |     13
+DELL     |    +2034 |            +39 |          +1995 |  90.0% |     10
+DVA      |    +1880 |           +146 |          +1734 |  83.3% |      6
+IBKR     |    +1823 |           +230 |          +1592 | 100.0% |     11
+MRK      |    +1503 |             +0 |          +1503 |  88.9% |      9
+MRVL     |    +1479 |           +167 |          +1312 |  73.3% |     15
+NVDA     |    +1446 |           +298 |          +1148 | 100.0% |     12
+TXN      |    +1432 |           +209 |          +1223 |  77.8% |      9
+AMD      |    +1382 |           +602 |           +779 |  80.0% |     10
+INTC     |    +1378 |            +37 |          +1341 |  81.8% |     11
+CSCO     |    +1265 |            +55 |          +1210 |  77.8% |      9
+BAC      |    +1137 |             +0 |          +1137 |  83.3% |     12
+ESE.PA   |    +1135 |           +244 |           +892 |  87.5% |      8
+JPM      |    +1111 |           +179 |           +932 |  88.9% |      9
+AVGO     |    +1097 |           +178 |           +919 | 100.0% |      9
+MU       |    +1007 |           +344 |           +662 |  77.8% |      9
+GOOG     |     +961 |           -209 |          +1170 |  60.0% |     10
+ORCL     |     +927 |           +456 |           +471 |  70.0% |     10
+ASML     |     +906 |           -194 |          +1100 |  72.7% |     11
+AAPL     |     +882 |            +59 |           +824 |  64.3% |     14
+BARC.L   |     +859 |             +0 |           +859 |  88.9% |      9
+WFC      |     +735 |            +85 |           +650 |  80.0% |     10
+CVX      |     +728 |           +202 |           +525 |  85.7% |      7
+TSM      |     +700 |           +145 |           +555 |  87.5% |      8
+MRNA     |     +588 |           +260 |           +328 |  75.0% |      8
+SAF.PA   |     +539 |           +231 |           +308 |  69.2% |     13
+KO       |     +496 |            +75 |           +421 |  75.0% |     12
+WMT      |     +489 |            +66 |           +424 |  75.0% |     12
+ALB      |     +446 |            +38 |           +409 |  77.8% |      9
+XOM      |     +441 |           +184 |           +257 |  71.4% |     14
+HAL      |     +420 |             +0 |           +420 |  70.0% |     10
+TMO      |     +335 |             +0 |           +335 |  66.7% |      9
+ARM      |     +325 |             +0 |           +325 |  58.3% |     12
+JNJ      |     +306 |           -125 |           +431 |  62.5% |      8
+COP      |     +288 |           -178 |           +466 |  57.1% |      7
+PFE      |     +267 |           +239 |            +28 |  83.3% |      6
+META     |     +237 |            +60 |           +177 |  46.2% |     13
+UNH      |     +227 |             +0 |           +227 |  83.3% |      6
+AIR.PA   |     +197 |           +118 |            +79 |  66.7% |     12
+PSKY     |     +193 |           +195 |             -2 |  71.4% |      7
+ABBV     |     +148 |             +0 |           +148 |  60.0% |     10
+AMZN     |     +136 |           +154 |            -18 |  75.0% |      8
+IBM      |     +129 |             +0 |           +129 |  66.7% |      6
+GE       |      +58 |             +0 |            +58 |  60.0% |     10
+SPCX     |       +0 |             +0 |             +0 |   0.0% |      0
+EGLN.L   |       -1 |           -190 |           +190 |  70.0% |     10
+FLEX     |      -11 |             +0 |            -11 |  40.0% |      5
+APP      |      -13 |           -186 |           +173 |  57.9% |     19
+QCOM     |      -16 |             +0 |            -16 |  63.6% |     11
+MCD      |      -35 |            -56 |            +20 |  62.5% |      8
+HO.PA    |      -54 |           -193 |           +139 |  60.0% |     10
+LLY      |     -120 |             +0 |           -120 |  60.0% |     10
+AMGN     |     -140 |           -168 |            +28 |  66.7% |      9
+ABT      |     -221 |           -171 |            -50 |  55.6% |      9
+MSFT     |     -260 |             +0 |           -260 |  42.9% |      7
+V        |     -338 |           -155 |           -183 |  60.0% |     10
+ISRG     |     -352 |           -393 |            +40 |  37.5% |      8
+COST     |     -375 |           -123 |           -252 |  42.9% |      7
+NFLX     |     -386 |            +77 |           -463 |  40.0% |     10
+MA       |     -472 |            +24 |           -496 |  44.4% |      9
+BSX      |     -549 |           +127 |           -675 |  28.6% |      7
+TSLA     |     -573 |           -309 |           -264 |  42.9% |      7
+TTD      |    -2002 |             +0 |          -2002 |  12.5% |      8
 ```
 
 ## BUY AND HOLD SP500 ETF (ESE.PA) COMPARISON
 ```text
 Start Price (2y ago) : 25.68
-End Price (Today)    : 33.17
-Total Return (%)     : +29.15%
-Buy & Hold PnL (20k) :    +5829 EUR
+Cutoff Price (1y ago): 27.14
+End Price (Today)    : 33.05
+Total Return (%)     : +28.71%
+Buy & Hold PnL (20k) :    +5741 EUR
+   -> Year 1 PnL     :    +1136 EUR
+   -> Year 2 PnL     :    +4605 EUR
 
-Difference (Bot vs B&H):   +27090 EUR
-Bot OUTPERFORMED Buy & Hold S&P 500!
+Difference (Bot vs B&H):   +27494 EUR
+   -> Year 1 Diff      :    +2159 EUR
+   -> Year 2 Diff      :   +25334 EUR
+
+Bot OUTPERFORMED Buy & Hold S&P 500 overall!
 ```
