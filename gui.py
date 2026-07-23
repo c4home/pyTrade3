@@ -16,6 +16,74 @@ class NumericTableWidgetItem(QTableWidgetItem):
             return bool(self.sort_value < other.sort_value)
         return super().__lt__(other)
 
+class MaintenanceRoutineThread(QThread):
+    progress = pyqtSignal(int, str)
+    finished_data = pyqtSignal(list)
+    error = pyqtSignal(str)
+    
+    def __init__(self, db_manager):
+        super().__init__()
+        self.db_manager = db_manager
+
+    def run(self):
+        try:
+            import yfinance as yf
+            import pandas as pd
+            import requests
+            import io
+            from trading_bot import TradingBot
+            
+            self.progress.emit(0, "Fetching S&P 500 list from Wikipedia...")
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            response = requests.get('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies', headers=headers)
+            response.raise_for_status()
+            tables = pd.read_html(io.StringIO(response.text))
+            df = tables[0]
+            tickers = df['Symbol'].tolist()
+            tickers = [t.replace('.', '-') for t in tickers]
+            
+            results = []
+            total = len(tickers)
+            for i, symbol in enumerate(tickers):
+                if self.isInterruptionRequested():
+                    return
+                self.progress.emit(int((i / total) * 100), f"Fetching {symbol} ({i+1}/{total})")
+                try:
+                    # Use TradingBot's native fetch so the logic perfectly matches the UI
+                    bot = TradingBot(None, symbol, 1000, 5, 0.5, manual_mode=True, db_manager=self.db_manager, gui=None)
+                    target, source, date = bot.fetch_fresh_bank_note()
+                            
+                    if target and isinstance(target, (int, float)) and target > 0:
+                        is_stale = False
+                        if date and isinstance(date, str) and len(date) >= 10:
+                            try:
+                                from datetime import datetime
+                                d = datetime.strptime(date[:10], "%Y-%m-%d")
+                                if (datetime.now() - d).days > 90:
+                                    is_stale = True
+                            except Exception:
+                                pass
+                        
+                        if is_stale:
+                            continue
+
+                        info = yf.Ticker(symbol).info
+                        current = info.get('currentPrice') or info.get('previousClose')
+                        if current and current > 0:
+                            upside = (target - current) / current
+                            results.append({'symbol': symbol, 'upside': upside})
+                except Exception:
+                    pass
+            
+            self.progress.emit(100, "Sorting results...")
+            results.sort(key=lambda x: x['upside'], reverse=True)
+            top_10 = results[:10]
+            self.finished_data.emit(top_10)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            self.error.emit(str(e))
+
 # ==================== MAIN GUI ====================
 class TradingApp(QMainWindow):
     instance = None  # <-- ADD THIS
@@ -599,6 +667,23 @@ class TradingApp(QMainWindow):
         self.hold_btn.clicked.connect(self.handle_manual_hold)
         row_layout.addWidget(self.hold_btn)
 
+        self.maint_btn = QPushButton("Maintenance Routine")
+        self.maint_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #8e44ad;
+                color: white;
+                font-weight: bold;
+                border-radius: 4px;
+                padding: 4px 10px;
+                min-width: 120px;
+            }
+            QPushButton:hover { background-color: #9b59b6; }
+            QPushButton:pressed { background-color: #732d91; }
+            QPushButton:disabled { background-color: #555555; }
+        """)
+        self.maint_btn.clicked.connect(self.handle_maintenance_routine)
+        row_layout.addWidget(self.maint_btn)
+
         input_main_layout.addLayout(row_layout)
         input_frame.setLayout(input_main_layout)
         layout.addWidget(input_frame)
@@ -696,11 +781,12 @@ class TradingApp(QMainWindow):
             m_mode = bool(row[4])
             last_rej = row[5] if (len(row) > 5 and row[5] is not None) else 0
             highest_pnl = row[6] if (len(row) > 6 and row[6] is not None) else 0.0
+            is_auto = bool(row[7]) if (len(row) > 7 and row[7] is not None) else False
             
             # 3. Create the bot with the saved manual_mode state
             bot = TradingBot(
                 self.ibapi, sid, maxa, prof, drop, m_mode,
-                self.db_manager, self.csv_manager, self.exchange_manager, self
+                self.db_manager, self.csv_manager, self.exchange_manager, self, is_auto
             )
             bot.last_rejection_time = last_rej
             bot.highest_pnl = highest_pnl
@@ -887,7 +973,10 @@ class TradingApp(QMainWindow):
                     price_pct = 0.0
                     
                 if bot.manual_mode:
-                    status = "Hold"
+                    if getattr(bot, 'is_auto_watchlist', False):
+                        status = "Watchlist"
+                    else:
+                        status = "Hold"
 
                 earn_display = bot.next_earnings_date
                 if not earn_display or earn_display == "No payment":
@@ -1016,8 +1105,20 @@ class TradingApp(QMainWindow):
                             # Overvalued (Above Analyst Target) -> Red
                             item.setForeground(QColor("red"))
                     elif col == 7 and bank_target_long > 0:
-                        if bot.market_value < bank_target_long:
-                        # Undervalued (Good for Buy) -> Green
+                        is_stale = False
+                        bank_date_str = getattr(bot, 'latest_bank_date', "")
+                        if bank_date_str and len(bank_date_str) >= 10:
+                            try:
+                                d = datetime.strptime(bank_date_str[:10], "%Y-%m-%d")
+                                if (datetime.now() - d).days > 90:
+                                    is_stale = True
+                            except ValueError:
+                                pass
+
+                        if is_stale:
+                            item.setForeground(QColor("red"))
+                        elif bot.market_value < bank_target_long:
+                            # Undervalued (Good for Buy) -> Green
                             item.setForeground(QColor("green"))
                         elif bot.market_value > bank_target_long:
                             # Overvalued (Above Analyst Target) -> Red
@@ -1040,6 +1141,8 @@ class TradingApp(QMainWindow):
                     elif col == 28:  # Status column
                         if text == "Hold":
                             item.setForeground(QColor("red"))
+                        elif text == "Watchlist":
+                            item.setForeground(QColor("magenta"))
                         elif text == "Full capacity":
                             item.setForeground(QColor("green"))
                         elif text == "Budget too low":
@@ -1298,7 +1401,7 @@ class TradingApp(QMainWindow):
                 db_manager=self.db_manager,         
                 csv_manager=self.csv_manager,
                 exchange_manager=self.exchange_manager,
-                app=self
+                gui=self
             )
             self.bots[sid] = bot
             bot.create_yf_ticker()
@@ -1394,6 +1497,65 @@ class TradingApp(QMainWindow):
             logger.info(f"Bot {bot.stock_id} is now in {state} mode (Saved to DB).")
             self.update_display()
             
+    def handle_maintenance_routine(self):
+        self.maint_btn.setEnabled(False)
+        self.progress_dialog = QProgressDialog("Starting...", "Cancel", 0, 100, self)
+        self.progress_dialog.setWindowTitle("Maintenance Routine")
+        self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        
+        self.maint_thread = MaintenanceRoutineThread(self.db_manager)
+        self.maint_thread.progress.connect(self.on_maint_progress)
+        self.maint_thread.finished_data.connect(self.on_maint_finished)
+        self.maint_thread.error.connect(self.on_maint_error)
+        
+        self.progress_dialog.canceled.connect(self.maint_thread.requestInterruption)
+        self.maint_thread.start()
+
+    def on_maint_progress(self, val, text):
+        self.progress_dialog.setValue(val)
+        self.progress_dialog.setLabelText(text)
+
+    def on_maint_error(self, err):
+        self.progress_dialog.close()
+        self.maint_btn.setEnabled(True)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Maintenance Routine failed:\\n{err}")
+        print(f"Maintenance Routine error: {err}")
+
+    def on_maint_finished(self, top_10):
+        self.progress_dialog.close()
+        self.maint_btn.setEnabled(True)
+        
+        if not top_10:
+            QMessageBox.warning(self, "No Results", "Could not fetch any target prices.")
+            return
+
+        # 1. Identify old auto-watchlist stocks that have NO open positions
+        stocks_to_remove = []
+        for bot in list(self.bots.values()):
+            if getattr(bot, 'is_auto_watchlist', False):
+                if bot.quantity == 0:
+                    stocks_to_remove.append(bot.stock_id)
+        
+        # 2. Remove them
+        for sid in stocks_to_remove:
+            self.db_manager.remove_stock(sid)
+            self.bots.pop(sid, None)
+            
+        # 3. Add new top 10
+        added_count = 0
+        for item in top_10:
+            sym = item['symbol']
+            if sym not in self.bots:
+                # Default configuration for the new auto-added stock
+                # Assumes default: max=1000, profit=5.0, drop=0.5
+                self.db_manager.add_stock(sym, 1000.0, 5.0, 0.5, manual_mode=1, is_auto_watchlist=1)
+                added_count += 1
+                
+        self.load_stocks()
+        QMessageBox.information(self, "Success", f"Maintenance Routine completed!\\nRemoved {len(stocks_to_remove)} old watchlist stocks.\\nAdded {added_count} new stocks with highest upside to the Auto Watchlist.")
+
     def open_csv(self):
         import sys
         import subprocess

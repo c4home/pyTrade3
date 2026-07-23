@@ -42,10 +42,48 @@ if __name__ == "__main__":
         print(f"Total 2022 PnL: {pnl:+8.0f} | WR: {wr*100:4.1f}% | Trades: {len(trades):3d} | {p}")
         
         sorted_stats = sorted(stock_stats.items(), key=lambda item: item[1]['pnl'], reverse=True)
-        print("\n--- TOP 20 STOCKS (2022) ---")
-        for s, stat in sorted_stats[:20]:
-            print(f"{s:8s}: PnL: {stat['pnl']:+7.0f} | WR: {stat['wr']*100:5.1f}% | Trades: {stat['trades']:2d}")
+        print("\n--- FULL LIST OF STOCKS ---")
+        with open('sp500_bear_results.md', 'r') as f:
+            content = f.read()
+        
+        # Cut off at Top 20
+        idx = content.find("## Top 20")
+        if idx != -1:
+            content = content[:idx]
             
-        print("\n--- BOTTOM 20 STOCKS (2022) ---")
-        for s, stat in sorted_stats[-20:]:
-            print(f"{s:8s}: PnL: {stat['pnl']:+7.0f} | WR: {stat['wr']*100:5.1f}% | Trades: {stat['trades']:2d}")
+        with open('sp500_bear_results.md', 'w') as f:
+            f.write(content)
+            f.write("## Full Per-Stock Breakdown (Ranked Best to Worst)\n")
+            f.write("Here is the exact performance breakdown of all stocks tested, ranked from highest profit to lowest profit:\n\n")
+            f.write("| Symbol | Total PnL (€) | Win Rate (%) | Total Trades |\n")
+            f.write("| :--- | :--- | :--- | :--- |\n")
+            for s, stat in sorted_stats:
+                f.write(f"| **{s}** | {stat['pnl']:+7.0f} | {stat['wr']*100:5.1f}% | {stat['trades']} |\n")
+
+        print("\n--- BUY AND HOLD SP500 ETF (ESE.PA) COMPARISON ---")
+        import yfinance as yf
+        import pandas as pd
+        df_sp500 = yf.Ticker("ESE.PA").history(period="5y", auto_adjust=False, actions=False)
+        if isinstance(df_sp500.columns, pd.MultiIndex):
+            df_sp500.columns = df_sp500.columns.droplevel(1)
+        df_sp500 = df_sp500.loc['2022-01-01':'2022-12-31']
+        
+        if len(df_sp500) >= 2:
+            start_price = df_sp500['Close'].iloc[0]
+            end_price = df_sp500['Close'].iloc[-1]
+            shares_bought = 20000 / start_price
+            end_value = shares_bought * end_price
+            buy_hold_pnl = end_value - 20000
+            buy_hold_pct = (end_price - start_price) / start_price * 100
+            
+            print(f"Start Price (2022-01-03): {start_price:.2f}")
+            print(f"End Price (2022-12-30)  : {end_price:.2f}")
+            print(f"Total Return (%)        : {buy_hold_pct:+.2f}%")
+            print(f"Buy & Hold PnL (20k)    : {buy_hold_pnl:+8.0f} EUR")
+            
+            diff = pnl - buy_hold_pnl
+            print(f"\nDifference (Bot vs B&H): {diff:+8.0f} EUR")
+            if diff > 0:
+                print("Bot OUTPERFORMED Buy & Hold S&P 500!")
+            else:
+                print("Bot UNDERPERFORMED Buy & Hold S&P 500.")

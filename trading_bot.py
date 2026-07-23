@@ -20,7 +20,7 @@ class TradingBot:
     MACRO_DROP_LIMIT = -0.015  # -1.5% drop blocks DIP buys
     
     def __init__(self, ibapi, stock_id, max_amount, profit_target, drop_threshold,manual_mode=False,
-                 db_manager=None, csv_manager=None, exchange_manager=None, app=None):
+                 db_manager=None, csv_manager=None, exchange_manager=None, gui=None, is_auto_watchlist=False):
         self.ibapi = ibapi
         self.stock_id = stock_id
         self.ibkr_symbol = re.sub(r'\..*$', '', stock_id)
@@ -30,7 +30,7 @@ class TradingBot:
         self.db_manager = db_manager
         self.csv_manager = csv_manager
         self.exchange_manager = exchange_manager
-        self.app = app  # Reference to main app
+        self.app = gui  # Reference to main app
 
         self.market_value = 0
         self.smart_score = 0
@@ -100,6 +100,7 @@ class TradingBot:
         self.last_bank_update = None
         
         self.manual_mode = manual_mode  # If True, automated signals are ignored
+        self.is_auto_watchlist = is_auto_watchlist
         
         self.target_price = 0
         self.highest_pnl = 0.0
@@ -591,7 +592,10 @@ class TradingBot:
                 hist = ticker.history(period="5d", interval="1m")
                 if not hist.empty:
                     price = hist['Close'].iloc[-1]
-                    with self.ibapi.data_lock:
+                    if self.ibapi and hasattr(self.ibapi, 'data_lock'):
+                        with self.ibapi.data_lock:
+                            self.market_value = round(price, 2)
+                    else:
                         self.market_value = round(price, 2)
                     self.db_manager.update_latest_price(self.stock_id, price)
             except:
@@ -1046,10 +1050,9 @@ class TradingBot:
 
     def get_ubs_target(self, symbol):
         """
-        Scrape UBS research page for price target with robust parsing.
+        Get UBS research page for price target using yfinance.
         Returns: (target_price, description, date_string) or (None, error_msg, None)
         """
-        # Step 1: Try yfinance first (Keep your existing logic)
         try:
             ticker = yf.Ticker(symbol)
             df = ticker.upgrades_downgrades
@@ -1058,86 +1061,14 @@ class TradingBot:
                 ubs_data = df[df['Firm'].str.lower().isin(ubs_names)]
                 if not ubs_data.empty:
                     latest = ubs_data.sort_index().iloc[-1]
-                    # Check if this data is recent (e.g., within last 30 days) to prefer it
-                    # Otherwise, fall through to scraping for potentially newer data
                     target_val = latest.get('currentPriceTarget')
                     date_str = latest.name.strftime('%Y-%m-%d')
                     if pd.notnull(target_val) and target_val != 0:
-                        # If date is very recent, return it. If old, let scraping try.
-                        if (datetime.now() - latest.name).days < 30:
-                            return float(target_val), f"Target: ${float(target_val)}", date_str
+                        return float(target_val), f"Target: ${float(target_val)}", date_str
         except Exception as e:
             logger.warning(f"yfinance failed: {e}")
 
-        # Step 2: Web scraping fallback
-        logger.info(f"Attempting web scrape for {symbol}...")
-
-        ubs_url_map = {
-            'ASML': 'https://research.ibb.ubs.com/openaccess/compliance/107563_1_new.html',
-            'GOOG': 'https://research.ibb.ubs.com/openaccess/compliance/680397698365_1_new.html',
-            'AMZN': 'https://research.ibb.ubs.com/openaccess/compliance/163268_1_new.html',
-            'QCOM': 'https://research.ibb.ubs.com/openaccess/compliance/80649_1_new.html',
-            'MRNA': 'https://research.ibb.ubs.com/openaccess/compliance/3483757_1_new.html',
-            'NVDA': 'https://research.ibb.ubs.com/openaccess/compliance/194637_1_new.html',
-            'MU': 'https://research.ibb.ubs.com/openaccess/compliance/79529_1_new.html',
-            'TSLA': 'https://research.ibb.ubs.com/openaccess/compliance/711534_1_new.html',
-            'MSFT': 'https://research.ibb.ubs.com/openaccess/compliance/79078_1_new.html',
-            'AAPL': 'https://research.ibb.ubs.com/openaccess/compliance/79492_1_new.html',
-            'AMD': 'https://research.ibb.ubs.com/openaccess/compliance/76891_1_new.html',
-            'ARM': 'https://research.ibb.ubs.com/openaccess/compliance/681579446666_1_new.html',
-            'INTC': 'https://research.ibb.ubs.com/openaccess/compliance/79064_1_new.html',
-            'BARC.L': 'https://research.ibb.ubs.com/openaccess/compliance/77048_1_new.html',
-            'AIR.PA': 'https://research.ibb.ubs.com/openaccess/compliance/330733_1_new.html',
-            'HO.PA': 'https://research.ibb.ubs.com/openaccess/compliance/91575_1_new.html',
-            'SAF.PA': 'https://research.ibb.ubs.com/openaccess/compliance/90758_1_new.html',
-            'AC.PA': 'https://research.ibb.ubs.com/openaccess/compliance/91149_1_new.html'
-        }
-
-        url = ubs_url_map.get(symbol)
-        if not url:
-            return None, "No UBS URL mapping", None
-
-        try:
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            }
-
-            response = requests.get(url, headers=headers, timeout=20)
-            if response.status_code != 200:
-                return None, f"HTTP {response.status_code}", None
-
-            soup = BeautifulSoup(response.content, 'html.parser')
-
-            try:
-                # 1. Target the table by ID specifically
-                table = soup.find('table')
-                if not table:
-                    return None
-
-                # Get all rows (skipping the header)
-                rows = table.find_all('tr')[1:]
-                if not rows:
-                    return None
-
-                # The latest data is in the last row
-                latest_row = rows[-1]
-                cols = latest_row.find_all('td')
-
-                # Structure: Date | Price | Target | Rating
-                date = cols[0].get_text(strip=True)
-                target_price = cols[2].get_text(strip=True)
-    
-                logger.info(f"[SUCCESS] ASML Target: {target_price} (Date: {date})")
-                return float(target_price), f"Target: €{target_price}", date
-            
-            except Exception as e:
-                logger.error(f"Scrape error: {str(e)}")
-                return None, "Scrape failure", None
-    
-        except Exception as e:
-            logger.error(f"Error parsing UBS page: {e}")
-            return None, f"Parse error: {str(e)}", None
+        return None, "No UBS target found.", None
 
     def get_morgan_stanley_target(self, symbol):
         ticker = yf.Ticker(symbol)
@@ -1423,8 +1354,6 @@ class TradingBot:
                 return None
 
         self.update_analyst_data(run_async=True)
-        if self.manual_mode:
-            return None # Skip all automated logic
             
         # If background data fetches are still running, skip trading logic this tick to avoid blocking the UI
         if (getattr(self, '_fetching_market_value', False) or 
@@ -1448,6 +1377,9 @@ class TradingBot:
         
         # Run Score Calculation
         self.calculate_score()
+        
+        if self.manual_mode:
+            return None # Skip all automated buy/sell logic
 
         # -- SELL LOGIC (Exempt from cooldowns, prioritised) --
         def _throttled_sell_log(key, msg, interval=300):

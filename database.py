@@ -58,11 +58,17 @@ class DatabaseManager:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     manual_mode INTEGER DEFAULT 0,
-                    last_rejection_time REAL DEFAULT 0
+                    last_rejection_time REAL DEFAULT 0,
+                    is_auto_watchlist INTEGER DEFAULT 0
                 )
             """)
             try:
                 cursor.execute("ALTER TABLE stocks ADD COLUMN last_rejection_time REAL DEFAULT 0")
+            except sqlite3.OperationalError:
+                pass  # column already exists
+
+            try:
+                cursor.execute("ALTER TABLE stocks ADD COLUMN is_auto_watchlist INTEGER DEFAULT 0")
             except sqlite3.OperationalError:
                 pass  # column already exists
 
@@ -340,19 +346,19 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Database Error in save_target_to_db: {e}")
         
-    def add_stock(self, stock_id, max_amount, profit_target, drop_threshold):
+    def add_stock(self, stock_id, max_amount, profit_target, drop_threshold, manual_mode=0, is_auto_watchlist=0):
         """Add or update stock in watchlist"""
         with self.get_cursor() as cursor:
             cursor.execute(
-                """INSERT OR REPLACE INTO stocks (stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time, highest_pnl, updated_at)
-                   VALUES (?, ?, ?, ?, 0, 0, 0.0, CURRENT_TIMESTAMP)""",
-                (stock_id, max_amount, profit_target, drop_threshold)
+                """INSERT OR REPLACE INTO stocks (stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time, highest_pnl, is_auto_watchlist, updated_at)
+                   VALUES (?, ?, ?, ?, ?, 0, 0.0, ?, CURRENT_TIMESTAMP)""",
+                (stock_id, max_amount, profit_target, drop_threshold, manual_mode, is_auto_watchlist)
             )
 
     def get_all_stocks(self):
         """Get all stocks in watchlist"""
         with self.get_cursor() as cursor:
-            cursor.execute("SELECT stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time, highest_pnl FROM stocks")
+            cursor.execute("SELECT stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time, highest_pnl, is_auto_watchlist FROM stocks")
             return cursor.fetchall()
 
     def update_highest_pnl(self, stock_id, pnl):

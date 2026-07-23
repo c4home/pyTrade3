@@ -158,7 +158,7 @@ def run_backtest_with_params(symbol, config, data, params):
             dynamic_stop_loss = -5.0
 
         # Dynamic Sizing Calculation
-        global_acc = 14000
+        global_acc = 20000
         risk_euro = global_acc * 0.01
         stop_loss_dist = abs(dynamic_stop_loss) / 100.0
         if stop_loss_dist < 0.01: stop_loss_dist = 0.01
