@@ -16,6 +16,33 @@ class NumericTableWidgetItem(QTableWidgetItem):
             return bool(self.sort_value < other.sort_value)
         return super().__lt__(other)
 
+class BacktestThread(QThread):
+    progress = pyqtSignal(int, str)
+    finished_file = pyqtSignal(str)
+    error = pyqtSignal(str)
+    
+    def run(self):
+        try:
+            import sys
+            import os
+            # Add backtest dir to sys.path so we can import the script
+            backtest_dir = os.path.join(os.path.dirname(__file__), 'backtest')
+            if backtest_dir not in sys.path:
+                sys.path.append(backtest_dir)
+            import importlib
+            mod = importlib.import_module('run_present_stocks_backtest')
+            run_backtest_for_db_stocks = mod.run_backtest_for_db_stocks
+            
+            def cb(pct, msg):
+                if not self.isInterruptionRequested():
+                    self.progress.emit(pct, msg)
+
+            res_path = run_backtest_for_db_stocks(cb)
+            if not self.isInterruptionRequested():
+                self.finished_file.emit(res_path)
+        except Exception as e:
+            self.error.emit(str(e))
+
 class MaintenanceRoutineThread(QThread):
     progress = pyqtSignal(int, str)
     finished_data = pyqtSignal(list)
@@ -683,6 +710,23 @@ class TradingApp(QMainWindow):
         """)
         self.maint_btn.clicked.connect(self.handle_maintenance_routine)
         row_layout.addWidget(self.maint_btn)
+        
+        self.backtest_btn = QPushButton("Run Backtest (DB)")
+        self.backtest_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #34495e;
+                color: white;
+                font-weight: bold;
+                border-radius: 4px;
+                padding: 4px 10px;
+                min-width: 120px;
+            }
+            QPushButton:hover { background-color: #2c3e50; }
+            QPushButton:pressed { background-color: #1a252f; }
+            QPushButton:disabled { background-color: #555555; }
+        """)
+        self.backtest_btn.clicked.connect(self.handle_backtest)
+        row_layout.addWidget(self.backtest_btn)
 
         input_main_layout.addLayout(row_layout)
         input_frame.setLayout(input_main_layout)
@@ -1564,11 +1608,52 @@ class TradingApp(QMainWindow):
             if sys.platform == "win32":
                 os.startfile(filename)
             elif sys.platform == "darwin":
-                subprocess.run(["open", filename])
+                subprocess.run(["open", filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             else:
-                subprocess.run(["xdg-open", filename])
+                subprocess.run(["xdg-open", filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:
             QMessageBox.information(self, "Info", "No trades yet.")
+            
+    def handle_backtest(self):
+        self.backtest_btn.setEnabled(False)
+        self.progress_dialog = QProgressDialog("Running Backtest on all Database Stocks...", "Cancel", 0, 100, self)
+        self.progress_dialog.setWindowTitle("Backtest")
+        self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        self.progress_dialog.setAutoClose(True)
+        self.progress_dialog.setAutoReset(True)
+        
+        self.backtest_thread = BacktestThread()
+        self.progress_dialog.canceled.connect(self.backtest_thread.requestInterruption)
+        self.backtest_thread.progress.connect(self.on_backtest_progress)
+        self.backtest_thread.finished_file.connect(self.on_backtest_finished)
+        self.backtest_thread.error.connect(self.on_backtest_error)
+        self.backtest_thread.start()
+
+    def on_backtest_progress(self, val, msg):
+        if hasattr(self, 'progress_dialog'):
+            self.progress_dialog.setValue(val)
+            self.progress_dialog.setLabelText(msg)
+
+    def on_backtest_error(self, err):
+        self.backtest_btn.setEnabled(True)
+        QMessageBox.critical(self, "Error", f"Backtest failed:\n{err}")
+
+    def on_backtest_finished(self, filepath):
+        self.backtest_btn.setEnabled(True)
+        if hasattr(self, 'progress_dialog'):
+            self.progress_dialog.setValue(100)
+            
+        import sys
+        import subprocess
+        if os.path.exists(filepath):
+            if sys.platform == "win32":
+                os.startfile(filepath)
+            elif sys.platform == "darwin":
+                subprocess.run(["open", filepath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            else:
+                subprocess.run(["xdg-open", filepath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
+            QMessageBox.warning(self, "Error", "Result file not found.")
     
     def closeEvent(self, event):
         logger.info("Shutting down application...")

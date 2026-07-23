@@ -171,6 +171,26 @@ class TradingBot:
             return market_open <= current_time <= market_close
         except:
             return False
+
+    def is_market_cooling_down(self, cooldown_minutes=15):
+        """Returns True if the market just opened and is within the cooldown period."""
+        try:
+            tz = ZoneInfo(self.exchange_tz_name)
+            now = datetime.now(tz)
+            if now.weekday() >= 5:
+                return False
+            current_time = now.time()
+
+            if 'America/New_York' in self.exchange_tz_name:
+                market_open = dtime(9, 30)
+                cooldown_end = dtime(9, 30 + cooldown_minutes)
+            else:
+                market_open = dtime(9, 0)
+                cooldown_end = dtime(9, cooldown_minutes)
+
+            return market_open <= current_time < cooldown_end
+        except:
+            return False
             
     def get_projected_volume(self):
         """Estimates the final daily volume based on how much time has passed since market open."""
@@ -1388,6 +1408,11 @@ class TradingBot:
             if now - self._last_sell_log.get(key, 0) >= interval:
                 logger.info(msg)
                 self._last_sell_log[key] = now
+                
+        # 0. Market Cooldown Check (Wait 15 mins after open to avoid volatility traps)
+        if self.is_market_cooling_down():
+            _throttled_sell_log("market_cooldown", f"[{self.stock_id}] Market Open Cooldown (15m): Pausing automated sells.", interval=60)
+            return None
 
         if self.quantity > 0:
             if self.pnl_percent > self.highest_pnl:
@@ -1510,6 +1535,10 @@ class TradingBot:
 
         usable_cash = self.ibapi.available_cash - self.min_cash
         if not self.is_market_open() or min(self.cash_left, usable_cash) < self.MIN_CASH_FOR_BUY or not earnings_ok:
+            return None
+            
+        if self.is_market_cooling_down():
+            logger.info(f"[{self.stock_id}] Market Open Cooldown (15m): Pausing automated buys.")
             return None
 
         # 3. Daily growth check (block buy if stock rose more than 5% today)
