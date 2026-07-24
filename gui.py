@@ -370,7 +370,7 @@ class TradingApp(QMainWindow):
                         elif other.has_pending_order():
                             skip_reason = "pending order exists"
                         else:
-                            skip_reason = "technical conditions not met for BUY"
+                            skip_reason = getattr(other, 'get_buy_block_reason', lambda: "technical conditions not met for BUY")()
                             
                         skipped_list.append(f"- {other.stock_id} (Score: {other_score}/12): Skipped because {skip_reason}")
                         
@@ -615,7 +615,7 @@ class TradingApp(QMainWindow):
         headers = [
             "Company", "Sym", "Type", "Sector",
             "Price", "Chg%", "Target", "Bank Target", "Score", "14H", "14L", "RSI", "ADX", "MA", "MACD", "Vol(M)",
-            "Qty", "Buy@", "Value", "P&L%", "Left", "Max", "~Max", "TP%", "~TP", "Trail$", "SL%", "~SL", "Earn", "Status"
+            "Qty", "Buy", "Value", "P&L%", "Left", "Max", "~Max", "TP%", "~TP", "Trail", "SL%", "~SL", "Earn", "Status"
         ]
 
         self.table.setHorizontalHeaderLabels(headers)
@@ -1265,7 +1265,7 @@ class TradingApp(QMainWindow):
                                     item.setForeground(QColor("green"))  # Warning color
                             except ValueError:
                                 pass  # Invalid date format; skip coloring
-                    elif col == 28:  # Status column
+                    elif col == 29:  # Status column
                         if text == "Hold":
                             item.setForeground(QColor("red"))
                         elif text == "Watchlist":
@@ -1276,12 +1276,14 @@ class TradingApp(QMainWindow):
                             item.setForeground(QColor("red"))
                         elif "Low Cash" in text:
                             item.setForeground(QColor("orange"))
+                        elif "Closed" in text:
+                            item.setForeground(QColor("orange"))
+                        elif "Ready" in text:
+                            item.setForeground(QColor("green"))
                     elif "BUY" in text or "BULL" in text:
                         item.setForeground(QColor("green"))   # Bullish signal, indicating to buy
                     elif "SELL" in text or "BEAR" in text:
                         item.setForeground(QColor("red"))  # Bearish signal, indicating to sell
-                    elif "Closed" in text:
-                        item.setForeground(QColor("orange"))
                     elif col == 2:
                         color = QColor("blue") if "STOCK" in text else QColor("green") if "ETF" in text else QColor("orange") if "ETC" in text else QColor("black")
                         item.setForeground(QBrush(color))

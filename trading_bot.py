@@ -1471,7 +1471,10 @@ class TradingBot:
         if self.fourteen_day_high <= 0 or self.market_value <= 0:
             return None
 
-        # Update dynamic target
+        # Run Score Calculation first to determine active strategy regime (DIP or MOMENTUM)
+        self.calculate_score()
+
+        # Update dynamic target & strategy-specific dynamic stop loss
         atr = self.get_atr_14()
         if atr > 0:
             atr_pct = (atr / self.market_value) * 100
@@ -1479,10 +1482,9 @@ class TradingBot:
             self.dynamic_profit_target = max(self.min_profit_pct, min(dynamic_target_pct, self.max_profit_pct)) / 100
             
             raw_stop_pct = self.stop_multiplier * atr_pct
-            self.dynamic_stop_loss = -max(abs(self.min_stop_loss), min(raw_stop_pct, abs(self.max_stop_loss)))        
-        
-        # Run Score Calculation
-        self.calculate_score()
+            # Strategy-Specific Stop Caps: DIP = -7.0% (fast bounce required), MOMENTUM = -9.0% (more room for breakouts)
+            max_stop_cap = 7.0 if getattr(self, 'current_strategy', 'DIP') == 'DIP' else 9.0
+            self.dynamic_stop_loss = -max(abs(self.min_stop_loss), min(raw_stop_pct, max_stop_cap))
         
         if self.manual_mode:
             return None # Skip all automated buy/sell logic
@@ -1686,6 +1688,63 @@ class TradingBot:
             
             self.last_trade_reason = self.score_reason
             return 'BUY'
+
+    def get_buy_block_reason(self):
+        """Returns the specific technical or safety reason blocking a BUY for this stock."""
+        now = time.time()
+        if now - self.last_buy_time < 86400 or now - self.last_sell_time < 86400:
+            return "buy/sell 24h cooldown active"
+
+        if self.next_earnings_date and self.next_earnings_date != "No payment":
+            try:
+                earn_date = datetime.strptime(self.next_earnings_date, "%Y-%m-%d").date()
+                days = (earn_date - datetime.now().date()).days
+                if -2 <= days <= 3:
+                    return f"earnings report in {days} days"
+            except ValueError:
+                pass
+
+        if self.is_market_cooling_down():
+            return "market open 15m cooldown active"
+
+        if self.previous_close > 0:
+            daily_change = (self.market_value - self.previous_close) / self.previous_close
+            if daily_change > 0.05:
+                return f"daily rise ({daily_change*100:.1f}%) exceeds 5% limit"
+
+        if self.rsi_value >= 70:
+            return f"overbought zone (RSI {self.rsi_value:.1f} >= 70)"
+
+        if getattr(self, 'close_3d_ago', 0) > 0:
+            three_day_change = (self.market_value - self.close_3d_ago) / self.close_3d_ago
+            if three_day_change > 0.15:
+                return f"3-day cumulative rise ({three_day_change*100:.1f}%) exceeds 15% limit"
+
+        current_strategy = "DIP" if "DIP" in self.score_reason else "MOMENTUM"
+        if current_strategy == "DIP":
+            if self.smart_score < 7:
+                return f"DIP score ({self.smart_score}/12) below threshold 7"
+            
+            macro_status = self.check_macro_guard()
+            if macro_status['drop_pct'] <= self.MACRO_DROP_LIMIT:
+                return f"Macro Market Guard Active ({macro_status['status']})"
+
+            if self.previous_close > 0:
+                daily_drop = (self.market_value - self.previous_close) / self.previous_close
+                if daily_drop < -0.07:
+                    return f"daily drop ({daily_drop*100:.1f}%) exceeds -7% falling knife limit"
+                if daily_drop < -0.03 and self.rsi_value > 45:
+                    return f"falling knife guard (drop {daily_drop*100:.1f}% with RSI {self.rsi_value:.1f} > 45)"
+        else:
+            if self.smart_score < 8:
+                return f"MOMENTUM score ({self.smart_score}/12) below threshold 8"
+
+            if self.previous_close > 0:
+                daily_change = (self.market_value - self.previous_close) / self.previous_close
+                if daily_change > 0.05:
+                    return f"chasing breakout (daily rise {daily_change*100:.1f}% > 5%)"
+
+        return "technical conditions not met for BUY"
 
         # --- FAST RISING / OVERBOUGHT CHECKS ---
         daily_change = 0

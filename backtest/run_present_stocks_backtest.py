@@ -65,6 +65,9 @@ def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
         
         y1_pnl, y2_pnl = 0, 0
         y1_tc, y2_tc = 0, 0
+        dip_cnt, mom_cnt = 0, 0
+        dip_pnl_stk, mom_pnl_stk = 0, 0
+        rsi_exits, trail_exits, macd_exits, prot_exits, stop_exits = 0, 0, 0, 0, 0
         for t in stock_trades:
             sd = pd.to_datetime(t['sell_date'], utc=True)
             if sd < cutoff_date:
@@ -74,9 +77,40 @@ def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
                 y2_pnl += t['pnl_eur']
                 y2_tc += 1
                 
+            if t.get('strategy') == 'DIP':
+                dip_cnt += 1
+                dip_pnl_stk += t['pnl_eur']
+            elif t.get('strategy') == 'MOMENTUM':
+                mom_cnt += 1
+                mom_pnl_stk += t['pnl_eur']
+
+            reason = t.get('sell_reason', '')
+            if reason == 'RSI': rsi_exits += 1
+            elif reason == 'Trailing': trail_exits += 1
+            elif reason == 'MACD': macd_exits += 1
+            elif reason == 'Protective': prot_exits += 1
+            elif reason == 'Stop': stop_exits += 1
+                
         stock_pnl = y1_pnl + y2_pnl
         stock_wr = len([t for t in stock_trades if t['pnl_pct'] > 0]) / len(stock_trades) if stock_trades else 0
-        stock_stats[s] = {'pnl': stock_pnl, 'wr': stock_wr, 'trades': len(stock_trades), 'y1_pnl': y1_pnl, 'y2_pnl': y2_pnl, 'y1_tc': y1_tc, 'y2_tc': y2_tc}
+        stock_stats[s] = {
+            'pnl': stock_pnl, 
+            'wr': stock_wr, 
+            'trades': len(stock_trades), 
+            'y1_pnl': y1_pnl, 
+            'y2_pnl': y2_pnl, 
+            'y1_tc': y1_tc, 
+            'y2_tc': y2_tc,
+            'dip_cnt': dip_cnt,
+            'mom_cnt': mom_cnt,
+            'dip_pnl': dip_pnl_stk,
+            'mom_pnl': mom_pnl_stk,
+            'rsi_exits': rsi_exits,
+            'trail_exits': trail_exits,
+            'macd_exits': macd_exits,
+            'prot_exits': prot_exits,
+            'stop_exits': stop_exits
+        }
         
         bot_y1_pnl += y1_pnl
         bot_y2_pnl += y2_pnl
@@ -86,14 +120,62 @@ def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
     bot_total_pnl = sum(t['pnl_eur'] for t in trades)
     bot_wr = len([t for t in trades if t['pnl_pct'] > 0]) / len(trades) if trades else 0
 
+    dip_trades_list = [t for t in trades if t.get('strategy') == 'DIP']
+    mom_trades_list = [t for t in trades if t.get('strategy') == 'MOMENTUM']
+
+    dip_pnl_total = sum(t['pnl_eur'] for t in dip_trades_list)
+    dip_wr_total = (len([t for t in dip_trades_list if t['pnl_pct'] > 0]) / len(dip_trades_list) * 100) if dip_trades_list else 0.0
+
+    mom_pnl_total = sum(t['pnl_eur'] for t in mom_trades_list)
+    mom_wr_total = (len([t for t in mom_trades_list if t['pnl_pct'] > 0]) / len(mom_trades_list) * 100) if mom_trades_list else 0.0
+
+    gross_profit = sum(t['pnl_eur'] for t in trades if t['pnl_eur'] > 0)
+    gross_loss = abs(sum(t['pnl_eur'] for t in trades if t['pnl_eur'] < 0))
+    profit_factor = (gross_profit / gross_loss) if gross_loss > 0 else 0.0
+
+    winning_trades = [t for t in trades if t['pnl_pct'] > 0]
+    losing_trades = [t for t in trades if t['pnl_pct'] <= 0]
+
+    avg_win_eur = (sum(t['pnl_eur'] for t in winning_trades) / len(winning_trades)) if winning_trades else 0.0
+    avg_loss_eur = (sum(t['pnl_eur'] for t in losing_trades) / len(losing_trades)) if losing_trades else 0.0
+
+    avg_win_pct = (sum(t['pnl_pct'] for t in winning_trades) / len(winning_trades)) if winning_trades else 0.0
+    avg_loss_pct = (sum(t['pnl_pct'] for t in losing_trades) / len(losing_trades)) if losing_trades else 0.0
+
+    # Group by Exit Reason
+    exit_reasons = {}
+    for t in trades:
+        reason = t.get('sell_reason', 'Unknown')
+        if reason not in exit_reasons:
+            exit_reasons[reason] = {'count': 0, 'pnl': 0.0, 'wins': 0}
+        exit_reasons[reason]['count'] += 1
+        exit_reasons[reason]['pnl'] += t['pnl_eur']
+        if t['pnl_pct'] > 0:
+            exit_reasons[reason]['wins'] += 1
+
     output_lines = []
     output_lines.append(f"# BOT PERFORMANCE ({len(STOCKS)} STOCKS)")
     output_lines.append(f"**Total PnL:** {bot_total_pnl:+8.0f} EUR  ")
+    output_lines.append(f"**Profit Factor:** {profit_factor:4.2f} (Gross Gains: +{gross_profit:.0f}€ / Gross Losses: -{gross_loss:.0f}€)  ")
+    output_lines.append(f"**Win Rate:** {bot_wr*100:4.1f}% ({len(winning_trades)} wins / {len(losing_trades)} losses)  ")
+    output_lines.append(f"**Avg Win:** {avg_win_eur:+6.1f} EUR ({avg_win_pct:+.2f}%) | **Avg Loss:** {avg_loss_eur:+6.1f} EUR ({avg_loss_pct:+.2f}%)  ")
     output_lines.append(f"**Year 1 PnL (older):** {bot_y1_pnl:+8.0f} EUR ({bot_y1_trades} trades)  ")
     output_lines.append(f"**Year 2 PnL (recent):** {bot_y2_pnl:+8.0f} EUR ({bot_y2_trades} trades)  ")
-    output_lines.append(f"**Win Rate:** {bot_wr*100:4.1f}%  ")
     output_lines.append(f"**Total Trades:** {len(trades)}  \n")
+
+    output_lines.append("### 🎯 BUY STRATEGY TRIGGER BREAKDOWN")
+    output_lines.append(f"- **Strategy A (DIP Buyer):** {dip_pnl_total:+8.0f} EUR ({len(dip_trades_list)} trades, {dip_wr_total:4.1f}% WR)")
+    output_lines.append(f"- **Strategy B (MOMENTUM Breakout):** {mom_pnl_total:+8.0f} EUR ({len(mom_trades_list)} trades, {mom_wr_total:4.1f}% WR)  \n")
     
+    output_lines.append("### 🚪 EXIT TRIGGER BREAKDOWN (Why Trades Closed)")
+    output_lines.append("```text")
+    output_lines.append(f"{'Exit Reason':<18} | {'Trades':>6} | {'Total PnL (EUR)':>15} | {'Win Rate':>8}")
+    output_lines.append("-" * 55)
+    for reason, data in sorted(exit_reasons.items(), key=lambda x: x[1]['pnl'], reverse=True):
+        wr_r = (data['wins'] / data['count'] * 100) if data['count'] > 0 else 0.0
+        output_lines.append(f"{reason:<18} | {data['count']:6d} | {data['pnl']:+15.0f} | {wr_r:7.1f}%")
+    output_lines.append("```\n")
+
     y2_end = now.strftime('%Y')
     y2_start = cutoff_date.strftime('%Y')
     y1_start = (cutoff_date - pd.Timedelta(days=365)).strftime('%Y')
@@ -102,12 +184,14 @@ def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
     output_lines.append("```text")
     header_y1 = f"Y1 ({y1_start}-{y2_start})"
     header_y2 = f"Y2 ({y2_start}-{y2_end})"
-    output_lines.append(f"{'Symbol':<8} | {'Total':>8} | {header_y1:>14} | {header_y2:>14} | {'WR':>6} | {'Trades':>6}")
-    output_lines.append("-" * 69)
+    output_lines.append(f"{'Symbol':<8} | {'Total':>8} | {header_y1:>14} | {header_y2:>14} | {'WR':>6} | {'Trades':>6} | {'DIP/MOM':>8} | {'Exits (RSI/Trail/MACD/Prot/Stop)':>32}")
+    output_lines.append("-" * 115)
     
     sorted_stats = sorted(stock_stats.items(), key=lambda item: item[1]['pnl'], reverse=True)
     for s, stat in sorted_stats:
-        output_lines.append(f"{s:8s} | {stat['pnl']:+8.0f} | {stat['y1_pnl']:+14.0f} | {stat['y2_pnl']:+14.0f} | {stat['wr']*100:5.1f}% | {stat['trades']:6d}")
+        dip_mom_str = f"{stat['dip_cnt']}/{stat['mom_cnt']}"
+        exits_str = f"{stat['rsi_exits']} / {stat['trail_exits']} / {stat['macd_exits']} / {stat['prot_exits']} / {stat['stop_exits']}"
+        output_lines.append(f"{s:8s} | {stat['pnl']:+8.0f} | {stat['y1_pnl']:+14.0f} | {stat['y2_pnl']:+14.0f} | {stat['wr']*100:5.1f}% | {stat['trades']:6d} | {dip_mom_str:>8s} | {exits_str:>32s}")
     output_lines.append("```\n")
 
     output_lines.append("## BUY AND HOLD SP500 ETF (ESE.PA) COMPARISON")

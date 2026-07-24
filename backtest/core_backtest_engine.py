@@ -147,12 +147,13 @@ def run_backtest_with_params(symbol, config, data, params):
         rsi = row.get('RSI', 50)
         prev_close = prev_row['Close']
 
-        if pd.isna(price) or price <= 0: continue
+        score, strategy = calculate_score(row, prev_row)
+        max_stop_cap = 7.0 if strategy == "DIP" else 9.0
 
         if atr > 0 and price > 0:
             atr_pct = (atr / price) * 100
             dynamic_profit_target = max(profit_target, min(ATR_MUL * atr_pct, 15.0)) / 100
-            dynamic_stop_loss = -max(abs(3.0), min(STOP_MUL * atr_pct, abs(MAX_STOP)))
+            dynamic_stop_loss = -max(abs(3.0), min(STOP_MUL * atr_pct, max_stop_cap))
         else:
             dynamic_profit_target = profit_target / 100
             dynamic_stop_loss = -5.0
@@ -192,7 +193,13 @@ def run_backtest_with_params(symbol, config, data, params):
             prev_macd_class = macd_class
 
             if sell_reason:
-                trades.append({'pnl_pct': pnl_pct, 'pnl_eur': position['qty'] * (price - position['buy_price']), 'sell_date': date})
+                trades.append({
+                    'pnl_pct': pnl_pct, 
+                    'pnl_eur': position['qty'] * (price - position['buy_price']), 
+                    'sell_date': date,
+                    'strategy': position.get('strategy', 'UNKNOWN'),
+                    'sell_reason': sell_reason
+                })
                 last_sell_day = date
                 position = None
             continue
@@ -217,7 +224,7 @@ def run_backtest_with_params(symbol, config, data, params):
         if buy_signal:
             # Use dyn_max instead of max_amount
             qty = max(1, int(dyn_max / price))
-            position = {'qty': qty, 'buy_price': price, 'highest_pnl': 0.0}
+            position = {'qty': qty, 'buy_price': price, 'highest_pnl': 0.0, 'strategy': strategy}
             last_buy_day = date
             
     return trades
