@@ -20,13 +20,17 @@ def get_stocks_from_db():
         stocks[row[0]] = {"max_amount": max_amount, "profit_target": profit_target}
     return stocks
 
-def run_backtest_for_db_stocks(progress_callback=None):
+def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
     STOCKS = get_stocks_from_db()
     if progress_callback: progress_callback(0, f"Loaded {len(STOCKS)} stocks from the database.")
     
     cached_data = {}
     total = len(STOCKS)
     for i, s in enumerate(STOCKS):
+        if pause_callback:
+            while pause_callback():
+                import time
+                time.sleep(1.0)
         if progress_callback: progress_callback(int((i/total)*50), f"Downloading {s} ({i+1}/{total})...")
         try:
             df = yf.Ticker(s).history(period="2y", interval="1d", auto_adjust=False, actions=False)
@@ -37,6 +41,9 @@ def run_backtest_for_db_stocks(progress_callback=None):
             cached_data[s] = compute_indicators(df)
         except Exception:
             pass
+            
+        import time
+        time.sleep(1.0)
 
     grid = {'atr_mul': 1.5, 'stop_mul': 2.3, 'max_stop': -12.0, 'rsi_exit': 80, 'prot_act': 5.0, 'prot_drop': 0.5, 'dip_th': 7, 'mom_th': 8}
     

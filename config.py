@@ -45,8 +45,8 @@ def _load_env_config():
         "RECEIVER_EMAIL"   : os.getenv("RECEIVER_EMAIL"),
     }
 ENV = _load_env_config()
-
-executor = ThreadPoolExecutor(max_workers=8)
+# Limit background threads to 2 so yfinance doesn't get hammered with simultaneous requests
+executor = ThreadPoolExecutor(max_workers=2)
 
 # Configure logging at module level
 logger = logging.getLogger(__name__)

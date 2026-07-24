@@ -286,9 +286,9 @@ class TradingBot:
         if run_async:
             if not getattr(self, '_fetching_bank_note', False):
                 self._fetching_bank_note = True
-                def async_fetch():
+                def async_fetch(_force=force):
                     try:
-                        self.fetch_fresh_bank_note(fallback)
+                        self.fetch_fresh_bank_note(fallback, force=_force)
                     finally:
                         self._fetching_bank_note = False
                 executor.submit(async_fetch)
@@ -300,9 +300,34 @@ class TradingBot:
                 return fallback
             return None, "N/A", "--"
         else:
-            return self.fetch_fresh_bank_note(fallback)
+            return self.fetch_fresh_bank_note(fallback, force=force)
 
-    def fetch_fresh_bank_note(self, fallback=None):
+    def fetch_fresh_bank_note(self, fallback=None, max_age_hours=24, force=False):
+        # 1. Check if we have recent cached data to avoid redundant API requests
+        # Skip this check if force=True (e.g. user clicked the Update button)
+        if self.db_manager and not force:
+            cached_data = self.db_manager.get_cached_bank_note(self.stock_id)
+            if cached_data:
+                price, source, date_str, last_updated = cached_data
+                if last_updated:
+                    try:
+                        if isinstance(last_updated, str):
+                            if "." in last_updated:
+                                last_dt = datetime.strptime(last_updated, "%Y-%m-%d %H:%M:%S.%f")
+                            else:
+                                last_dt = datetime.strptime(last_updated, "%Y-%m-%d %H:%M:%S")
+                        else:
+                            last_dt = last_updated
+                            
+                        if (datetime.now() - last_dt).total_seconds() < (max_age_hours * 3600):
+                            logger.info(f"Using cached analyst targets for {self.stock_id} (fetched < {max_age_hours}h ago)")
+                            self.latest_bank_target = price
+                            self.latest_bank_source = source
+                            self.latest_bank_date = date_str
+                            return price, source, date_str
+                    except Exception as e:
+                        logger.warning(f"Error parsing cache date for {self.stock_id}: {e}")
+
         logger.info(f"Fetching fresh analyst targets for {self.stock_id}...")
         firms = [
             ("Barclays", self.get_barclays_target),
@@ -491,13 +516,13 @@ class TradingBot:
                     self.next_earnings_date = self.fetch_next_event_date(ticker_obj)
                     
                     try:
-                        self.target_price = ticker_obj.info.get('targetMeanPrice', 0)
-                        self.num_analysts = ticker_obj.info.get('numberOfAnalystOpinions', 0)
-                        # We prefer our history-based previous close calculation over .info
-                        # as .info can be delayed or missing.
-                        # info_prev = ticker_obj.info.get('previousClose', 0)
-                        # if info_prev and info_prev > 0:
-                        #     self.previous_close = info_prev
+                        # Only fetch .info (which is heavily rate limited) once per 24h or if target is missing
+                        now_time = time.time()
+                        last_info = getattr(self, '_last_info_fetch', 0)
+                        if (now_time - last_info > 86400) or getattr(self, 'target_price', 0) <= 0:
+                            self.target_price = ticker_obj.info.get('targetMeanPrice', 0)
+                            self.num_analysts = ticker_obj.info.get('numberOfAnalystOpinions', 0)
+                            self._last_info_fetch = now_time
                     except Exception as info_err:
                         logger.warning(f"Failed to fetch yfinance .info for {self.stock_id}: {info_err}")
                     
@@ -1070,9 +1095,12 @@ class TradingBot:
 
     def get_ubs_target(self, symbol):
         """
-        Get UBS research page for price target using yfinance.
+        Scrape UBS research page for price target with robust parsing.
+        Step 1: Try yfinance upgrades/downgrades (fast, cached).
+        Step 2: Fall back to UBS research web scraping if yfinance is missing/stale.
         Returns: (target_price, description, date_string) or (None, error_msg, None)
         """
+        # Step 1: Try yfinance first
         try:
             ticker = yf.Ticker(symbol)
             df = ticker.upgrades_downgrades
@@ -1084,11 +1112,69 @@ class TradingBot:
                     target_val = latest.get('currentPriceTarget')
                     date_str = latest.name.strftime('%Y-%m-%d')
                     if pd.notnull(target_val) and target_val != 0:
-                        return float(target_val), f"Target: ${float(target_val)}", date_str
+                        days_old = (datetime.now() - latest.name.to_pydatetime().replace(tzinfo=None)).days
+                        if days_old <= 30:
+                            logger.info(f"[UBS yfinance] {symbol} target ${target_val} is fresh ({days_old}d old). Using it.")
+                            return float(target_val), f"Target: ${float(target_val)}", date_str
+                        else:
+                            logger.info(f"[UBS yfinance] {symbol} target is stale ({days_old}d old). Trying web scrape for fresher data...")
         except Exception as e:
-            logger.warning(f"yfinance failed: {e}")
+            logger.warning(f"yfinance UBS lookup failed for {symbol}: {e}")
 
-        return None, "No UBS target found.", None
+        # Step 2: Web scraping fallback for stocks with known UBS research URLs
+        logger.info(f"Attempting UBS web scrape for {symbol}...")
+
+        # Load UBS URL map from ubs_links.json (edit that file to add new stocks)
+        _ubs_links_path = os.path.join(os.path.dirname(__file__), 'ubs_links.json')
+        try:
+            import json
+            with open(_ubs_links_path, 'r') as _f:
+                ubs_url_map = {k: v for k, v in json.load(_f).items() if not k.startswith('_')}
+        except Exception as _e:
+            logger.warning(f"Could not load ubs_links.json: {_e}")
+            ubs_url_map = {}
+
+        url = ubs_url_map.get(symbol)
+        if not url:
+            return None, "No UBS URL mapping", None
+
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            }
+            response = requests.get(url, headers=headers, timeout=20)
+            if response.status_code != 200:
+                return None, f"HTTP {response.status_code}", None
+
+            soup = BeautifulSoup(response.content, 'html.parser')
+            table = soup.find('table')
+            if not table:
+                return None, "No table found on UBS page", None
+
+            rows = table.find_all('tr')[1:]  # Skip header
+            if not rows:
+                return None, "No data rows on UBS page", None
+
+            # Latest data is in the last row; structure: Date | Price | Target | Rating
+            latest_row = rows[-1]
+            cols = latest_row.find_all('td')
+            if len(cols) < 3:
+                return None, "Unexpected UBS table structure", None
+
+            date = cols[0].get_text(strip=True)
+            target_price_str = cols[2].get_text(strip=True).replace(',', '').replace('€', '').replace('$', '').strip()
+
+            target_price = float(target_price_str)
+            logger.info(f"[UBS Scrape] {symbol} Target: {target_price} (Date: {date})")
+            return target_price, f"Target: {target_price}", date
+
+        except (ValueError, IndexError) as e:
+            logger.error(f"UBS scrape parse error for {symbol}: {e}")
+            return None, "Scrape parse failure", None
+        except Exception as e:
+            logger.error(f"UBS scrape request error for {symbol}: {e}")
+            return None, f"Scrape error: {e}", None
 
     def get_morgan_stanley_target(self, symbol):
         ticker = yf.Ticker(symbol)

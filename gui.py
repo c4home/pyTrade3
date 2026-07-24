@@ -21,6 +21,10 @@ class BacktestThread(QThread):
     finished_file = pyqtSignal(str)
     error = pyqtSignal(str)
     
+    def __init__(self, pause_callback=None):
+        super().__init__()
+        self.pause_callback = pause_callback
+
     def run(self):
         try:
             import sys
@@ -37,7 +41,7 @@ class BacktestThread(QThread):
                 if not self.isInterruptionRequested():
                     self.progress.emit(pct, msg)
 
-            res_path = run_backtest_for_db_stocks(cb)
+            res_path = run_backtest_for_db_stocks(cb, pause_callback=self.pause_callback)
             if not self.isInterruptionRequested():
                 self.finished_file.emit(res_path)
         except Exception as e:
@@ -48,9 +52,10 @@ class MaintenanceRoutineThread(QThread):
     finished_data = pyqtSignal(list)
     error = pyqtSignal(str)
     
-    def __init__(self, db_manager):
+    def __init__(self, db_manager, pause_callback=None):
         super().__init__()
         self.db_manager = db_manager
+        self.pause_callback = pause_callback
 
     def run(self):
         try:
@@ -58,6 +63,7 @@ class MaintenanceRoutineThread(QThread):
             import pandas as pd
             import requests
             import io
+            import time
             from trading_bot import TradingBot
             
             self.progress.emit(0, "Fetching S&P 500 list from Wikipedia...")
@@ -76,6 +82,10 @@ class MaintenanceRoutineThread(QThread):
             for i, symbol in enumerate(tickers):
                 if self.isInterruptionRequested():
                     return
+                if self.pause_callback:
+                    while self.pause_callback() and not self.isInterruptionRequested():
+                        import time
+                        time.sleep(1.0)
                 if symbol in ignored_stocks:
                     continue
                 self.progress.emit(int((i / total) * 100), f"Fetching {symbol} ({i+1}/{total})")
@@ -105,6 +115,9 @@ class MaintenanceRoutineThread(QThread):
                             results.append({'symbol': symbol, 'upside': upside})
                 except Exception:
                     pass
+                
+                # Sleep to prevent hitting yfinance and bank target rate limits
+                time.sleep(1.0)
             
             self.progress.emit(100, "Sorting results...")
             results.sort(key=lambda x: x['upside'], reverse=True)
@@ -120,6 +133,13 @@ class TradingApp(QMainWindow):
     instance = None  # <-- ADD THIS
     DEFAULT_SORT_COLUMN = 18
     DEFAULT_SORT_ORDER  = Qt.SortOrder.DescendingOrder
+
+    def is_background_busy(self):
+        for bot in self.bots.values():
+            if getattr(bot, '_fetching_indicators', False) or getattr(bot, '_fetching_market_value', False) or getattr(bot, '_fetching_bank_note', False):
+                return True
+        return False
+
     def __init__(self):
         super().__init__()
         TradingApp.instance = self  # <-- SET INSTANCE
@@ -169,24 +189,20 @@ class TradingApp(QMainWindow):
         # 3. auto-refresh data
         QTimer.singleShot(1500, self.manual_refresh_data)
         
-        # 4. Auto maintenance chain (check every minute)
-        # It will naturally trigger 60 seconds after startup to avoid rate limiting
-        # with the initial data fetching of the watchlist stocks.
-        self.auto_maint_timer = QTimer()
-        self.auto_maint_timer.timeout.connect(self.run_auto_maintenance_chain)
-        self.auto_maint_timer.start(60000) # 1 minute
+        # Note: Maintenance Routine and Backtest are now manual-only.
+        # Use the buttons in the toolbar to run them when desired.
         
-    def run_auto_maintenance_chain(self):
-        import time
-        import logging
-        logger = logging.getLogger(__name__)
-        last_run = self.db_manager.get_setting("last_auto_routine_time")
-        now = time.time()
-        
-        # Run if never run before, or if > 24 hours have passed
-        if last_run is None or (now - float(last_run)) > 86400:
-            logger.info("Triggering automated maintenance and backtest chain.")
-            self.handle_maintenance_routine(silent=True)
+    def _format_last_run(self, ts_str):
+        """Convert a stored epoch timestamp string to a human-readable label."""
+        if ts_str is None:
+            return "Never"
+        try:
+            from datetime import datetime
+            dt = datetime.fromtimestamp(float(ts_str))
+            return dt.strftime("%Y-%m-%d %H:%M")
+        except Exception:
+            return "Never"
+
 
     def _auto_connect(self):
         # Called once at start‑up – only if the checkbox is checked.
@@ -575,7 +591,7 @@ class TradingApp(QMainWindow):
         layout.addWidget(conn_frame)
 
         self.table = QTableWidget()
-        self.table.setColumnCount(29)
+        self.table.setColumnCount(30)
         self.table.setWordWrap(True)                 
         self.table.setStyleSheet("""
             QTableWidget {
@@ -599,7 +615,7 @@ class TradingApp(QMainWindow):
         headers = [
             "Company", "Sym", "Type", "Sector",
             "Price", "Chg%", "Target", "Bank Target", "Score", "14H", "14L", "RSI", "ADX", "MA", "MACD", "Vol(M)",
-            "Qty", "Buy@", "Value", "P&L%", "Left", "Max", "DynMax", "TP%", "DynTP", "SL%", "DynSL", "Earn", "Status"
+            "Qty", "Buy@", "Value", "P&L%", "Left", "Max", "~Max", "TP%", "~TP", "Trail$", "SL%", "~SL", "Earn", "Status"
         ]
 
         self.table.setHorizontalHeaderLabels(headers)
@@ -613,7 +629,7 @@ class TradingApp(QMainWindow):
         self.table.setColumnHidden(20, True)  # Hide Left
         self.table.setColumnHidden(21, True)  # Hide Max
         self.table.setColumnHidden(23, True)  # Hide TP%
-        self.table.setColumnHidden(25, True)  # Hide SL%
+        self.table.setColumnHidden(26, True)  # Hide SL%
 
         # Enable context menu on the horizontal header to show/hide any column they want
         self.table.horizontalHeader().setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -623,7 +639,10 @@ class TradingApp(QMainWindow):
         self.table.horizontalHeader().sectionClicked.connect(self.on_header_clicked)
         self.table.itemSelectionChanged.connect(self.highlight_selected_row)
 
-        column_widths = [110, 42, 50, 80, 46, 46, 46, 105, 32, 45, 45, 25, 25, 45, 45, 40, 30, 45, 45, 48, 45, 45, 45, 40, 40, 35, 40, 68, 52]
+        # Col: 0=Company,1=Sym,2=Type,3=Sector,4=Price,5=Chg%,6=Target,7=BankTarget,8=Score,9=14H,10=14L,
+        #      11=RSI,12=ADX,13=MA,14=MACD,15=Vol(M),16=Qty,17=Buy@,18=Value,19=P&L%,20=Left,21=Max,
+        #      22=~Max,23=TP%,24=~TP,25=Trail$,26=SL%,27=~SL,28=Earn,29=Status
+        column_widths = [110, 42, 50, 80, 46, 46, 46, 105, 32, 45, 45, 25, 25, 45, 45, 40, 30, 45, 45, 48, 45, 45, 36, 40, 36, 46, 40, 36, 68, 52]
         for i, w in enumerate(column_widths):
             if w:
                 self.table.setColumnWidth(i, w)
@@ -733,7 +752,14 @@ class TradingApp(QMainWindow):
         """)
         self.maint_btn.clicked.connect(self.handle_maintenance_routine)
         row_layout.addWidget(self.maint_btn)
-        
+
+        last_maint = self.db_manager.get_setting("last_maint_time")
+        maint_ts = self._format_last_run(last_maint)
+        self.maint_last_label = QLabel(f"Last: {maint_ts}")
+        self.maint_last_label.setStyleSheet("color: #aaaaaa; font-size: 10px; font-style: italic;")
+        self.maint_last_label.setToolTip("Last time Maintenance Routine was run")
+        row_layout.addWidget(self.maint_last_label)
+
         self.backtest_btn = QPushButton("Run Backtest (DB)")
         self.backtest_btn.setStyleSheet("""
             QPushButton {
@@ -750,6 +776,13 @@ class TradingApp(QMainWindow):
         """)
         self.backtest_btn.clicked.connect(self.handle_backtest)
         row_layout.addWidget(self.backtest_btn)
+
+        last_bt = self.db_manager.get_setting("last_backtest_time")
+        bt_ts = self._format_last_run(last_bt)
+        self.backtest_last_label = QLabel(f"Last: {bt_ts}")
+        self.backtest_last_label.setStyleSheet("color: #aaaaaa; font-size: 10px; font-style: italic;")
+        self.backtest_last_label.setToolTip("Last time Backtest was run")
+        row_layout.addWidget(self.backtest_last_label)
         
         self.auto_status_icon = QLabel("✉")
         self.auto_status_icon.setStyleSheet("color: #7f8c8d; font-size: 20px;")
@@ -1065,6 +1098,18 @@ class TradingApp(QMainWindow):
                 else:
                     score_display = f"{bot.smart_score}{strategy_arrow}"
 
+                # Compute trailing sell price (price at which trailing profit would trigger)
+                if bot.quantity > 0 and bot.bought_price > 0 and getattr(bot, 'highest_pnl', 0) >= bot.dynamic_profit_target * 100:
+                    _atr_pct = (bot.get_atr_14() / bot.market_value) * 100 if bot.market_value > 0 else 0
+                    _trail_drop = max(1.0, min(_atr_pct * 1.0, 3.0))
+                    _trail_activation = bot.highest_pnl - _trail_drop
+                    trail_sell_price = bot.bought_price * (1 + _trail_activation / 100)
+                    trail_sell_display = f"{bot.currency_symbol}{trail_sell_price:.2f}"
+                    trail_sell_sort = trail_sell_price
+                else:
+                    trail_sell_display = "--"
+                    trail_sell_sort = 0.0
+
                 items = [
                     comp_name_display, sid, bot.asset_type, bot.sector,
                     f"{bot.currency_symbol}{bot.market_value:.2f}",  
@@ -1088,6 +1133,7 @@ class TradingApp(QMainWindow):
                     format_currency_short(getattr(bot, 'current_max_investment', bot.max_amount), "€"),
                     f"{bot.profit_target*100:.1f}%",
                     f"{bot.dynamic_profit_target*100:.1f}%",
+                    trail_sell_display,
                     f"{bot.drop_threshold*100:.1f}%",
                     f"{bot.dynamic_stop_loss:.1f}%",
                     earn_display,
@@ -1117,6 +1163,7 @@ class TradingApp(QMainWindow):
                     getattr(bot, 'current_max_investment', bot.max_amount),
                     bot.profit_target,
                     bot.dynamic_profit_target,
+                    trail_sell_sort,
                     bot.drop_threshold,
                     bot.dynamic_stop_loss,
                     earn_display,
@@ -1200,7 +1247,15 @@ class TradingApp(QMainWindow):
                             item.setForeground(QColor("green"))
                         elif bot.pnl_percent < 0:
                             item.setForeground(QColor("red"))
-                    elif col == 27:  # Earnings column
+                    elif col in (24, 27): # DynTP and DynSL
+                        if bot.dynamic_stop_loss <= -8.0:
+                            item.setForeground(QColor("red"))
+                            item.setToolTip("High Volatility Stock")
+                    elif col == 25:  # Trail$ column - highlight green when trailing is active
+                        if trail_sell_sort > 0:
+                            item.setForeground(QColor("#f39c12"))  # Orange to indicate active trailing
+                            item.setToolTip(f"Trailing sell triggers if price drops to {trail_sell_display} (Peak PnL: {getattr(bot, 'highest_pnl', 0):.1f}%)")
+                    elif col == 28:  # Earnings column
                         if bot.next_earnings_date:
                             try:
                                 earn_date = datetime.strptime(bot.next_earnings_date, "%Y-%m-%d").date()
@@ -1591,7 +1646,7 @@ class TradingApp(QMainWindow):
         else:
             self.progress_dialog = None
         
-        self.maint_thread = MaintenanceRoutineThread(self.db_manager)
+        self.maint_thread = MaintenanceRoutineThread(self.db_manager, pause_callback=self.is_background_busy)
         self.maint_thread.progress.connect(self.on_maint_progress)
         self.maint_thread.finished_data.connect(self.on_maint_finished)
         self.maint_thread.error.connect(self.on_maint_error)
@@ -1649,10 +1704,13 @@ class TradingApp(QMainWindow):
                 added_count += 1
                 
         self.load_stocks()
+        import time as _time
+        self.db_manager.set_setting("last_maint_time", _time.time())
+        if hasattr(self, 'maint_last_label'):
+            self.maint_last_label.setText(f"Last: {self._format_last_run(str(_time.time()))}")
+        self.maint_btn.setEnabled(True)
         if not getattr(self, '_maint_silent', False):
             QMessageBox.information(self, "Success", f"Maintenance Routine completed!\nRemoved {len(stocks_to_remove)} old watchlist stocks.\nAdded {added_count} new stocks with highest upside to the Auto Watchlist.")
-        else:
-            self.handle_backtest(silent=True)
 
     def open_csv(self):
         import sys
@@ -1681,7 +1739,7 @@ class TradingApp(QMainWindow):
         else:
             self.progress_dialog = None
             
-        self.backtest_thread = BacktestThread()
+        self.backtest_thread = BacktestThread(pause_callback=self.is_background_busy)
         if not silent:
             self.progress_dialog.canceled.connect(self.backtest_thread.requestInterruption)
         self.backtest_thread.progress.connect(self.on_backtest_progress)
@@ -1706,19 +1764,10 @@ class TradingApp(QMainWindow):
 
     def on_backtest_finished(self, file_path):
         self.backtest_btn.setEnabled(True)
-        
-        if getattr(self, '_backtest_silent', False):
-            import time
-            import logging
-            logger = logging.getLogger(__name__)
-            self.db_manager.set_setting("last_auto_routine_time", time.time())
-            logger.info("Automated chain completed silently. Backtest results saved.")
-            
-            # Update status icon to red to alert the user
-            if hasattr(self, 'auto_status_icon'):
-                self.auto_status_icon.setStyleSheet("color: #e74c3c; font-size: 18px;")
-                self.auto_status_icon.setToolTip("Automated chain completed! Check results.")
-            return
+        import time as _time
+        self.db_manager.set_setting("last_backtest_time", _time.time())
+        if hasattr(self, 'backtest_last_label'):
+            self.backtest_last_label.setText(f"Last: {self._format_last_run(str(_time.time()))}") 
             
         if hasattr(self, 'progress_dialog'):
             self.progress_dialog.setValue(100)
