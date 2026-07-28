@@ -144,6 +144,9 @@ class TradingApp(QMainWindow):
         super().__init__()
         TradingApp.instance = self  # <-- SET INSTANCE
         self.setWindowTitle("pyTrade")
+        icon_path = os.path.join(os.path.dirname(__file__), "assets", "app_icon.png")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
         self.setGeometry(100, 100, 1900, 900)
 
         self.db_manager = DatabaseManager()
@@ -1098,11 +1101,21 @@ class TradingApp(QMainWindow):
                 else:
                     score_display = f"{bot.smart_score}{strategy_arrow}"
 
-                # Compute trailing sell price (price at which trailing profit would trigger)
-                if bot.quantity > 0 and bot.bought_price > 0 and getattr(bot, 'highest_pnl', 0) >= bot.dynamic_profit_target * 100:
+                # Compute trailing sell price (price at which trailing profit or protective stop would trigger)
+                peak_pnl = max(price_pct, getattr(bot, 'highest_pnl', 0.0))
+                target_pnl_pct = bot.dynamic_profit_target * 100
+
+                if bot.quantity > 0 and bot.bought_price > 0 and peak_pnl >= target_pnl_pct:
                     _atr_pct = (bot.get_atr_14() / bot.market_value) * 100 if bot.market_value > 0 else 0
                     _trail_drop = max(1.0, min(_atr_pct * 1.0, 3.0))
-                    _trail_activation = bot.highest_pnl - _trail_drop
+                    _trail_activation = peak_pnl - _trail_drop
+                    trail_sell_price = bot.bought_price * (1 + _trail_activation / 100)
+                    trail_sell_display = f"{bot.currency_symbol}{trail_sell_price:.2f}"
+                    trail_sell_sort = trail_sell_price
+                elif bot.quantity > 0 and bot.bought_price > 0 and peak_pnl >= 5.0:
+                    # Protective Trailing Stop (locks 50% of peak gains once peak >= 5%)
+                    _trail_drop = peak_pnl * 0.5
+                    _trail_activation = peak_pnl - _trail_drop
                     trail_sell_price = bot.bought_price * (1 + _trail_activation / 100)
                     trail_sell_display = f"{bot.currency_symbol}{trail_sell_price:.2f}"
                     trail_sell_sort = trail_sell_price
@@ -1247,14 +1260,19 @@ class TradingApp(QMainWindow):
                             item.setForeground(QColor("green"))
                         elif bot.pnl_percent < 0:
                             item.setForeground(QColor("red"))
-                    elif col in (24, 27): # DynTP and DynSL
-                        if bot.dynamic_stop_loss <= -8.0:
+                    elif col in (22, 24, 27): # ~Max, ~TP and ~SL
+                        current_strat = getattr(bot, 'current_strategy', 'DIP')
+                        stop_cap = -7.0 if current_strat == 'DIP' else -9.0
+                        atr = bot.get_atr_14()
+                        atr_pct = (atr / bot.market_value * 100) if (atr > 0 and bot.market_value > 0) else 0
+                        
+                        if bot.dynamic_stop_loss <= stop_cap or atr_pct >= 3.0:
                             item.setForeground(QColor("red"))
-                            item.setToolTip("High Volatility Stock")
-                    elif col == 25:  # Trail$ column - highlight green when trailing is active
+                            item.setToolTip(f"High Volatility Stock (ATR: {atr_pct:.1f}%, Max Stop: {stop_cap:.1f}%)")
+                    elif col == 25:  # Trail$ column - highlight green/orange when trailing is active
                         if trail_sell_sort > 0:
                             item.setForeground(QColor("#f39c12"))  # Orange to indicate active trailing
-                            item.setToolTip(f"Trailing sell triggers if price drops to {trail_sell_display} (Peak PnL: {getattr(bot, 'highest_pnl', 0):.1f}%)")
+                            item.setToolTip(f"Trailing sell triggers if price drops to {trail_sell_display} (Peak PnL: {peak_pnl:.1f}%)")
                     elif col == 28:  # Earnings column
                         if bot.next_earnings_date:
                             try:
