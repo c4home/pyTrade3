@@ -144,6 +144,7 @@ class TradingBot:
             self.today_volume = cached_ind["today_volume"]
             self.avg_volume_14d = cached_ind["avg_volume_14d"]
             self.previous_close = cached_ind.get("prev_close") or 0.0
+            self.day_before_yesterday_close = cached_ind.get("day_before_yesterday_close") or 0.0
             self.target_price = cached_ind.get("target_mean_price") or 0.0
             self.last_indicators_fetch = cached_ind["fetched_at"]
         else:
@@ -412,6 +413,11 @@ class TradingBot:
                     low   = data['Low'].iloc[:, 0]   if isinstance(data['Low'], pd.DataFrame)   else data['Low']
                     volume= data['Volume'].iloc[:, 0] if isinstance(data['Volume'], pd.DataFrame) else data['Volume']
                     
+                    close = close.dropna()
+                    high = high.dropna()
+                    low = low.dropna()
+                    volume = volume.dropna()
+                    
                     if len(close) >= 2:
                         last_date = close.index[-1].date()
                         today = pd.Timestamp.now(tz=close.index.tz).date()
@@ -531,7 +537,8 @@ class TradingBot:
                         self.rsi_value, self.adx_value, self.bb_upper, self.bb_middle, self.bb_lower,
                         self.ma_signal, self.macd_signal,
                         self.next_earnings_date, self.today_volume, self.avg_volume_14d,
-                        self.previous_close, self.target_price, self.num_analysts
+                        self.previous_close, self.target_price, self.num_analysts,
+                        getattr(self, 'day_before_yesterday_close', 0.0)
                     )
                     
                     self.update_analyst_data(run_async=False)
@@ -1707,6 +1714,12 @@ class TradingBot:
         if self.is_market_cooling_down():
             return "market open 15m cooldown active"
 
+        # Check cash availability
+        usable_cash = getattr(self.ibapi, 'available_cash', 0) - self.min_cash
+        effective_cash = min(self.cash_left, usable_cash)
+        if effective_cash < self.MIN_CASH_FOR_BUY:
+            return f"insufficient cash (available: €{effective_cash:.0f}, min required: €{self.MIN_CASH_FOR_BUY:.0f})"
+
         if self.previous_close > 0:
             daily_change = (self.market_value - self.previous_close) / self.previous_close
             if daily_change > 0.05:
@@ -1720,11 +1733,33 @@ class TradingBot:
             if three_day_change > 0.15:
                 return f"3-day cumulative rise ({three_day_change*100:.1f}%) exceeds 15% limit"
 
+        # Portfolio priority check
+        if hasattr(self, 'gui') and self.gui and hasattr(self.gui, 'bots'):
+            highest_score = max(
+                [b.smart_score for b in self.gui.bots.values() if b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500)],
+                default=0
+            )
+            if self.smart_score < highest_score:
+                top_stock = next(
+                    (b.stock_id for b in self.gui.bots.values()
+                     if b.smart_score == highest_score and b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500)),
+                    "another stock"
+                )
+                return f"lower portfolio priority (score {self.smart_score}/12 vs {top_stock} at {highest_score}/12)"
+
+            if self.smart_score == highest_score and self.is_market_open():
+                for b in self.gui.bots.values():
+                    if (b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500)
+                            and b.smart_score == highest_score
+                            and not b.is_market_open()):
+                        return f"waiting for tied top-scorer {b.stock_id} (score {highest_score}/12) market to open"
+
         current_strategy = "DIP" if "DIP" in self.score_reason else "MOMENTUM"
+
         if current_strategy == "DIP":
             if self.smart_score < 7:
                 return f"DIP score ({self.smart_score}/12) below threshold 7"
-            
+
             macro_status = self.check_macro_guard()
             if macro_status['drop_pct'] <= self.MACRO_DROP_LIMIT:
                 return f"Macro Market Guard Active ({macro_status['status']})"
@@ -1734,51 +1769,31 @@ class TradingBot:
                 if daily_drop < -0.07:
                     return f"daily drop ({daily_drop*100:.1f}%) exceeds -7% falling knife limit"
                 if daily_drop < -0.03 and self.rsi_value > 45:
-                    return f"falling knife guard (drop {daily_drop*100:.1f}% with RSI {self.rsi_value:.1f} > 45)"
-        else:
+                    return f"falling knife guard (drop {daily_drop*100:.1f}% with RSI {self.rsi_value:.1f} > 45, not oversold enough)"
+
+        else:  # MOMENTUM
             if self.smart_score < 8:
                 return f"MOMENTUM score ({self.smart_score}/12) below threshold 8"
 
+            # ATR-based fast-rising check
             if self.previous_close > 0:
                 daily_change = (self.market_value - self.previous_close) / self.previous_close
-                if daily_change > 0.05:
-                    return f"chasing breakout (daily rise {daily_change*100:.1f}% > 5%)"
+                yesterday_change = 0
+                if getattr(self, 'day_before_yesterday_close', 0) > 0:
+                    yesterday_change = (self.previous_close - self.day_before_yesterday_close) / self.day_before_yesterday_close
 
-        return "technical conditions not met for BUY"
+                atr = getattr(self, '_cached_atr_14', 0)
+                atr_pct = (atr / self.previous_close) if self.previous_close > 0 else 0.025
+                daily_threshold = min(0.08, max(0.03, atr_pct * 2.0))
+                yesterday_threshold = min(0.08, max(0.05, atr_pct * 2.5))
 
-        # --- FAST RISING / OVERBOUGHT CHECKS ---
-        daily_change = 0
-        if self.previous_close > 0:
-            daily_change = (self.market_value - self.previous_close) / self.previous_close
+                if daily_change > daily_threshold:
+                    return f"MOMENTUM blocked: parabolic rise today ({daily_change*100:.1f}% > ATR threshold {daily_threshold*100:.1f}%)"
+                if yesterday_change > yesterday_threshold:
+                    return f"MOMENTUM blocked: parabolic rise yesterday ({yesterday_change*100:.1f}% > ATR threshold {yesterday_threshold*100:.1f}%)"
 
-        yesterday_change = 0
-        if getattr(self, 'day_before_yesterday_close', 0) > 0 and self.previous_close > 0:
-            yesterday_change = (self.previous_close - self.day_before_yesterday_close) / self.day_before_yesterday_close
+        return f"score qualifies ({self.smart_score}/12) but {current_strategy} entry conditions not satisfied (RSI: {self.rsi_value:.1f}, daily change: {((self.market_value - self.previous_close)/self.previous_close*100) if self.previous_close > 0 else 0:.1f}%)"
 
-        # Dynamic Volatility Thresholds using Average True Range (ATR)
-        # Instead of fixed 5% or 8%, we scale it to the stock's normal daily range.
-        atr = getattr(self, '_cached_atr_14', 0)
-        atr_pct = (atr / self.previous_close) if self.previous_close > 0 else 0.025
-        
-        # A parabolic move is defined as 2x its normal daily range (min 3%, max 8%)
-        daily_threshold = min(0.08, max(0.03, atr_pct * 2.0)) 
-        yesterday_threshold = min(0.08, max(0.05, atr_pct * 2.5))
-
-        is_fast_rising = daily_change > daily_threshold or yesterday_change > yesterday_threshold
-        is_overbought = getattr(self, 'rsi_value', 50) > 70
-
-        # 2. MOMENTUM STRATEGY TRIGGER
-        if current_strategy == "MOMENTUM" and self.smart_score >= 8:
-            if is_fast_rising:
-                logger.info(f"[{self.stock_id}] Blocked MOMENTUM buy: Fast-rising stock (daily: {daily_change*100:.1f}%, yest: {yesterday_change*100:.1f}%)")
-                return None
-            if is_overbought:
-                logger.info(f"[{self.stock_id}] Blocked MOMENTUM buy: RSI is overbought ({self.rsi_value:.1f})")
-                return None
-                
-            self.last_trade_reason = self.score_reason
-            return 'BUY'
-        return None
 
     def get_status(self):
         if not self.is_market_open():

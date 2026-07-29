@@ -77,6 +77,11 @@ class DatabaseManager:
             except sqlite3.OperationalError:
                 pass
 
+            try:
+                cursor.execute("ALTER TABLE cached_indicators ADD COLUMN day_before_yesterday_close REAL DEFAULT 0.0")
+            except sqlite3.OperationalError:
+                pass
+
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS trading_history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -126,6 +131,7 @@ class DatabaseManager:
                     prev_close REAL NOT NULL,
                     target_mean_price REAL DEFAULT 0,
                     number_of_analysts INTEGER DEFAULT 0,
+                    day_before_yesterday_close REAL DEFAULT 0.0,
                     fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
@@ -283,7 +289,8 @@ class DatabaseManager:
         with self.get_cursor() as cursor:
             cursor.execute(
                 """SELECT high_14d, low_14d, rsi, adx, ma_signal, macd_signal, next_earnings_date, 
-                   today_volume, avg_volume_14d, prev_close, target_mean_price, number_of_analysts, strftime('%s', fetched_at) 
+                   today_volume, avg_volume_14d, prev_close, target_mean_price, number_of_analysts, 
+                   COALESCE(day_before_yesterday_close, 0), strftime('%s', fetched_at) 
                    FROM cached_indicators WHERE stock_id=?""",
                 (stock_id,)
             )
@@ -303,20 +310,23 @@ class DatabaseManager:
                 "prev_close": row[9],
                 "target_mean_price": row[10],
                 "number_of_analysts": row[11],
-                "fetched_at": int(row[12])
+                "day_before_yesterday_close": float(row[12] or 0),
+                "fetched_at": int(row[13])
             }
         return None
 
-    def update_cached_indicators(self, stock_id, high_14d, low_14d, rsi, adx,bb_upper, bb_middle, bb_lower,
+    def update_cached_indicators(self, stock_id, high_14d, low_14d, rsi, adx, bb_upper, bb_middle, bb_lower,
                                   ma_signal, macd_signal, next_earnings_date,
-                                  today_volume, avg_volume_14d, prev_close, target_mean_price,number_of_analysts):
+                                  today_volume, avg_volume_14d, prev_close, target_mean_price, number_of_analysts,
+                                  day_before_yesterday_close=0.0):
         """Update cached technical indicators"""
         with self.get_cursor() as cursor:
             cursor.execute(
                 """INSERT OR REPLACE INTO cached_indicators
                    (stock_id, high_14d, low_14d, rsi, adx, bb_upper, bb_middle, bb_lower, ma_signal, macd_signal,
-                    next_earnings_date, today_volume, avg_volume_14d, prev_close, target_mean_price, number_of_analysts, fetched_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)""",
+                    next_earnings_date, today_volume, avg_volume_14d, prev_close, target_mean_price, number_of_analysts,
+                    day_before_yesterday_close, fetched_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)""",
                 (
                     stock_id,
                     float(high_14d or 0),
@@ -333,7 +343,8 @@ class DatabaseManager:
                     float(avg_volume_14d or 0),
                     float(prev_close or 0),
                     float(target_mean_price or 0),
-                    int(number_of_analysts or 0)
+                    int(number_of_analysts or 0),
+                    float(day_before_yesterday_close or 0)
                 )
             )
             

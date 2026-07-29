@@ -15,27 +15,44 @@
 
 ---
 
-## 📊 2. Strategy Regimes & Stock Scoring (`calculate_score()`)
+## 📊 2. Detailed Smart Score Calculation (`calculate_score()`)
 
-Every stock is dynamically evaluated in real-time. The bot calculates a multi-factor `smart_score` (0 to 10+) and assigns one of two strategy regimes:
+The bot calculates a multi-factor `smart_score` (0 to 12 points) in real-time to select the active strategy regime and rank execution priority:
 
-### 🟢 Strategy A: DIP Buyer (Pullback Strategy)
-* **Target:** Quality stocks experiencing a short-term pullback within an overall uptrend.
-* **Scoring Criteria:** `smart_score >= 7`
-* **Technical Triggers:**
-  * Price touching/near Lower Bollinger Band (`BB_PctB <= 0.20`).
-  * Oversold RSI (`RSI <= 45`).
-  * Bullish trend context (`MA20 > MA50` or `Close > MA200`).
+```text
+smart_score = min(12, max(0, base_score + analyst_modifier + target_bonus + etf_boost))
+```
 
-### 🚀 Strategy B: MOMENTUM Breakout (Trend Strategy)
-* **Target:** High-volatility trend continuations breaking above resistance.
-* **Scoring Criteria:** `smart_score >= 8`
-* **Technical Triggers:**
-  * 14-day High breakout (`Close >= 14-Day High`).
-  * MACD bullish alignment (`MACD > Signal`).
-  * High relative volume (`Volume >= 1.5 * 20-Day Volume MA`).
-  * Trend strength confirmed (`ADX >= 25`).
-  * RSI in active trend zone (`45 <= RSI < 70`).
+### Step 1: Trend Baseline Context (0 to +3 Points)
+* **`Market Value > MA200`**: **+3 Points** (Healthy long-term bull trend)
+* **`Market Value > Previous Close`**: **+1 Point** (Short-term recovery)
+
+### Step 2: Strategy Sub-Scoring (`base_score = max(DIP_Points, MOMENTUM_Points)`)
+
+#### 🟢 Strategy A: DIP Buyer Base Score (Max 10 Points)
+* **RSI Oversold Level (Max 4 Pts):** `RSI < 25` (+4) | `RSI < 30` (+3) | `RSI < 40` (+2)
+* **Bollinger Band `BB_PctB` (Max 3 Pts):** `BB < 0.0` (+3) | `BB < 0.1` (+2) | `BB < 0.2` (+1)
+* **Trend Baseline Context:** **+0 to +3 Points** (From Step 1 above)
+* **Trigger Threshold:** `smart_score >= 7`
+
+#### 🚀 Strategy B: MOMENTUM Breakout Base Score (Max 10 Points)
+* **MACD Trend Alignment (Max 3 Pts):** `S_BULL` (+3) | `BULL` (+2)
+* **ADX Trend Strength (Max 2 Pts, if `Price > MA50`):** `ADX > 35` (+2) | `ADX > 25` (+1)
+* **Volume Spike (Max 2 Pts):** `Projected Vol > 1.5 * MA(14)` (+2) | `Projected Vol > MA(14)` (+1)
+* **RSI Sweet Spot (Max 3 Pts):** `50 <= RSI <= 70` (+3) | `40 <= RSI <= 50` (+1)
+* **Trigger Threshold:** `smart_score >= 8`
+
+### Step 3: Valuation & Analyst Modifiers (-5 to +5 Points)
+* **`Price <= 80% of Analyst Target`** (>=20% Undervalued): **+3 Points**
+* **`Price <= 90% of Analyst Target`** (>=10% Undervalued): **+2 Points**
+* **`Price < Analyst Target`**: **+1 Point**
+* **`Price > Analyst Target`**: **-1 Point**
+* **`Price >= 110% of Analyst Target`** (>=10% Overvalued): **-2 Points**
+* **`Price >= 120% of Analyst Target`** (>=20% Overvalued): **-3 Points**
+* **Analyst Rating Notes:** **-2 to +2 Points** (Upgrade notes vs Downgrade cuts)
+
+### Step 4: Asset Class Adjustment
+* **ETF / ETC Boost:** **+6 Points baseline** (For `ESE.PA`, `EGLN.L`, `SPCX` to offset lack of single-stock analyst targets).
 
 ---
 
@@ -43,14 +60,14 @@ Every stock is dynamically evaluated in real-time. The bot calculates a multi-fa
 
 Before executing any **BUY** order, the bot checks and enforces these strict safety guards:
 
-1. **Market Open Cooldown:** No automated buys during the first **15 minutes** after market open (avoids open-trap volatility).
+1. **Market Open Cooldown:** No automated buys during the first **15 minutes** after market open.
 2. **24-Hour Trade Cooldown:** Min **24 hours** between consecutive buy/sell trades on the same stock.
 3. **Earnings Blackout:** Skip buys **3 days before** and **2 days after** scheduled earnings announcements.
-4. **Daily Rise Cap:** Block buys if the stock rose **> +5.0%** today (prevents buying at the top of a vertical pump).
+4. **Daily Rise Cap:** Block buys if the stock rose **> +5.0%** today.
 5. **3-Day Cumulative Rise Cap:** Block buys if the stock rose **> +15.0%** over the last 3 days.
 6. **RSI Overbought Filter:** Block buys if **`RSI >= 70`**.
 7. **Single-Day Drop Limit (Falling Knife Guard):**
-   * Block DIP buys if daily drop is worse than **`-7.0%`** (prevents buying earnings crashes or panic dumps).
+   * Block DIP buys if daily drop is worse than **`-7.0%`** (prevents buying earnings crashes).
    * Block moderate DIP buys if drop is between **`-3.0%` and `-7.0%`** while **`RSI > 45`**.
 8. **Macro Market Guard:** Block DIP buys if S&P 500 ETF (ESE.PA) market drop limit is breached.
 9. **Portfolio Score Priority:** Capital is allocated to the highest `smart_score` stock across the portfolio first.

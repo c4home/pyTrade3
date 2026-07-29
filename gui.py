@@ -1070,10 +1070,10 @@ class TradingApp(QMainWindow):
                 if bot.previous_close > 0:
                     price_pct = ((bot.market_value - bot.previous_close) / bot.previous_close) * 100
                     
-                    # If the market is closed, overnight pre-market changes are tiny.
-                    # Show the performance of the last completed session instead to match user expectations.
+                    # If the market is closed or hasn't started trading live today (e.g. US stocks before 15:30 CET),
+                    # fallback to showing the last completed session's performance instead of +0.00%.
                     if getattr(bot, 'is_market_open', None) and not bot.is_market_open():
-                        if not getattr(bot, 'is_last_date_today', True):
+                        if not getattr(bot, 'is_last_date_today', True) or abs(price_pct) < 0.0001:
                             db_close = getattr(bot, 'day_before_yesterday_close', 0)
                             if db_close > 0:
                                 price_pct = ((bot.previous_close - db_close) / db_close) * 100

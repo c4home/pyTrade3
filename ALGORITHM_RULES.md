@@ -26,7 +26,82 @@ The goal of `pyTrade3` is to automate swing-trading across US and European stock
 
 ---
 
-## 📥 3. Entry Logic & Buy Conditions
+## 📊 3. Detailed Smart Score Calculation (`calculate_score()`)
+
+The bot calculates a dynamic multi-factor score between **0 and 12 points** for every stock in real time:
+
+```text
+smart_score = min(12, max(0, base_score + analyst_modifier + target_bonus + etf_boost))
+```
+
+---
+
+### Step 1: Trend Baseline Context (0 to +3 Points)
+Evaluates long-term structural health of the stock:
+* **`Market Value > MA200`**: **+3 Points** (Bullish long-term trend context)
+* **`Market Value > Previous Close`**: **+1 Point** (Short-term price recovery)
+* Otherwise: **0 Points**
+
+---
+
+### Step 2: Base Strategy Scoring (Max 10 Points)
+The bot calculates two sub-scores (**Candidate A: DIP** and **Candidate B: MOMENTUM**) and selects the strategy with the higher score:
+
+```text
+base_score = max(DIP_Points, MOMENTUM_Points)
+```
+
+#### 🟢 Candidate A: DIP Buyer Score Breakdown (Max 10 Points)
+1. **RSI Oversold Level (Max 4 Points):**
+   * `RSI < 25`: **+4 Points** (Extreme oversold)
+   * `RSI < 30`: **+3 Points** (Deep oversold)
+   * `RSI < 40`: **+2 Points** (Moderate oversold)
+2. **Bollinger Band Position `BB_PctB` (Max 3 Points):**
+   * `BB_PctB < 0.0` (Price below Lower Band): **+3 Points**
+   * `BB_PctB < 0.1`: **+2 Points**
+   * `BB_PctB < 0.2`: **+1 Point**
+3. **Trend Baseline Context:** **+0 to +3 Points** (From Step 1 above)
+
+#### 🚀 Candidate B: MOMENTUM Breakout Score Breakdown (Max 10 Points)
+1. **MACD Alignment (Max 3 Points):**
+   * `MACD == S_BULL` (Strong bullish trend alignment): **+3 Points**
+   * `MACD == BULL` (Bullish trend alignment): **+2 Points**
+2. **ADX Trend Strength (Max 2 Points — Only awarded if `Price > MA50`):**
+   * `ADX > 35`: **+2 Points** (Strong trend)
+   * `ADX > 25`: **+1 Point** (Developing trend)
+3. **Volume Surge Support (Max 2 Points):**
+   * `Projected Volume > 1.5 * MA(Volume, 14)`: **+2 Points**
+   * `Projected Volume > MA(Volume, 14)`: **+1 Point**
+4. **RSI Sweet Spot (Max 3 Points):**
+   * `50 <= RSI <= 70`: **+3 Points** (Active momentum zone without overbought risk)
+   * `40 <= RSI <= 50`: **+1 Point** (Weak momentum)
+
+---
+
+### Step 3: Institutional Analyst Modifiers (-5 to +5 Points)
+
+#### A. Valuation vs UBS / Analyst Price Target (`target_bonus`)
+Compares current market price against cached bank notes / UBS price targets:
+* **`Market Value <= 80% of Target`** (>=20% Undervalued): **+3 Points**
+* **`Market Value <= 90% of Target`** (>=10% Undervalued): **+2 Points**
+* **`Market Value < Target`**: **+1 Point**
+* **`Market Value > Target`**: **-1 Point**
+* **`Market Value >= 110% of Target`** (>=10% Overvalued): **-2 Points**
+* **`Market Value >= 120% of Target`** (>=20% Overvalued): **-3 Points**
+
+#### B. Rating Conviction (`analyst_modifier`)
+* High-conviction Buy / Outperform notes: **+1 to +2 Points**
+* Rating downgrades / Sell notes: **-1 to -2 Points**
+
+---
+
+### Step 4: Asset Class Adjustment (`etf_boost`)
+* **ETF / ETC Asset Class:** **+6 Points baseline**
+  * Applied to index funds (`ESE.PA`, `EGLN.L`, `SPCX`) to compensate for their lower volatility and lack of single-stock analyst price targets.
+
+---
+
+## 📥 4. Entry Logic & Buy Conditions
 
 ### A. Global Pre-Buy Safeguards (All Strategies)
 * **Market Open Cooldown:** No automated buys in the first 15 minutes after market open.
@@ -59,7 +134,7 @@ The goal of `pyTrade3` is to automate swing-trading across US and European stock
 
 ---
 
-## 📤 4. Exit Logic & Sell Conditions (Execution Hierarchy)
+## 📤 5. Exit Logic & Sell Conditions (Execution Hierarchy)
 
 Sell triggers bypass buy cooldowns and execute in this order of precedence:
 
@@ -86,7 +161,7 @@ Sell triggers bypass buy cooldowns and execute in this order of precedence:
 
 ---
 
-## 🔄 5. Synchronization & Change Protocol
+## 🔄 6. Synchronization & Change Protocol
 When updating the trading algorithm:
 1. Modify [trading_bot.py](file:///Users/canhhung/Documents/pyTrade3/trading_bot.py).
 2. Update [core_backtest_engine.py](file:///Users/canhhung/Documents/pyTrade3/backtest/core_backtest_engine.py) to keep backtests identical.
