@@ -419,22 +419,34 @@ class TradingBot:
                     volume = volume.dropna()
                     
                     if len(close) >= 2:
-                        last_date = close.index[-1].date()
-                        today = pd.Timestamp.now(tz=close.index.tz).date()
-                        self.is_last_date_today = (last_date == today)
-                        idx = -2 if self.is_last_date_today else -1
-                        
-                        self.previous_close = float(close.iat[idx])
-                        
-                        if len(close) >= abs(idx) + 1:
-                            self.day_before_yesterday_close = float(close.iat[idx - 1])
+                        info_prev = 0
+                        try:
+                            info_prev = ticker_obj.info.get('previousClose') or ticker_obj.info.get('regularMarketPreviousClose') or 0
+                        except Exception:
+                            pass
+
+                        if info_prev and float(info_prev) > 0:
+                            self.previous_close = float(info_prev)
+                            self.is_last_date_today = True
+                            self.day_before_yesterday_close = float(close.iat[-2]) if len(close) >= 2 else self.previous_close
+                            self.close_3d_ago = float(close.iat[-4]) if len(close) >= 4 else self.previous_close
                         else:
-                            self.day_before_yesterday_close = self.previous_close
+                            last_date = close.index[-1].date()
+                            today = pd.Timestamp.now(tz=close.index.tz).date()
+                            self.is_last_date_today = (last_date == today)
+                            idx = -2 if self.is_last_date_today else -1
                             
-                        if len(close) >= abs(idx) + 3:
-                            self.close_3d_ago = float(close.iat[idx - 3])
-                        else:
-                            self.close_3d_ago = self.previous_close
+                            self.previous_close = float(close.iat[idx])
+                            
+                            if len(close) >= abs(idx) + 1:
+                                self.day_before_yesterday_close = float(close.iat[idx - 1])
+                            else:
+                                self.day_before_yesterday_close = self.previous_close
+                                
+                            if len(close) >= abs(idx) + 3:
+                                self.close_3d_ago = float(close.iat[idx - 3])
+                            else:
+                                self.close_3d_ago = self.previous_close
          
                     self.fourteen_day_high = float(high.rolling(14).max().iat[-1])
                     self.fourteen_day_low  = float(low.rolling(14).min().iat[-1])
@@ -1490,7 +1502,9 @@ class TradingBot:
             
             raw_stop_pct = self.stop_multiplier * atr_pct
             # Strategy-Specific Stop Caps: DIP = -7.0% (fast bounce required), MOMENTUM = -9.0% (more room for breakouts)
-            max_stop_cap = 7.0 if getattr(self, 'current_strategy', 'DIP') == 'DIP' else 9.0
+            # Locked to bought_strategy (strategy at the moment of buy) to prevent regime drift during trades
+            active_strat = getattr(self, 'bought_strategy', None) or getattr(self, 'current_strategy', 'DIP')
+            max_stop_cap = 7.0 if active_strat == 'DIP' else 9.0
             self.dynamic_stop_loss = -max(abs(self.min_stop_loss), min(raw_stop_pct, max_stop_cap))
         
         if self.manual_mode:
@@ -1673,8 +1687,13 @@ class TradingBot:
         
         current_strategy = "DIP" if "DIP" in self.score_reason else "MOMENTUM"
         
+        # Option 4: Two-gate system — both raw technical base_score AND smart_score must qualify
+        # This prevents analyst bonus alone from carrying a weak technical setup past the threshold
+        DIP_BASE_MIN = 5   # DIP: RSI+BB+Trend raw points must be >= 5
+        MOM_BASE_MIN = 6   # MOMENTUM: MACD+ADX+Vol+RSI raw points must be >= 6
+        
         # 1. DIP STRATEGY TRIGGER
-        if current_strategy == "DIP" and self.smart_score >= 7:
+        if current_strategy == "DIP" and self.smart_score >= 7 and self.base_score >= DIP_BASE_MIN:
             # Macro Market Guard
             macro_status = self.check_macro_guard()
             if macro_status['drop_pct'] <= self.MACRO_DROP_LIMIT:
@@ -1693,8 +1712,36 @@ class TradingBot:
                 logger.info(f"[{self.stock_id}] Blocked DIP buy: catching a falling knife (RSI: {self.rsi_value:.1f})")
                 return None
             
+            self.bought_strategy = "DIP"
             self.last_trade_reason = self.score_reason
             return 'BUY'
+
+        # 2. MOMENTUM STRATEGY TRIGGER
+        if current_strategy == "MOMENTUM" and self.smart_score >= 8 and self.base_score >= MOM_BASE_MIN:
+            # ATR-based fast-rising guard (prevents chasing parabolic moves)
+            if self.previous_close > 0:
+                daily_change = (self.market_value - self.previous_close) / self.previous_close
+                yesterday_change = 0
+                if getattr(self, 'day_before_yesterday_close', 0) > 0:
+                    yesterday_change = (self.previous_close - self.day_before_yesterday_close) / self.day_before_yesterday_close
+
+                atr = getattr(self, '_cached_atr_14', 0)
+                atr_pct = (atr / self.previous_close) if self.previous_close > 0 else 0.025
+                daily_threshold = min(0.08, max(0.03, atr_pct * 2.0))
+                yesterday_threshold = min(0.08, max(0.05, atr_pct * 2.5))
+
+                if daily_change > daily_threshold or yesterday_change > yesterday_threshold:
+                    logger.info(f"[{self.stock_id}] Blocked MOMENTUM buy: Fast-rising (daily: {daily_change*100:.1f}%, yest: {yesterday_change*100:.1f}%)")
+                    return None
+
+            if self.rsi_value > 70:
+                logger.info(f"[{self.stock_id}] Blocked MOMENTUM buy: RSI overbought ({self.rsi_value:.1f})")
+                return None
+
+            self.bought_strategy = "MOMENTUM"
+            self.last_trade_reason = self.score_reason
+            return 'BUY'
+
 
     def get_buy_block_reason(self):
         """Returns the specific technical or safety reason blocking a BUY for this stock."""
@@ -1754,11 +1801,20 @@ class TradingBot:
                             and not b.is_market_open()):
                         return f"waiting for tied top-scorer {b.stock_id} (score {highest_score}/12) market to open"
 
-        current_strategy = "DIP" if "DIP" in self.score_reason else "MOMENTUM"
+        current_strategy = "DIP" if "DIP" in self.score_reason else "NEUTRAL"
+        if hasattr(self, 'current_strategy'):
+            current_strategy = self.current_strategy
 
         if current_strategy == "DIP":
             if self.smart_score < 7:
                 return f"DIP score ({self.smart_score}/12) below threshold 7"
+
+            # Base score gate check (Option 4)
+            base = getattr(self, 'base_score', None)
+            if base is not None and base < 5:
+                return (f"DIP base technical score too weak (base={base}/10, need >= 5). "
+                        f"RSI={self.rsi_value:.1f}, analyst bonus is carrying the score — "
+                        f"need stronger RSI/BB/Trend signals first")
 
             macro_status = self.check_macro_guard()
             if macro_status['drop_pct'] <= self.MACRO_DROP_LIMIT:
@@ -1774,6 +1830,13 @@ class TradingBot:
         else:  # MOMENTUM
             if self.smart_score < 8:
                 return f"MOMENTUM score ({self.smart_score}/12) below threshold 8"
+
+            # Base score gate check (Option 4)
+            base = getattr(self, 'base_score', None)
+            if base is not None and base < 6:
+                return (f"MOMENTUM base technical score too weak (base={base}/10, need >= 6). "
+                        f"MACD={self.macd_signal}, ADX={self.adx_value:.0f} — "
+                        f"need MACD + at least 2 more signals to align")
 
             # ATR-based fast-rising check
             if self.previous_close > 0:

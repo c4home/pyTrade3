@@ -33,14 +33,14 @@ smart_score = min(12, max(0, base_score + analyst_modifier + target_bonus + etf_
 * **RSI Oversold Level (Max 4 Pts):** `RSI < 25` (+4) | `RSI < 30` (+3) | `RSI < 40` (+2)
 * **Bollinger Band `BB_PctB` (Max 3 Pts):** `BB < 0.0` (+3) | `BB < 0.1` (+2) | `BB < 0.2` (+1)
 * **Trend Baseline Context:** **+0 to +3 Points** (From Step 1 above)
-* **Trigger Threshold:** `smart_score >= 7`
+* **Trigger Threshold:** `smart_score >= 7` **AND** `base_score >= 5` (Two-gate: analyst bonus alone cannot carry a weak setup)
 
 #### 🚀 Strategy B: MOMENTUM Breakout Base Score (Max 10 Points)
 * **MACD Trend Alignment (Max 3 Pts):** `S_BULL` (+3) | `BULL` (+2)
 * **ADX Trend Strength (Max 2 Pts, if `Price > MA50`):** `ADX > 35` (+2) | `ADX > 25` (+1)
 * **Volume Spike (Max 2 Pts):** `Projected Vol > 1.5 * MA(14)` (+2) | `Projected Vol > MA(14)` (+1)
 * **RSI Sweet Spot (Max 3 Pts):** `50 <= RSI <= 70` (+3) | `40 <= RSI <= 50` (+1)
-* **Trigger Threshold:** `smart_score >= 8`
+* **Trigger Threshold:** `smart_score >= 8` **AND** `base_score >= 6` (Two-gate: MACD + at least 2 other signals must align)
 
 ### Step 3: Valuation & Analyst Modifiers (-5 to +5 Points)
 * **`Price <= 80% of Analyst Target`** (>=20% Undervalued): **+3 Points**

@@ -33,12 +33,19 @@ class IBApi(EWrapper, EClient):
         self.next_order_id += 1  # Increment for next use
         return current_id
     
-    def error(self, reqId, errorCode, errorString):
-        if errorCode in [2104, 2106, 2158, 502, 504]: return
+    def error(self, reqId, errorCode, errorString, advancedOrderRejectJson="", *args, **kwargs):
+        # Ignore informational codes and order cancellation acknowledgment/not-found codes
+        if errorCode in [2104, 2106, 2158, 502, 504, 10147, 202]:
+            if errorCode in [10147, 202] and hasattr(self, 'order_callbacks'):
+                self.order_callbacks.pop(reqId, None)
+            return
+
         logger.error(f"Error {reqId}: {errorCode} - {errorString}")
         
         # Automatically cancel order if an error/warning occurs for an active order we placed
         if hasattr(self, 'order_callbacks') and reqId in self.order_callbacks:
+            # Pop callback FIRST before cancelOrder to prevent recursive infinite loops
+            self.order_callbacks.pop(reqId, None)
             logger.warning(f"Automatically cancelling order {reqId} due to error/warning {errorCode}: {errorString}")
             try:
                 self.cancelOrder(reqId)

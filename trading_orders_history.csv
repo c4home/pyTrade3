@@ -352,3 +352,4 @@ Order ID,Stock ID,Action,Quantity,Price,Currency,Total Value,Timestamp,Status
 189,GE,BUY,3,352.2800,USD,1056.84,24/07/2026 21:08:05,Pending,"[DIP] Score: 8/12 {Trend: +3, Analyst: +3 (Strong-Upside),FILLED
 190,ISRG,SELL,3,361.4600,USD,1084.38,28/07/2026 21:10:39,Pending,"Trailing Profit Triggered at 7.29% (Peak: 10.29%,FILLED
 191,IBKR,BUY,11,90.7400,USD,998.14,28/07/2026 21:11:09,Pending,"[DIP] Score: 9/12 {Trend: +3, Analyst: +3 (Strong-Upside),FILLED
+192,SAF.PA,SELL,2,340.6000,EUR,681.20,29/07/2026 14:33:58,Pending,"MACD Bearish Crossover Exit (S_BULL → BEAR,FILLED

@@ -446,6 +446,44 @@ class TradingApp(QMainWindow):
             return False
         
     def init_ui(self):
+        self.setStyleSheet("""
+            QMainWindow, QWidget {
+                background-color: #1e1e1e;
+                color: #ffffff;
+            }
+            QGroupBox {
+                background-color: #252526;
+                color: #ffffff;
+                font-weight: bold;
+                border: 1px solid #3c3c3c;
+                border-radius: 6px;
+                margin-top: 6px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left;
+                padding: 0 5px;
+                color: #3498db;
+            }
+            QLabel {
+                color: #e0e0e0;
+            }
+            QLineEdit {
+                background-color: #2d2d2d;
+                color: #ffffff;
+                border: 1px solid #3c3c3c;
+                border-radius: 4px;
+                padding: 3px 6px;
+            }
+            QSpinBox, QDoubleSpinBox {
+                background-color: #2d2d2d;
+                color: #ffffff;
+                border: 1px solid #3c3c3c;
+                border-radius: 4px;
+            }
+        """)
+
         central = QWidget()
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
@@ -1185,7 +1223,20 @@ class TradingApp(QMainWindow):
 
                 for col, text in enumerate(items):
                     item = NumericTableWidgetItem(text, sort_values[col])
-                    if col == 11:  # RSI column
+                    if col == 4:  # Price Column (Highlight in Green based purely on BUY score condition)
+                        current_strat = getattr(bot, 'current_strategy', 'DIP')
+                        base_score = getattr(bot, 'base_score', 0)
+                        smart_score = getattr(bot, 'smart_score', 0)
+                        
+                        qualifies_dip = (current_strat == 'DIP' and smart_score >= 7 and base_score >= 5)
+                        qualifies_mom = (current_strat == 'MOMENTUM' and smart_score >= 8 and base_score >= 6)
+                        
+                        if qualifies_dip or qualifies_mom:
+                            item.setForeground(QColor("green"))          # Green Text Only
+                            item.setFont(QFont("Arial", 10, QFont.Weight.Bold))
+                            item.setToolTip(f"🟢 BUY TRIGGER SCORE MET: {current_strat} Score: {smart_score}/12 (Base: {base_score}/10)")
+
+                    elif col == 11:  # RSI column
                         try:
                             rsi_val = float(text)
                             if rsi_val > 70:

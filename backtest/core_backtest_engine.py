@@ -115,9 +115,9 @@ def calculate_score(row, prev_row):
     elif 40 <= rsi <= 50: mom_points += 1
 
     if dip_points >= mom_points:
-        return min(12, max(0, dip_points)), "DIP"
+        return min(12, max(0, dip_points)), "DIP", dip_points
     else:
-        return min(12, max(0, mom_points)), "MOMENTUM"
+        return min(12, max(0, mom_points)), "MOMENTUM", mom_points
 
 def run_backtest_with_params(symbol, config, data, params):
     profit_target = config["profit_target"]
@@ -131,6 +131,9 @@ def run_backtest_with_params(symbol, config, data, params):
     PROT_DROP = params['prot_drop']
     DIP_TH = params['dip_th']
     MOM_TH = params['mom_th']
+    # Option 4: minimum raw base technical score required before analyst bonus can trigger a buy
+    DIP_BASE_MIN = params.get('dip_base_min', 5)   # DIP: RSI+BB+Trend must be >= 5
+    MOM_BASE_MIN = params.get('mom_base_min', 6)   # MOM: MACD+ADX+Vol+RSI must be >= 6
     
     trades = []
     position = None
@@ -147,7 +150,7 @@ def run_backtest_with_params(symbol, config, data, params):
         rsi = row.get('RSI', 50)
         prev_close = prev_row['Close']
 
-        score, strategy = calculate_score(row, prev_row)
+        score, strategy, base_score = calculate_score(row, prev_row)
         max_stop_cap = 7.0 if strategy == "DIP" else 9.0
 
         if atr > 0 and price > 0:
@@ -210,13 +213,13 @@ def run_backtest_with_params(symbol, config, data, params):
         if rsi >= 70: continue
         if i >= 3 and data.iloc[i - 3]['Close'] > 0 and (price - data.iloc[i - 3]['Close']) / data.iloc[i - 3]['Close'] > 0.15: continue
 
-        score, strategy = calculate_score(row, prev_row)
+        score, strategy, base_score = calculate_score(row, prev_row)
         buy_signal = False
-        if strategy == "DIP" and score >= DIP_TH:
+        if strategy == "DIP" and score >= DIP_TH and base_score >= DIP_BASE_MIN:
             if prev_close > 0:
                 drop = (price - prev_close) / prev_close
                 if drop > -0.07 and not (drop < -0.03 and rsi > 45): buy_signal = True
-        if strategy == "MOMENTUM" and score >= MOM_TH:
+        if strategy == "MOMENTUM" and score >= MOM_TH and base_score >= MOM_BASE_MIN:
             if prev_close > 0 and (price - prev_close) / prev_close <= 0.05:
                 if i >= 2 and data.iloc[i - 2]['Close'] > 0 and (prev_close - data.iloc[i - 2]['Close']) / data.iloc[i - 2]['Close'] <= 0.15:
                     buy_signal = True
