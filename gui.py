@@ -447,9 +447,16 @@ class TradingApp(QMainWindow):
         
     def init_ui(self):
         self.setStyleSheet("""
-            QMainWindow, QWidget {
+            QMainWindow {
                 background-color: #1e1e1e;
                 color: #ffffff;
+            }
+            QWidget#centralWidget {
+                background-color: #1e1e1e;
+            }
+            QLabel, QCheckBox {
+                background-color: transparent;
+                color: #e0e0e0;
             }
             QGroupBox {
                 background-color: #252526;
@@ -465,9 +472,6 @@ class TradingApp(QMainWindow):
                 subcontrol-position: top left;
                 padding: 0 5px;
                 color: #3498db;
-            }
-            QLabel {
-                color: #e0e0e0;
             }
             QLineEdit {
                 background-color: #2d2d2d;
@@ -485,6 +489,7 @@ class TradingApp(QMainWindow):
         """)
 
         central = QWidget()
+        central.setObjectName("centralWidget")
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
 
@@ -510,8 +515,22 @@ class TradingApp(QMainWindow):
             }
         """
 
-        conn_frame = QGroupBox("IBKR Connection")
-        conn_main_layout = QVBoxLayout()
+        # Single Unified Title-less Top Header Panel (IBKR Connection + Stock Settings combined)
+        top_frame = QFrame()
+        top_frame.setObjectName("topHeaderFrame")
+        top_frame.setStyleSheet("""
+            QFrame#topHeaderFrame {
+                background-color: #252526;
+                border: 1px solid #3c3c3c;
+                border-radius: 6px;
+            }
+            QFrame#topHeaderFrame QLabel, QFrame#topHeaderFrame QCheckBox {
+                background-color: transparent;
+            }
+        """)
+        top_main_layout = QVBoxLayout()
+        top_main_layout.setContentsMargins(10, 6, 10, 10)
+        top_main_layout.setSpacing(6)
         
         # Row 1: Connection controls
         conn_row_layout = QHBoxLayout()
@@ -575,7 +594,7 @@ class TradingApp(QMainWindow):
         self.csv_btn.clicked.connect(self.open_csv)
         conn_row_layout.addWidget(self.csv_btn)
         
-        conn_main_layout.addLayout(conn_row_layout)
+        top_main_layout.addLayout(conn_row_layout)
         
         # Row 2: Portfolio Dashboard Banner
         dash_row_layout = QHBoxLayout()
@@ -627,10 +646,156 @@ class TradingApp(QMainWindow):
         self.rate_label.setStyleSheet("font-size: 13px; font-weight: bold; color: #3498db;")
         dash_row_layout.addWidget(self.rate_label)
         
-        conn_main_layout.addLayout(dash_row_layout)
-        conn_frame.setLayout(conn_main_layout)
-        layout.addWidget(conn_frame)
+        top_main_layout.addLayout(dash_row_layout)
 
+        top_main_layout.addSpacing(4)
+        separator_line = QFrame()
+        separator_line.setFrameShape(QFrame.Shape.HLine)
+        separator_line.setFrameShadow(QFrame.Shadow.Sunken)
+        separator_line.setStyleSheet("background-color: #3c3c3c; max-height: 1px; border: none; margin-top: 4px; margin-bottom: 4px;")
+        top_main_layout.addWidget(separator_line)
+        top_main_layout.addSpacing(4)
+
+        # Row 3: Stock Settings Controls
+        stock_row_layout = QHBoxLayout()
+        stock_row_layout.addWidget(QLabel("Symbol:"))
+        self.sym_edit = QLineEdit()
+        self.sym_edit.setFixedWidth(65)
+        self.sym_edit.setPlaceholderText("Sym")
+        stock_row_layout.addWidget(self.sym_edit)
+        
+        stock_row_layout.addSpacing(10)
+        
+        self.add_btn = QPushButton("Add Stock")
+        self.add_btn.setStyleSheet(common_button_style)
+        self.add_btn.clicked.connect(self.add_stock)
+        stock_row_layout.addWidget(self.add_btn)
+        
+        self.remove_btn = QPushButton("Remove Stock")
+        self.remove_btn.setStyleSheet(common_button_style)
+        self.remove_btn.clicked.connect(self.remove_stock)
+        stock_row_layout.addWidget(self.remove_btn)
+        
+        stock_row_layout.addStretch()
+        
+        self.buy_btn = QPushButton("Buy")
+        self.buy_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2ecc71;
+                color: white;
+                font-weight: bold;
+                border-radius: 4px;
+                padding: 4px 10px;
+                min-width: 60px;
+            }
+            QPushButton:hover {
+                background-color: #27ae60;
+            }
+            QPushButton:pressed {
+                background-color: #1e8449;
+            }
+        """)
+        self.buy_btn.clicked.connect(self.handle_manual_buy)
+        stock_row_layout.addWidget(self.buy_btn)
+
+        self.sell_btn = QPushButton("Sell")
+        self.sell_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #e74c3c;
+                color: white;
+                font-weight: bold;
+                border-radius: 4px;
+                padding: 4px 10px;
+                min-width: 60px;
+            }
+            QPushButton:hover {
+                background-color: #c0392b;
+            }
+            QPushButton:pressed {
+                background-color: #922b21;
+            }
+        """)
+        self.sell_btn.clicked.connect(self.handle_manual_sell)
+        stock_row_layout.addWidget(self.sell_btn)
+
+        self.hold_btn = QPushButton("Hold")
+        self.hold_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #f1c40f;
+                color: black;
+                font-weight: bold;
+                border-radius: 4px;
+                padding: 4px 10px;
+                min-width: 60px;
+            }
+            QPushButton:hover {
+                background-color: #f39c12;
+            }
+            QPushButton:pressed {
+                background-color: #d68910;
+            }
+        """)
+        self.hold_btn.clicked.connect(self.handle_manual_hold)
+        stock_row_layout.addWidget(self.hold_btn)
+
+        self.maint_btn = QPushButton("Maintenance Routine")
+        self.maint_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #8e44ad;
+                color: white;
+                font-weight: bold;
+                border-radius: 4px;
+                padding: 4px 10px;
+                min-width: 120px;
+            }
+            QPushButton:hover { background-color: #9b59b6; }
+            QPushButton:pressed { background-color: #732d91; }
+            QPushButton:disabled { background-color: #555555; }
+        """)
+        self.maint_btn.clicked.connect(self.handle_maintenance_routine)
+        stock_row_layout.addWidget(self.maint_btn)
+
+        last_maint = self.db_manager.get_setting("last_maint_time")
+        maint_ts = self._format_last_run(last_maint)
+        self.maint_last_label = QLabel(f"Last: {maint_ts}")
+        self.maint_last_label.setStyleSheet("color: #aaaaaa; font-size: 10px; font-style: italic;")
+        self.maint_last_label.setToolTip("Last time Maintenance Routine was run")
+        stock_row_layout.addWidget(self.maint_last_label)
+
+        self.backtest_btn = QPushButton("Run Backtest (DB)")
+        self.backtest_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #34495e;
+                color: white;
+                font-weight: bold;
+                border-radius: 4px;
+                padding: 4px 10px;
+                min-width: 120px;
+            }
+            QPushButton:hover { background-color: #2c3e50; }
+            QPushButton:pressed { background-color: #1a252f; }
+            QPushButton:disabled { background-color: #555555; }
+        """)
+        self.backtest_btn.clicked.connect(self.handle_backtest)
+        stock_row_layout.addWidget(self.backtest_btn)
+
+        last_bt = self.db_manager.get_setting("last_backtest_time")
+        bt_ts = self._format_last_run(last_bt)
+        self.backtest_last_label = QLabel(f"Last: {bt_ts}")
+        self.backtest_last_label.setStyleSheet("color: #aaaaaa; font-size: 10px; font-style: italic;")
+        self.backtest_last_label.setToolTip("Last time Backtest was run")
+        stock_row_layout.addWidget(self.backtest_last_label)
+        
+        self.auto_status_icon = QLabel("✉")
+        self.auto_status_icon.setStyleSheet("color: #7f8c8d; font-size: 20px;")
+        self.auto_status_icon.setToolTip("Automated Routine Status")
+        stock_row_layout.addWidget(self.auto_status_icon)
+
+        top_main_layout.addLayout(stock_row_layout)
+        top_frame.setLayout(top_main_layout)
+        layout.addWidget(top_frame)
+
+        # Main Stock Table
         self.table = QTableWidget()
         self.table.setColumnCount(30)
         self.table.setWordWrap(True)                 
@@ -680,9 +845,6 @@ class TradingApp(QMainWindow):
         self.table.horizontalHeader().sectionClicked.connect(self.on_header_clicked)
         self.table.itemSelectionChanged.connect(self.highlight_selected_row)
 
-        # Col: 0=Company,1=Sym,2=Type,3=Sector,4=Price,5=Chg%,6=Target,7=BankTarget,8=Score,9=14H,10=14L,
-        #      11=RSI,12=ADX,13=MA,14=MACD,15=Vol(M),16=Qty,17=Buy@,18=Value,19=P&L%,20=Left,21=Max,
-        #      22=~Max,23=TP%,24=~TP,25=Trail$,26=SL%,27=~SL,28=Earn,29=Status
         column_widths = [110, 42, 50, 80, 46, 46, 46, 105, 32, 45, 45, 25, 25, 45, 45, 40, 30, 45, 45, 48, 45, 45, 36, 40, 36, 46, 40, 36, 68, 52]
         for i, w in enumerate(column_widths):
             if w:
@@ -691,148 +853,6 @@ class TradingApp(QMainWindow):
                 self.table.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.Stretch)
 
         layout.addWidget(self.table)
-
-        input_frame = QGroupBox("Stock Settings")
-        input_main_layout = QVBoxLayout()
-        input_main_layout.setContentsMargins(10, 4, 10, 4)
-        
-        row_layout = QHBoxLayout()
-        row_layout.addWidget(QLabel("Symbol:"))
-        self.sym_edit = QLineEdit()
-        self.sym_edit.setFixedWidth(65)
-        self.sym_edit.setPlaceholderText("Sym")
-        row_layout.addWidget(self.sym_edit)
-        
-        row_layout.addSpacing(10)
-        
-        self.add_btn = QPushButton("Add Stock")
-        self.add_btn.setStyleSheet(common_button_style)
-        self.add_btn.clicked.connect(self.add_stock)
-        row_layout.addWidget(self.add_btn)
-        
-        self.remove_btn = QPushButton("Remove Stock")
-        self.remove_btn.setStyleSheet(common_button_style)
-        self.remove_btn.clicked.connect(self.remove_stock)
-        row_layout.addWidget(self.remove_btn)
-        
-        row_layout.addStretch()
-        
-        self.buy_btn = QPushButton("Buy")
-        self.buy_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #2ecc71;
-                color: white;
-                font-weight: bold;
-                border-radius: 4px;
-                padding: 4px 10px;
-                min-width: 60px;
-            }
-            QPushButton:hover {
-                background-color: #27ae60;
-            }
-            QPushButton:pressed {
-                background-color: #1e8449;
-            }
-        """)
-        self.buy_btn.clicked.connect(self.handle_manual_buy)
-        row_layout.addWidget(self.buy_btn)
-
-        self.sell_btn = QPushButton("Sell")
-        self.sell_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #e74c3c;
-                color: white;
-                font-weight: bold;
-                border-radius: 4px;
-                padding: 4px 10px;
-                min-width: 60px;
-            }
-            QPushButton:hover {
-                background-color: #c0392b;
-            }
-            QPushButton:pressed {
-                background-color: #922b21;
-            }
-        """)
-        self.sell_btn.clicked.connect(self.handle_manual_sell)
-        row_layout.addWidget(self.sell_btn)
-
-        self.hold_btn = QPushButton("Hold")
-        self.hold_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #f1c40f;
-                color: black;
-                font-weight: bold;
-                border-radius: 4px;
-                padding: 4px 10px;
-                min-width: 60px;
-            }
-            QPushButton:hover {
-                background-color: #f39c12;
-            }
-            QPushButton:pressed {
-                background-color: #d68910;
-            }
-        """)
-        self.hold_btn.clicked.connect(self.handle_manual_hold)
-        row_layout.addWidget(self.hold_btn)
-
-        self.maint_btn = QPushButton("Maintenance Routine")
-        self.maint_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #8e44ad;
-                color: white;
-                font-weight: bold;
-                border-radius: 4px;
-                padding: 4px 10px;
-                min-width: 120px;
-            }
-            QPushButton:hover { background-color: #9b59b6; }
-            QPushButton:pressed { background-color: #732d91; }
-            QPushButton:disabled { background-color: #555555; }
-        """)
-        self.maint_btn.clicked.connect(self.handle_maintenance_routine)
-        row_layout.addWidget(self.maint_btn)
-
-        last_maint = self.db_manager.get_setting("last_maint_time")
-        maint_ts = self._format_last_run(last_maint)
-        self.maint_last_label = QLabel(f"Last: {maint_ts}")
-        self.maint_last_label.setStyleSheet("color: #aaaaaa; font-size: 10px; font-style: italic;")
-        self.maint_last_label.setToolTip("Last time Maintenance Routine was run")
-        row_layout.addWidget(self.maint_last_label)
-
-        self.backtest_btn = QPushButton("Run Backtest (DB)")
-        self.backtest_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #34495e;
-                color: white;
-                font-weight: bold;
-                border-radius: 4px;
-                padding: 4px 10px;
-                min-width: 120px;
-            }
-            QPushButton:hover { background-color: #2c3e50; }
-            QPushButton:pressed { background-color: #1a252f; }
-            QPushButton:disabled { background-color: #555555; }
-        """)
-        self.backtest_btn.clicked.connect(self.handle_backtest)
-        row_layout.addWidget(self.backtest_btn)
-
-        last_bt = self.db_manager.get_setting("last_backtest_time")
-        bt_ts = self._format_last_run(last_bt)
-        self.backtest_last_label = QLabel(f"Last: {bt_ts}")
-        self.backtest_last_label.setStyleSheet("color: #aaaaaa; font-size: 10px; font-style: italic;")
-        self.backtest_last_label.setToolTip("Last time Backtest was run")
-        row_layout.addWidget(self.backtest_last_label)
-        
-        self.auto_status_icon = QLabel("✉")
-        self.auto_status_icon.setStyleSheet("color: #7f8c8d; font-size: 20px;")
-        self.auto_status_icon.setToolTip("Automated Routine Status")
-        row_layout.addWidget(self.auto_status_icon)
-
-        input_main_layout.addLayout(row_layout)
-        input_frame.setLayout(input_main_layout)
-        layout.addWidget(input_frame)
 
     def save_min_cash(self):
         val = self.min_cash_edit.text().strip()
