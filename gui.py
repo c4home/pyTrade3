@@ -191,9 +191,12 @@ class TradingApp(QMainWindow):
         
         # 3. auto-refresh data
         QTimer.singleShot(1500, self.manual_refresh_data)
-        
-        # Note: Maintenance Routine and Backtest are now manual-only.
-        # Use the buttons in the toolbar to run them when desired.
+
+        # 4. Periodic Auto-Reconnect Monitor (checks every 15s for midnight TWS resets or connection drops)
+        self.is_reconnecting = False
+        self.reconnect_timer = QTimer()
+        self.reconnect_timer.timeout.connect(self._check_auto_reconnect)
+        self.reconnect_timer.start(15000)
         
     def _format_last_run(self, ts_str):
         """Convert a stored epoch timestamp string to a human-readable label."""
@@ -206,7 +209,6 @@ class TradingApp(QMainWindow):
         except Exception:
             return "Never"
 
-
     def _auto_connect(self):
         # Called once at start‑up – only if the checkbox is checked.
         if not self.auto_connect_cb.isChecked():
@@ -215,6 +217,117 @@ class TradingApp(QMainWindow):
         # Force the button into “Connect” mode (in case it was left disconnected)
         self.conn_btn.setText("Connect")
         self.toggle_connection()          # <-- this does the real connect
+
+    def _check_auto_reconnect(self):
+        """Monitors IBKR TWS/Gateway connection and automatically reconnects if lost (e.g. midnight reboot)."""
+        if self.is_reconnecting:
+            if time.time() - getattr(self, 'last_reconnect_start', 0) > 45:
+                logger.warning("⚠️ Auto-reconnect task timed out (>45s). Resetting lock for next retry cycle...")
+                self.is_reconnecting = False
+            else:
+                return
+
+        should_reconnect = self.auto_connect_cb.isChecked() or self.auto_trading
+        if not should_reconnect:
+            return
+
+        is_connected = False
+        if hasattr(self, 'ibapi') and self.ibapi and hasattr(self.ibapi, 'isConnected'):
+            try:
+                is_connected = self.ibapi.isConnected()
+            except Exception:
+                is_connected = False
+
+        if not is_connected:
+            self.connected = False
+            self.status_label.setText("Reconnecting...")
+            self.status_label.setStyleSheet("color: orange; font-weight: bold;")
+            self.conn_btn.setText("Connecting...")
+            self.conn_btn.setEnabled(False)
+
+            self._trigger_auto_reconnect()
+
+    def _trigger_auto_reconnect(self):
+        if self.is_reconnecting:
+            return
+        self.is_reconnecting = True
+        self.last_reconnect_start = time.time()
+        self.reconnect_attempts = getattr(self, 'reconnect_attempts', 0) + 1
+        logger.info(f"🔄 [AUTO-RECONNECT] Attempt #{self.reconnect_attempts}: Connecting to IBKR TWS/Gateway...")
+
+        def reconnect_task():
+            try:
+                host = self.host_edit.text().strip() or ENV["IBKR_HOST"]
+                try:
+                    port = int(self.port_edit.text())
+                except ValueError:
+                    port = int(ENV["IBKR_PORT"])
+                try:
+                    cid = int(self.client_edit.text())
+                except ValueError:
+                    cid = int(ENV["IBKR_CLIENT_ID"])
+
+                # Clean up old connection instance if any
+                if hasattr(self, 'ibapi') and self.ibapi:
+                    try:
+                        self.ibapi.disconnect()
+                    except Exception:
+                        pass
+                
+                time.sleep(2)
+                self.ibapi = IBApi()
+                for bot in self.bots.values():
+                    bot.ibapi = self.ibapi
+
+                self.ibapi.connect(host, port, clientId=cid)
+                threading.Thread(target=self.ibapi.run, daemon=True).start()
+
+                if self.ibapi.connected_event.wait(12):
+                    self.connected = True
+                    try:
+                        self.ibapi.reqPositions()
+                    except Exception as e:
+                        logger.error(f"Error requesting positions after auto-reconnect: {e}")
+
+                    try:
+                        self.ibapi.cash_ready_event.clear()
+                        self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds")
+                        if self.ibapi.cash_ready_event.wait(8):
+                            self.ibapi.last_cash_fetch = time.time()
+                    except Exception as e:
+                        logger.error(f"Error requesting account summary after auto-reconnect: {e}")
+
+                    QTimer.singleShot(0, lambda: self._on_auto_reconnect_success())
+                else:
+                    QTimer.singleShot(0, lambda: self._on_auto_reconnect_fail())
+            except Exception as e:
+                logger.error(f"Auto-reconnect task error: {e}")
+                QTimer.singleShot(0, lambda: self._on_auto_reconnect_fail())
+
+        threading.Thread(target=reconnect_task, daemon=True).start()
+
+    def _on_auto_reconnect_success(self):
+        self.is_reconnecting = False
+        self.connected = True
+        attempts = getattr(self, 'reconnect_attempts', 1)
+        self.reconnect_attempts = 0
+        self.status_label.setText("Connected")
+        self.status_label.setStyleSheet("color: green; font-weight: bold;")
+        self.conn_btn.setText("Disconnect")
+        self.conn_btn.setEnabled(True)
+        if not self.auto_trading:
+            self.trade_btn.setEnabled(True)
+        logger.info(f"✅ [AUTO-RECONNECT] Successfully reconnected to IBKR TWS/Gateway after {attempts} attempt(s)!")
+
+    def _on_auto_reconnect_fail(self):
+        self.is_reconnecting = False
+        self.connected = False
+        attempts = getattr(self, 'reconnect_attempts', 1)
+        self.status_label.setText("Reconnecting...")
+        self.status_label.setStyleSheet("color: orange; font-weight: bold;")
+        self.conn_btn.setText("Connect")
+        self.conn_btn.setEnabled(True)
+        logger.info(f"⏳ [AUTO-RECONNECT] Attempt #{attempts} failed (TWS rebooting/not ready). Retrying in 15 seconds...")
         
     #  Portfolio composition helpers
     # --------------------------------------------------------------
@@ -1011,8 +1124,12 @@ class TradingApp(QMainWindow):
             stock_p, etf_p, etc_p = self._calc_portfolio_composition()
             comp_str = f"{stock_p}% STOCK – {etf_p}% ETF – {etc_p}% ETC"
 
-            conn_text = "Connected" if self.connected else "Disconnected"
-            conn_color = "green" if self.connected else "red"
+            if getattr(self, 'is_reconnecting', False) or self.status_label.text() in ("Connecting...", "Reconnecting..."):
+                conn_text = "Reconnecting..." if not self.connected else "Connected"
+                conn_color = "orange" if not self.connected else "green"
+            else:
+                conn_text = "Connected" if self.connected else "Disconnected"
+                conn_color = "green" if self.connected else "red"
 
             self.status_label.setText(conn_text)
             self.status_label.setStyleSheet(f"color: {conn_color}; font-weight: bold;")
@@ -1539,8 +1656,11 @@ class TradingApp(QMainWindow):
 
     def trading_loop(self):
         while self.auto_trading:
-            if self.connected:
-                self.ibapi.reqPositions()
+            if self.connected and hasattr(self, 'ibapi') and self.ibapi and getattr(self.ibapi, 'isConnected', lambda: False)():
+                try:
+                    self.ibapi.reqPositions()
+                except Exception as e:
+                    logger.warning(f"Error requesting positions in trading loop: {e}")
                 time.sleep(3)
 
                 # 1. Evaluate and Execute Sell Orders Immediately (First Priority)

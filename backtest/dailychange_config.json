@@ -1,0 +1,12 @@
+{
+  "description": "50 custom stocks for dailychange backtest comparison",
+  "extra_stocks": [
+    "PLTR", "SMCI", "PANW", "CRWD", "NOW", "SNOW", "NET", "COIN",
+    "MSTR", "SQ", "SHOP", "UBER", "ABNB", "DIS", "PYPL", "INTU",
+    "LRCX", "KLAC", "AMAT", "NVO", "AZN", "GS", "MS", "C",
+    "AXP", "BLK", "PG", "PEP", "HD", "LOW", "TGT", "CAT",
+    "DE", "BA", "LMT", "RTX", "HON", "BKNG", "MAR", "SBUX",
+    "CMG", "MCD", "ORLY", "AZO", "MDLZ", "CL", "KMB", "GIS",
+    "ADM", "EL"
+  ]
+}

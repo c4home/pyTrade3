@@ -33,9 +33,22 @@ class IBApi(EWrapper, EClient):
         self.next_order_id += 1  # Increment for next use
         return current_id
     
+    def connectionClosed(self):
+        logger.warning("🚨 IBKR TWS/Gateway socket connection was closed by host.")
+        self.connected_event.clear()
+        self.cash_ready_event.clear()
+
     def error(self, reqId, errorCode, errorString, advancedOrderRejectJson="", *args, **kwargs):
-        # Ignore informational codes and order cancellation acknowledgment/not-found codes
-        if errorCode in [2104, 2106, 2158, 502, 504, 10147, 202]:
+        # Explicit connection status codes (e.g. 502, 504, 1100 connection lost/restored)
+        if errorCode in [502, 504, 1100, 1101, 1102]:
+            logger.warning(f"⚠️ IBKR Connection Event {reqId}: [{errorCode}] {errorString}")
+            if errorCode in [502, 504, 1100]:
+                self.connected_event.clear()
+                self.cash_ready_event.clear()
+            return
+
+        # Ignore minor informational notification codes and order cancellation acknowledgment
+        if errorCode in [2104, 2106, 2158, 10147, 202]:
             if errorCode in [10147, 202] and hasattr(self, 'order_callbacks'):
                 self.order_callbacks.pop(reqId, None)
             return

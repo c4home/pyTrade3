@@ -134,6 +134,8 @@ def run_backtest_with_params(symbol, config, data, params):
     # Option 4: minimum raw base technical score required before analyst bonus can trigger a buy
     DIP_BASE_MIN = params.get('dip_base_min', 5)   # DIP: RSI+BB+Trend must be >= 5
     MOM_BASE_MIN = params.get('mom_base_min', 6)   # MOM: MACD+ADX+Vol+RSI must be >= 6
+    DAILY_CHANGE_CAP = params.get('daily_change_cap', 0.05) # None or float (e.g. 0.05 for 5%)
+    DAILY_CHANGE_MIN = params.get('daily_change_min', None) # None or float (e.g. -0.05 for -5%)
     
     trades = []
     position = None
@@ -209,7 +211,10 @@ def run_backtest_with_params(symbol, config, data, params):
 
         if last_buy_day and (date - last_buy_day).days < 1: continue
         if last_sell_day and (date - last_sell_day).days < 1: continue
-        if prev_close > 0 and (price - prev_close) / prev_close > 0.05: continue
+        if prev_close > 0:
+            chg = (price - prev_close) / prev_close
+            if DAILY_CHANGE_CAP is not None and chg > DAILY_CHANGE_CAP: continue
+            if DAILY_CHANGE_MIN is not None and chg < DAILY_CHANGE_MIN: continue
         if rsi >= 70: continue
         if i >= 3 and data.iloc[i - 3]['Close'] > 0 and (price - data.iloc[i - 3]['Close']) / data.iloc[i - 3]['Close'] > 0.15: continue
 
@@ -220,8 +225,10 @@ def run_backtest_with_params(symbol, config, data, params):
                 drop = (price - prev_close) / prev_close
                 if drop > -0.07 and not (drop < -0.03 and rsi > 45): buy_signal = True
         if strategy == "MOMENTUM" and score >= MOM_TH and base_score >= MOM_BASE_MIN:
-            if prev_close > 0 and (price - prev_close) / prev_close <= 0.05:
-                if i >= 2 and data.iloc[i - 2]['Close'] > 0 and (prev_close - data.iloc[i - 2]['Close']) / data.iloc[i - 2]['Close'] <= 0.15:
+            if prev_close > 0:
+                chg = (price - prev_close) / prev_close
+                mom_ok = (DAILY_CHANGE_CAP is None or chg <= DAILY_CHANGE_CAP) and (DAILY_CHANGE_MIN is None or chg >= DAILY_CHANGE_MIN)
+                if mom_ok and i >= 2 and data.iloc[i - 2]['Close'] > 0 and (prev_close - data.iloc[i - 2]['Close']) / data.iloc[i - 2]['Close'] <= 0.15:
                     buy_signal = True
 
         if buy_signal:
