@@ -1344,7 +1344,7 @@ class TradingApp(QMainWindow):
                     bot.today_volume,
                     bot.quantity,
                     bot.bought_price,
-                    bot.current_value,
+                    (bot.current_value, bot.smart_score, getattr(bot, 'target_upside_pct', 0.0)),
                     bot.pnl_percent,
                     bot.cash_left,
                     bot.max_amount,
