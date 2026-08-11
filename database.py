@@ -1,3 +1,4 @@
+import shutil
 from config import *
 # ==================== DATABASE MANAGER ====================
 class DatabaseManager:
@@ -26,18 +27,57 @@ class DatabaseManager:
         """Context manager for database operations with automatic commit/rollback"""
         with self._lock:
             conn = self.connection
-            cursor = conn.cursor()
             try:
+                cursor = conn.cursor()
                 yield cursor
                 conn.commit()
+            except sqlite3.DatabaseError as e:
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+                err_str = str(e).lower()
+                if "malformed" in err_str or "disk image" in err_str:
+                    logger.critical(f"🚨 Corrupt SQLite DB image detected: {e}. Auto-rebuilding database...")
+                    self._recover_corrupt_database()
+                    conn = self.connection
+                    cursor = conn.cursor()
+                    yield cursor
+                    conn.commit()
+                else:
+                    raise e
             except Exception as e:
-                conn.rollback()
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
                 raise e
+
+    def _recover_corrupt_database(self):
+        """Backup corrupt database and re-initialize a fresh schema"""
+        self.close()
+        try:
+            timestamp = int(time.time())
+            corrupt_bak = f"{self.db_path}.corrupt_{timestamp}"
+            if os.path.exists(self.db_path):
+                shutil.move(self.db_path, corrupt_bak)
+                logger.warning(f"Moved malformed database to {corrupt_bak}")
+            for ext in ["-wal", "-shm"]:
+                wal_file = f"{self.db_path}{ext}"
+                if os.path.exists(wal_file):
+                    os.remove(wal_file)
+        except Exception as ex:
+            logger.error(f"Error resetting corrupt DB files: {ex}")
+        # Re-initialize DB tables
+        self.init_database()
 
     def close(self):
         """Close the thread-local connection"""
         if hasattr(self._local, 'conn') and self._local.conn:
-            self._local.conn.close()
+            try:
+                self._local.conn.close()
+            except Exception:
+                pass
             self._local.conn = None
 
     def init_database(self):

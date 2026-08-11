@@ -291,7 +291,7 @@ class TradingApp(QMainWindow):
 
                     try:
                         self.ibapi.cash_ready_event.clear()
-                        self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds")
+                        self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds,DailyPnL,UnrealizedPnL,RealizedPnL")
                         if self.ibapi.cash_ready_event.wait(8):
                             self.ibapi.last_cash_fetch = time.time()
                     except Exception as e:
@@ -369,6 +369,84 @@ class TradingApp(QMainWindow):
         etf_pct   = (etf_val   / total_port) * 100
         etc_pct   = (etc_val   / total_port) * 100
         return round(stock_pct, 1), round(etf_pct, 1), round(etc_pct, 1)
+
+    def _calc_total_positions_pnl_eur(self):
+        """Calculate total unrealized P&L in EUR across all active positions in self.bots"""
+        total_pnl_eur = 0.0
+        usd_to_eur = self._get_usd_to_eur_rate()
+
+        for bot in self.bots.values():
+            if bot.quantity <= 0 or bot.bought_price <= 0:
+                continue
+            
+            price = bot.market_value
+            if price <= 0:
+                continue
+                
+            bought = bot.bought_price
+            if bot.currency == "GBp":
+                bought_comp = bought * 100.0
+                bot_pnl = (price - bought_comp) * bot.quantity / 100.0
+            else:
+                bot_pnl = (price - bought) * bot.quantity
+
+            curr = bot.currency.upper()
+            if curr == "EUR":
+                pnl_eur = bot_pnl
+            else:
+                rate = self.exchange_manager.get_rate(curr)
+                if rate > 0:
+                    pnl_eur = bot_pnl / rate
+                else:
+                    pnl_eur = bot_pnl * usd_to_eur
+
+            total_pnl_eur += pnl_eur
+
+        return total_pnl_eur
+
+    def _calc_total_daily_pnl_eur(self):
+        """Calculate total Daily P&L (since prior close) in EUR across all active positions in self.bots"""
+        total_daily_pnl_eur = 0.0
+        usd_to_eur = self._get_usd_to_eur_rate()
+
+        for bot in self.bots.values():
+            if bot.quantity <= 0:
+                continue
+
+            # Compute daily percentage change (matching table Chg% column)
+            price_pct = 0.0
+            if bot.previous_close > 0:
+                price_pct = ((bot.market_value - bot.previous_close) / bot.previous_close) * 100
+                if getattr(bot, 'is_market_open', None) and not bot.is_market_open():
+                    if not getattr(bot, 'is_last_date_today', True) or abs(price_pct) < 0.0001:
+                        db_close = getattr(bot, 'day_before_yesterday_close', 0)
+                        if db_close > 0:
+                            price_pct = ((bot.previous_close - db_close) / db_close) * 100
+
+            if abs(price_pct) < 0.000001:
+                continue
+
+            # Compute position value in EUR
+            val = bot.current_value
+            if val <= 0:
+                val = bot.quantity * bot.market_value
+                if bot.currency == "GBp":
+                    val = val / 100.0
+
+            curr = bot.currency.upper()
+            if curr == "EUR":
+                val_eur = val
+            else:
+                rate = self.exchange_manager.get_rate(curr)
+                if rate > 0:
+                    val_eur = val / rate
+                else:
+                    val_eur = val * usd_to_eur
+
+            # Daily P&L contribution in EUR
+            total_daily_pnl_eur += val_eur * (price_pct / 100.0)
+
+        return total_daily_pnl_eur
     
     def _apply_default_sort(self):
         if self.table.rowCount() == 0:
@@ -397,7 +475,7 @@ class TradingApp(QMainWindow):
         if not self.connected:
             return
         self.ibapi.cash_ready_event.clear()
-        self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds")
+        self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds,DailyPnL,UnrealizedPnL,RealizedPnL")
         if self.ibapi.cash_ready_event.wait(5):
             self.rate_label.setText(
                 f"EUR/USD: {self.exchange_manager.get_eur_usd_rate():.3f}  "
@@ -712,7 +790,7 @@ class TradingApp(QMainWindow):
         # Row 2: Portfolio Dashboard Banner
         dash_row_layout = QHBoxLayout()
         
-        self.portfolio_label = QLabel("Total Value: €--  |  Cash: €--  |  Portfolio: €--  |  Allocation: --")
+        self.portfolio_label = QLabel("Total: €--  |  Daily: €--  |  Unrealized: €--  |  Cash: €--  |  Portfolio: €--  |  Allocation: --")
         self.portfolio_label.setStyleSheet("font-size: 13px; font-weight: 500; color: #dfdfdf;")
         dash_row_layout.addWidget(self.portfolio_label)
         
@@ -1086,7 +1164,7 @@ class TradingApp(QMainWindow):
                         self.ibapi.cancelAccountSummary(9001)
                         time.sleep(0.5)
                         self.ibapi.cash_ready_event.clear()
-                        self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds")
+                        self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds,DailyPnL,UnrealizedPnL,RealizedPnL")
                         self.ibapi.cash_ready_event.wait(15)
                     except Exception as e:
                         logger.error(f"Error fetching cash summary in background: {e}")
@@ -1120,6 +1198,29 @@ class TradingApp(QMainWindow):
             port_str   = f"{port_val:,.0f}" if self.connected else "--"
             total_str  = f"{total_val:,.0f}" if self.connected else "--"
 
+            # ---------- 1. DAILY P&L (from IBKR reqPnL or calculated from prior close) ----------
+            raw_daily_pnl = getattr(self.ibapi, 'daily_pnl', 0.0) if self.connected else 0.0
+            if raw_daily_pnl == 0.0:
+                raw_daily_pnl = self._calc_total_daily_pnl_eur()
+
+            daily_sign = "+" if raw_daily_pnl > 0 else ""
+            daily_pct = (raw_daily_pnl / total_val * 100) if total_val > 0 else 0.0
+            daily_color = "#2ecc71" if raw_daily_pnl > 0 else ("#e74c3c" if raw_daily_pnl < 0 else "#aaaaaa")
+            daily_pnl_display = f"Daily: <span style='color: {daily_color}; font-weight: bold;'>{daily_sign}€{raw_daily_pnl:,.2f} ({daily_sign}{daily_pct:.2f}%)</span>"
+
+            # ---------- 2. UNREALIZED P&L (Total open position profit/loss) ----------
+            raw_unreal_pnl = getattr(self.ibapi, 'unrealized_pnl', 0.0) if self.connected else 0.0
+            if raw_unreal_pnl == 0.0 and hasattr(self.ibapi, 'positions') and self.ibapi.positions:
+                with getattr(self.ibapi, 'data_lock', threading.Lock()):
+                    raw_unreal_pnl = sum(pos.get('unrealizedPNL', 0.0) for pos in self.ibapi.positions.values())
+            if raw_unreal_pnl == 0.0:
+                raw_unreal_pnl = self._calc_total_positions_pnl_eur()
+
+            unreal_sign = "+" if raw_unreal_pnl > 0 else ""
+            unreal_pct = (raw_unreal_pnl / total_val * 100) if total_val > 0 else 0.0
+            unreal_color = "#2ecc71" if raw_unreal_pnl > 0 else ("#e74c3c" if raw_unreal_pnl < 0 else "#aaaaaa")
+            unreal_pnl_display = f"Unrealized: <span style='color: {unreal_color}; font-weight: bold;'>{unreal_sign}€{raw_unreal_pnl:,.2f} ({unreal_sign}{unreal_pct:.2f}%)</span>"
+
             # ----- % composition -----
             stock_p, etf_p, etc_p = self._calc_portfolio_composition()
             comp_str = f"{stock_p}% STOCK – {etf_p}% ETF – {etc_p}% ETC"
@@ -1142,11 +1243,11 @@ class TradingApp(QMainWindow):
                 else:
                     cash_display = f"Cash: <b>€{cash_str}</b>"
                 self.portfolio_label.setText(
-                    f"Total Value: <b>€{total_str}</b>  |  {cash_display}  |  "
-                    f"Portfolio: <b>€{port_str}</b>  |  Allocation: <b>{comp_str}</b>"
+                    f"Total: <b>€{total_str}</b>  |  {daily_pnl_display}  |  {unreal_pnl_display}  |  {cash_display}  |  "
+                    f"Port: <b>€{port_str}</b>  |  Alloc: <b>{comp_str}</b>"
                 )
             else:
-                self.portfolio_label.setText("Total Value: €--  |  Cash: €--  |  Portfolio: €--  |  Allocation: --")
+                self.portfolio_label.setText("Total: €--  |  Daily: €--  |  Unrealized: €--  |  Cash: €--  |  Port: €--  |  Alloc: --")
             # ---------- 4. TABLE ----------
             selected_symbol = None
             selected_items = self.table.selectedItems()
@@ -1574,7 +1675,7 @@ class TradingApp(QMainWindow):
                         try:
                             # ---- INITIAL CASH ----
                             self.ibapi.cash_ready_event.clear()
-                            self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds")
+                            self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds,DailyPnL,UnrealizedPnL,RealizedPnL")
                             if self.ibapi.cash_ready_event.wait(8):
                                 self.ibapi.last_cash_fetch = time.time()
                         except Exception as e:
@@ -1639,7 +1740,7 @@ class TradingApp(QMainWindow):
         # 3. Request fresh values from IBKR if connected
         if self.connected and self.ibapi:
             try:
-                self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,AvailableFunds")
+                self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,AvailableFunds,DailyPnL,UnrealizedPnL,RealizedPnL")
                 self.ibapi.reqPositions()
             except Exception as e:
                 logger.error(f"Error requesting manual update from IBKR: {e}")

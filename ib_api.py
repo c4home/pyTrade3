@@ -1,3 +1,4 @@
+import math
 from config import *
 # ==================== IBKR API ====================
 class IBApi(EWrapper, EClient):
@@ -11,16 +12,32 @@ class IBApi(EWrapper, EClient):
         self.order_callbacks = {}
         self.currency_symbol = "$"
         
-        # ---- CASH ----
+        # ---- CASH & PNL ----
         self.net_liquidation = 0.0
         self.total_cash = 0.0
         self.available_cash = 0.0 
-        self.portfolio_value = 0.0  
+        self.portfolio_value = 0.0
+        self.daily_pnl = 0.0
+        self.unrealized_pnl = 0.0
+        self.realized_pnl = 0.0
+        self.account_id = ""
         self.cash_ready_event = threading.Event()
         self.last_cash_fetch = 0
         self.cash_fetch_interval = 20      # seconds
         self.max_cash_cache_age = 10800
         self.last_ibkr_update = 0
+
+    def managedAccounts(self, accountsList: str):
+        with self.data_lock:
+            self.last_ibkr_update = time.time()
+            if accountsList:
+                self.account_id = accountsList.split(',')[0]
+                logger.info(f"Connected IBKR Account: {self.account_id}")
+                try:
+                    self.reqPnL(7001, self.account_id, "")
+                    self.reqAccountUpdates(True, self.account_id)
+                except Exception as e:
+                    logger.warning(f"Could not request IBKR PnL stream: {e}")
 
     def nextValidId(self, orderId: int):
         self.next_order_id = orderId
@@ -66,14 +83,35 @@ class IBApi(EWrapper, EClient):
                 logger.error(f"Failed to send cancel request for order {reqId}: {e}")
         
     def accountSummary(self, reqId: int, account: str, tag: str, value: str, currency: str):
-            with self.data_lock:
-                self.last_ibkr_update = time.time()
-                if tag == "NetLiquidation":
-                    self.net_liquidation = float(value)
-                elif tag == "TotalCashValue":
-                    self.total_cash = float(value)
-                elif tag == "AvailableFunds":
-                    self.available_cash = float(value)
+        with self.data_lock:
+            self.last_ibkr_update = time.time()
+            self.account_id = account
+            try:
+                val = float(value)
+            except ValueError:
+                val = 0.0
+            if tag == "NetLiquidation":
+                self.net_liquidation = val
+            elif tag == "TotalCashValue":
+                self.total_cash = val
+            elif tag == "AvailableFunds":
+                self.available_cash = val
+            elif tag == "DailyPnL":
+                self.daily_pnl = val
+            elif tag == "UnrealizedPnL":
+                self.unrealized_pnl = val
+            elif tag == "RealizedPnL":
+                self.realized_pnl = val
+
+    def pnl(self, reqId: int, dailyPnL: float, unrealizedPnL: float, realizedPnL: float):
+        with self.data_lock:
+            self.last_ibkr_update = time.time()
+            if dailyPnL is not None and not math.isnan(dailyPnL):
+                self.daily_pnl = float(dailyPnL)
+            if unrealizedPnL is not None and not math.isnan(unrealizedPnL):
+                self.unrealized_pnl = float(unrealizedPnL)
+            if realizedPnL is not None and not math.isnan(realizedPnL):
+                self.realized_pnl = float(realizedPnL)
 
     def accountSummaryEnd(self, reqId: int):
         with self.data_lock:
