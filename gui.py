@@ -1383,17 +1383,19 @@ class TradingApp(QMainWindow):
 
                 if bot.quantity > 0 and bot.bought_price > 0 and peak_pnl >= target_pnl_pct:
                     _atr_pct = (bot.get_atr_14() / bot.market_value) * 100 if bot.market_value > 0 else 0
-                    _trail_drop = max(1.0, min(_atr_pct * 1.0, 3.0))
+                    _trail_drop = max(0.5, min(_atr_pct * 0.5, 1.5))
                     _trail_activation = peak_pnl - _trail_drop
                     trail_sell_price = bot.bought_price * (1 + _trail_activation / 100)
-                    trail_sell_display = f"{bot.currency_symbol}{trail_sell_price:.2f}"
+                    _sign = "+" if _trail_activation > 0 else ""
+                    trail_sell_display = f"{bot.currency_symbol}{trail_sell_price:.2f} ({_sign}{_trail_activation:.2f}%)"
                     trail_sell_sort = trail_sell_price
                 elif bot.quantity > 0 and bot.bought_price > 0 and peak_pnl >= 5.0:
-                    # Protective Trailing Stop (locks 50% of peak gains once peak >= 5%)
-                    _trail_drop = peak_pnl * 0.5
+                    # Protective Trailing Stop (locks 75% of peak gains once peak >= 5%)
+                    _trail_drop = peak_pnl * 0.25
                     _trail_activation = peak_pnl - _trail_drop
                     trail_sell_price = bot.bought_price * (1 + _trail_activation / 100)
-                    trail_sell_display = f"{bot.currency_symbol}{trail_sell_price:.2f}"
+                    _sign = "+" if _trail_activation > 0 else ""
+                    trail_sell_display = f"{bot.currency_symbol}{trail_sell_price:.2f} ({_sign}{_trail_activation:.2f}%)"
                     trail_sell_sort = trail_sell_price
                 else:
                     trail_sell_display = "--"

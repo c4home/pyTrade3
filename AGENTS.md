@@ -82,10 +82,10 @@ Sell evaluation is prioritized over buys and bypasses buy cooldowns. A sell orde
 
 ```text
 1. Dynamic ATR Trailing Profit Lock   (highest_pnl >= dynamic_profit_target)
-   └─ Sell if pnl_percent <= highest_pnl - dynamic_trail_drop (1% - 3% drop based on ATR)
+   └─ Sell if pnl_percent <= highest_pnl - dynamic_trail_drop (0.5% - 1.5% drop based on 0.5x ATR)
 
 2. Proportional Protective Trailing   (highest_pnl >= 5.0%)
-   └─ Sell if pnl_percent <= highest_pnl * 0.5 (locks in 50% of peak gains)
+   └─ Sell if pnl_percent <= highest_pnl * 0.75 floor (locks in 75% of peak gains, max 25% drop)
 
 3. Dynamic ATR Stop Loss              (pnl_percent <= dynamic_stop_loss)
    └─ DIP Stop Cap: -7.0% | MOMENTUM Stop Cap: -9.0%

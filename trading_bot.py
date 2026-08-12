@@ -1549,7 +1549,7 @@ class TradingBot:
             # 1. Dynamic ATR Trailing Profit Lock
             profit_target_pct = self.dynamic_profit_target * 100
             current_atr_pct = (self.get_atr_14() / self.market_value) * 100 if self.market_value > 0 else 0
-            dynamic_trail_drop = max(1.0, min(current_atr_pct * 1.0, 3.0))
+            dynamic_trail_drop = max(0.5, min(current_atr_pct * 0.5, 1.5))
 
             if self.highest_pnl >= profit_target_pct:
                 trail_activation = self.highest_pnl - dynamic_trail_drop
@@ -1559,10 +1559,10 @@ class TradingBot:
                     self.last_trade_reason = reason_msg
                     return 'SELL'
                     
-            # 1.5 Proportional Protective Trailing Stop (lock in gains once > 5%)
+            # 1.5 Proportional Protective Trailing Stop (lock in 75% of gains once > 5%)
             elif self.highest_pnl >= 5.0:
-                # Give back at most 50% of peak gains (e.g. peak 4% → sell at 2%, peak 6% → sell at 3%)
-                protective_trail_drop = self.highest_pnl * 0.5
+                # Give back at most 25% of peak gains (locks in 75% of peak gains)
+                protective_trail_drop = self.highest_pnl * 0.25
                 protective_floor = self.highest_pnl - protective_trail_drop
                 if self.pnl_percent <= protective_floor:
                     reason_msg = f"Protective Stop Triggered at {self.pnl_percent:.2f}% (Peak: {self.highest_pnl:.2f}%, Trail: {protective_trail_drop:.2f}%)"
