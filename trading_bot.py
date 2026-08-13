@@ -1406,7 +1406,7 @@ class TradingBot:
             elif self.market_value > 10 and temp_target < 10:
                 temp_target = temp_target * 100
 
-            self.target_upside_pct = (temp_target - self.market_value) / self.market_value
+            self.target_upside_pct = ((temp_target - self.market_value) / self.market_value) * 100
 
             # --- COMBINED UNDER/OVERVALUATION LOGIC ---
             
