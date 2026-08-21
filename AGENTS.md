@@ -60,7 +60,7 @@ smart_score = min(12, max(0, base_score + analyst_modifier + target_bonus + etf_
 
 Before executing any **BUY** order, the bot checks and enforces these strict safety guards:
 
-1. **Market Open Cooldown:** No automated buys during the first **15 minutes** after market open.
+1. **Market Open Cooldown:** No automated buys during the first **30 minutes** after market open.
 2. **24-Hour Trade Cooldown:** Min **24 hours** between consecutive buy/sell trades on the same stock.
 3. **Earnings Blackout:** Skip buys **3 days before** and **2 days after** scheduled earnings announcements.
 4. **Daily Rise Cap:** Block buys if the stock rose **> +5.0%** today.

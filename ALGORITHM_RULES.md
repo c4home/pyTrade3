@@ -104,7 +104,7 @@ Compares current market price against cached bank notes / UBS price targets:
 ## 📥 4. Entry Logic & Buy Conditions
 
 ### A. Global Pre-Buy Safeguards (All Strategies)
-* **Market Open Cooldown:** No automated buys in the first 15 minutes after market open.
+* **Market Open Cooldown:** No automated buys in the first 30 minutes after market open.
 * **Trade Cooldown:** 24-hour minimum gap between consecutive buy/sell trades per stock.
 * **Earnings Guard:** No buys 3 days before or 2 days after earnings announcements.
 * **Overbought Cap:** No buys if `RSI >= 70`.

@@ -173,7 +173,7 @@ class TradingBot:
         except:
             return False
 
-    def is_market_cooling_down(self, cooldown_minutes=15):
+    def is_market_cooling_down(self, cooldown_minutes=30):
         """Returns True if the market just opened and is within the cooldown period."""
         try:
             tz = ZoneInfo(self.exchange_tz_name)
@@ -184,10 +184,17 @@ class TradingBot:
 
             if 'America/New_York' in self.exchange_tz_name:
                 market_open = dtime(9, 30)
-                cooldown_end = dtime(9, 30 + cooldown_minutes)
+                # Compute cooldown end handling minute overflow
+                end_min = 30 + cooldown_minutes
+                end_hour = 9 + (end_min // 60)
+                end_min = end_min % 60
+                cooldown_end = dtime(end_hour, end_min)
             else:
                 market_open = dtime(9, 0)
-                cooldown_end = dtime(9, cooldown_minutes)
+                end_min = cooldown_minutes
+                end_hour = 9 + (end_min // 60)
+                end_min = end_min % 60
+                cooldown_end = dtime(end_hour, end_min)
 
             return market_open <= current_time < cooldown_end
         except:
@@ -1518,9 +1525,9 @@ class TradingBot:
                 logger.info(msg)
                 self._last_sell_log[key] = now
                 
-        # 0. Market Cooldown Check (Wait 15 mins after open to avoid volatility traps)
+        # 0. Market Cooldown Check (Wait 30 mins after open to avoid volatility traps)
         if self.is_market_cooling_down():
-            _throttled_sell_log("market_cooldown", f"[{self.stock_id}] Market Open Cooldown (15m): Pausing automated sells.", interval=60)
+            _throttled_sell_log("market_cooldown", f"[{self.stock_id}] Market Open Cooldown (30m): Pausing automated sells.", interval=60)
             return None
 
         if self.quantity > 0:
@@ -1647,7 +1654,7 @@ class TradingBot:
             return None
             
         if self.is_market_cooling_down():
-            logger.info(f"[{self.stock_id}] Market Open Cooldown (15m): Pausing automated buys.")
+            logger.info(f"[{self.stock_id}] Market Open Cooldown (30m): Pausing automated buys.")
             return None
 
         # 3. Daily growth check (block buy if stock rose more than 5% today)
@@ -1759,7 +1766,7 @@ class TradingBot:
                 pass
 
         if self.is_market_cooling_down():
-            return "market open 15m cooldown active"
+            return "market open 30m cooldown active"
 
         # Check cash availability
         usable_cash = getattr(self.ibapi, 'available_cash', 0) - self.min_cash
