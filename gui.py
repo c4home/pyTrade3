@@ -502,6 +502,7 @@ class TradingApp(QMainWindow):
                 ma = "N/A"
                 macd = "N/A"
                 earnings = "N/A"
+                company_name = ""
             else:
                 score = bot.smart_score
                 rsi = f"{bot.rsi_value:.1f}"
@@ -518,6 +519,18 @@ class TradingApp(QMainWindow):
                 macd = f"{prev_macd} → {bot.macd_signal}" if prev_macd and prev_macd != bot.macd_signal else bot.macd_signal
                 
                 earnings = bot.next_earnings_date or "None"
+                company_name = getattr(bot, 'company_name', '')
+
+            if not company_name or company_name == "Loading...":
+                if hasattr(self, 'db_manager') and self.db_manager:
+                    try:
+                        c_info = self.db_manager.get_company_info(symbol)
+                        if c_info and c_info.get("company_name"):
+                            company_name = c_info["company_name"]
+                    except Exception:
+                        pass
+            if not company_name:
+                company_name = symbol
                 
             # 1. Currency symbol ($, €, £ …)
             curr_symbol = self.exchange_manager.get_currency_symbol(native_currency)
@@ -599,6 +612,7 @@ class TradingApp(QMainWindow):
             TRADE EXECUTED - pyTrade BOT
 
             Symbol     : {symbol}
+            Company    : {company_name}
             Action     : {action}
             Quantity   : {quantity}
             Price      : {curr_symbol}{price:.2f}
