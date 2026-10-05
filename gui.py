@@ -197,6 +197,13 @@ class TradingApp(QMainWindow):
         self.reconnect_timer = QTimer()
         self.reconnect_timer.timeout.connect(self._check_auto_reconnect)
         self.reconnect_timer.start(15000)
+
+        # 5. IBKR Connection Watchdog (gửi mail cảnh báo khi mất kết nối/logged out trừ T7, CN)
+        self.app_start_time = time.time()
+        self.ibkr_alert_sent = False
+        self.last_ibkr_alert_time = 0
+        self.ibkr_disconnected_since = None
+        self.last_ibkr_ping_time = 0
         
     def _format_last_run(self, ts_str):
         """Convert a stored epoch timestamp string to a human-readable label."""
@@ -220,6 +227,9 @@ class TradingApp(QMainWindow):
 
     def _check_auto_reconnect(self):
         """Monitors IBKR TWS/Gateway connection and automatically reconnects if lost (e.g. midnight reboot)."""
+        # 1. Check IBKR connection health watchdog & send alert if logged out for too long
+        self._check_ibkr_watchdog()
+
         if self.is_reconnecting:
             if time.time() - getattr(self, 'last_reconnect_start', 0) > 45:
                 logger.warning("⚠️ Auto-reconnect task timed out (>45s). Resetting lock for next retry cycle...")
@@ -246,6 +256,15 @@ class TradingApp(QMainWindow):
             self.conn_btn.setEnabled(False)
 
             self._trigger_auto_reconnect()
+        else:
+            # Heartbeat ping every 30s when connected to verify TWS responsiveness
+            now = time.time()
+            if now - getattr(self, 'last_ibkr_ping_time', 0) >= 30:
+                self.last_ibkr_ping_time = now
+                try:
+                    self.ibapi.reqCurrentTime()
+                except Exception as e:
+                    logger.debug(f"Heartbeat reqCurrentTime error: {e}")
 
     def _trigger_auto_reconnect(self):
         if self.is_reconnecting:
@@ -317,6 +336,9 @@ class TradingApp(QMainWindow):
         self.conn_btn.setEnabled(True)
         if not self.auto_trading:
             self.trade_btn.setEnabled(True)
+        if getattr(self, 'ibkr_alert_sent', False):
+            self._on_ibkr_reconnected()
+        self.ibkr_disconnected_since = None
         logger.info(f"✅ [AUTO-RECONNECT] Successfully reconnected to IBKR TWS/Gateway after {attempts} attempt(s)!")
 
     def _on_auto_reconnect_fail(self):
@@ -328,6 +350,185 @@ class TradingApp(QMainWindow):
         self.conn_btn.setText("Connect")
         self.conn_btn.setEnabled(True)
         logger.info(f"⏳ [AUTO-RECONNECT] Attempt #{attempts} failed (TWS rebooting/not ready). Retrying in 15 seconds...")
+
+    # --------------------------------------------------------------
+    #  IBKR Connection Watchdog & Email Alerts (Excluding Weekends)
+    # --------------------------------------------------------------
+    def _check_ibkr_watchdog(self):
+        """
+        Monitors IBKR connection status and sends an alert email if IBKR is logged out
+        or no signal has been received for too long (default 15 minutes).
+        Rule: Excludes Saturday and Sunday.
+        """
+        now = time.time()
+        now_dt = datetime.now()
+
+        # Rule: Exclude Saturday (weekday 5) and Sunday (weekday 6)
+        if now_dt.weekday() in (5, 6):
+            self.ibkr_alert_sent = False
+            self.ibkr_disconnected_since = None
+            return
+
+        # Only monitor if auto_connect or auto_trading is enabled (bot is expected to run)
+        if not (self.auto_connect_cb.isChecked() or self.auto_trading):
+            self.ibkr_disconnected_since = None
+            return
+
+        try:
+            timeout_minutes = int(ENV.get("IBKR_DISCONNECT_ALERT_MINUTES") or 15)
+        except (ValueError, TypeError):
+            timeout_minutes = 15
+        timeout_seconds = timeout_minutes * 60
+
+        is_connected = False
+        if hasattr(self, 'ibapi') and self.ibapi and hasattr(self.ibapi, 'isConnected'):
+            try:
+                is_connected = self.ibapi.isConnected()
+            except Exception:
+                is_connected = False
+
+        has_issue = False
+        duration_minutes = 0
+        issue_reason = ""
+
+        if not is_connected:
+            if not self.ibkr_disconnected_since:
+                self.ibkr_disconnected_since = now
+            elapsed = now - self.ibkr_disconnected_since
+            if elapsed >= timeout_seconds:
+                has_issue = True
+                duration_minutes = int(elapsed // 60)
+                issue_reason = f"Mất kết nối IBKR TWS/Gateway liên tục trong {duration_minutes} phút"
+        else:
+            # Socket is connected, check when was the last signal/heartbeat from IBKR
+            last_update = getattr(self.ibapi, 'last_ibkr_update', 0)
+            if last_update > 0:
+                elapsed = now - last_update
+                if elapsed >= timeout_seconds:
+                    has_issue = True
+                    duration_minutes = int(elapsed // 60)
+                    issue_reason = f"Không nhận được tín hiệu/heartbeat từ IBKR trong {duration_minutes} phút"
+                else:
+                    self.ibkr_disconnected_since = None
+                    if getattr(self, 'ibkr_alert_sent', False):
+                        self._on_ibkr_reconnected()
+            else:
+                elapsed = now - getattr(self, 'app_start_time', now)
+                if elapsed >= timeout_seconds:
+                    has_issue = True
+                    duration_minutes = int(elapsed // 60)
+                    issue_reason = f"Chưa nhận được tín hiệu IBKR ban đầu sau {duration_minutes} phút"
+
+        if has_issue:
+            last_alert = getattr(self, 'last_ibkr_alert_time', 0)
+            # Send alert if not sent yet, or send a reminder every 60 minutes while still disconnected
+            if not getattr(self, 'ibkr_alert_sent', False) or (now - last_alert >= 3600):
+                self.ibkr_alert_sent = True
+                self.last_ibkr_alert_time = now
+                logger.warning(f"🚨 [IBKR WATCHDOG] {issue_reason}. Gửi email cảnh báo...")
+                executor.submit(self._send_ibkr_disconnect_email, duration_minutes, issue_reason)
+
+    def _on_ibkr_reconnected(self):
+        """Called when IBKR reconnects after an alert was sent."""
+        logger.info("✅ [IBKR WATCHDOG] IBKR connection restored.")
+        self.ibkr_alert_sent = False
+        self.ibkr_disconnected_since = None
+        executor.submit(self._send_ibkr_recovery_email)
+
+    def _send_ibkr_disconnect_email(self, duration_minutes, reason):
+        try:
+            SMTP_SERVER = ENV.get("SMTP_SERVER")
+            SMTP_PORT = ENV.get("SMTP_PORT")
+            SENDER_EMAIL = ENV.get("SENDER_EMAIL")
+            SENDER_PASS = ENV.get("SENDER_EMAIL_PASS")
+            RECEIVER_EMAIL = ENV.get("RECEIVER_EMAIL")
+
+            if not (SMTP_SERVER and SENDER_EMAIL and SENDER_PASS and RECEIVER_EMAIL):
+                logger.warning("Cannot send IBKR alert email: SMTP settings not configured.")
+                return False
+
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            last_signal_str = "--"
+            if hasattr(self, 'ibapi') and getattr(self.ibapi, 'last_ibkr_update', 0) > 0:
+                last_signal_str = datetime.fromtimestamp(self.ibapi.last_ibkr_update).strftime("%Y-%m-%d %H:%M:%S")
+
+            subject = f"⚠️ [CẢNH BÁO] IBKR Log Out / Mất kết nối quá {duration_minutes} phút - pyTrade3"
+            body = f"""
+CẢNH BÁO KẾT NỐI IBKR - pyTrade3 BOT
+
+Hệ thống phát hiện tài khoản IBKR đã mất kết nối hoặc không nhận được tín hiệu.
+
+Chi tiết:
+- Trạng thái        : {reason}
+- Thời gian gián đoạn: ~{duration_minutes} phút
+- Thời điểm phát hiện: {now_str} (CET)
+- Tín hiệu cuối IBKR : {last_signal_str}
+- Chế độ Bot        : {"Đang bật Auto-Trading" if self.auto_trading else "Chế độ Standby / Manual"}
+
+HÀNH ĐỘNG CẦN THIẾT:
+Vui lòng đăng nhập lại vào IBKR (TWS hoặc IB Gateway) và xác thực 2FA để bot có thể tiếp tục tự động theo dõi và khớp lệnh!
+
+pyTrade3 Watchdog System
+""".strip()
+
+            msg = MIMEText(body, 'plain', 'utf-8')
+            msg['Subject'] = subject
+            msg['From'] = SENDER_EMAIL
+            msg['To'] = RECEIVER_EMAIL
+
+            with smtplib.SMTP(SMTP_SERVER, int(SMTP_PORT), timeout=10) as server:
+                server.starttls()
+                server.login(SENDER_EMAIL, SENDER_PASS)
+                server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
+
+            logger.info(f"IBKR disconnect alert email sent successfully to {RECEIVER_EMAIL}.")
+            return True
+        except Exception as e:
+            logger.error(f"[EMAIL ERROR] Failed to send IBKR disconnect alert: {e}")
+            return False
+
+    def _send_ibkr_recovery_email(self):
+        try:
+            SMTP_SERVER = ENV.get("SMTP_SERVER")
+            SMTP_PORT = ENV.get("SMTP_PORT")
+            SENDER_EMAIL = ENV.get("SENDER_EMAIL")
+            SENDER_PASS = ENV.get("SENDER_EMAIL_PASS")
+            RECEIVER_EMAIL = ENV.get("RECEIVER_EMAIL")
+
+            if not (SMTP_SERVER and SENDER_EMAIL and SENDER_PASS and RECEIVER_EMAIL):
+                return False
+
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            subject = "✅ [THÔNG BÁO] Đã kết nối lại IBKR thành công - pyTrade3"
+            body = f"""
+KẾT NỐI IBKR ĐÃ ĐƯỢC KHÔI PHỤC - pyTrade3 BOT
+
+Hệ thống đã kết nối lại thành công với IBKR TWS/Gateway.
+
+- Thời điểm khôi phục : {now_str} (CET)
+- Tài khoản IBKR      : {getattr(self.ibapi, 'account_id', 'N/A')}
+- Chế độ Bot          : {"Đang bật Auto-Trading" if self.auto_trading else "Chế độ Standby / Manual"}
+
+Bot đã sẵn sàng giao dịch bình thường!
+
+pyTrade3 Watchdog System
+""".strip()
+
+            msg = MIMEText(body, 'plain', 'utf-8')
+            msg['Subject'] = subject
+            msg['From'] = SENDER_EMAIL
+            msg['To'] = RECEIVER_EMAIL
+
+            with smtplib.SMTP(SMTP_SERVER, int(SMTP_PORT), timeout=10) as server:
+                server.starttls()
+                server.login(SENDER_EMAIL, SENDER_PASS)
+                server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
+
+            logger.info("IBKR recovery email sent successfully.")
+            return True
+        except Exception as e:
+            logger.error(f"[EMAIL ERROR] Failed to send IBKR recovery email: {e}")
+            return False
         
     #  Portfolio composition helpers
     # --------------------------------------------------------------
@@ -606,7 +807,9 @@ class TradingApp(QMainWindow):
                 if not formatted_reason.startswith("\n"):
                     formatted_reason = "- " + formatted_reason
 
-            subject = f"{action} {symbol} - {quantity} @ {curr_symbol}{price:.2f}"
+            clean_name = clean_company_name(company_name) or company_name
+            name_display = f" ({clean_name.strip()})" if clean_name and clean_name.strip() and clean_name.strip().upper() != symbol.strip().upper() else ""
+            subject = f"{action} {symbol}{name_display} - {quantity} @ {curr_symbol}{price:.2f}"
 
             body = f"""
             TRADE EXECUTED - pyTrade BOT
@@ -1656,6 +1859,8 @@ class TradingApp(QMainWindow):
         if self.connected:
             self.ibapi.disconnect()
             self.connected = False
+            self.ibkr_disconnected_since = None
+            self.ibkr_alert_sent = False
             self.status_label.setText("Disconnected")
             self.status_label.setStyleSheet("color: red;")
             self.conn_btn.setText("Connect")
@@ -1713,6 +1918,9 @@ class TradingApp(QMainWindow):
         self.conn_btn.setText("Disconnect")
         self.conn_btn.setEnabled(True)
         self.trade_btn.setEnabled(True)
+        if getattr(self, 'ibkr_alert_sent', False):
+            self._on_ibkr_reconnected()
+        self.ibkr_disconnected_since = None
 
     def _on_connect_fail(self):
         self.status_label.setText("Conn. failed")

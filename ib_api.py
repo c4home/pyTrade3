@@ -39,6 +39,10 @@ class IBApi(EWrapper, EClient):
                 except Exception as e:
                     logger.warning(f"Could not request IBKR PnL stream: {e}")
 
+    def currentTime(self, time_val: int):
+        with self.data_lock:
+            self.last_ibkr_update = time.time()
+
     def nextValidId(self, orderId: int):
         self.next_order_id = orderId
         self.connected_event.set()

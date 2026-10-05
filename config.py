@@ -43,6 +43,7 @@ def _load_env_config():
         "SENDER_EMAIL"     : os.getenv("SENDER_EMAIL"),
         "SENDER_EMAIL_PASS": os.getenv("SENDER_EMAIL_PASS"),
         "RECEIVER_EMAIL"   : os.getenv("RECEIVER_EMAIL"),
+        "IBKR_DISCONNECT_ALERT_MINUTES": os.getenv("IBKR_DISCONNECT_ALERT_MINUTES", "15"),
     }
 ENV = _load_env_config()
 # Limit background threads to 2 so yfinance doesn't get hammered with simultaneous requests
