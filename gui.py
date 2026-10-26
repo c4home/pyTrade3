@@ -119,9 +119,34 @@ class MaintenanceRoutineThread(QThread):
                 # Sleep to prevent hitting yfinance and bank target rate limits
                 time.sleep(1.0)
             
-            self.progress.emit(100, "Sorting results...")
+            self.progress.emit(95, "Filtering top candidates by MA200 & Backtest PF >= 1.2...")
             results.sort(key=lambda x: x['upside'], reverse=True)
-            top_10 = results[:10]
+            top_10 = []
+            from backtest.core_backtest_engine import compute_indicators, run_backtest_with_params
+            bt_params = {'atr_mul': 1.5, 'stop_mul': 2.3, 'max_stop': -12.0, 'rsi_exit': 80, 'prot_act': 5.0, 'prot_drop': 0.25, 'dip_th': 7, 'mom_th': 8}
+            for cand in results:
+                if len(top_10) >= 10 or self.isInterruptionRequested():
+                    break
+                sym = cand['symbol']
+                try:
+                    hist_df = yf.Ticker(sym).history(period="2y", interval="1d", auto_adjust=False, actions=False)
+                    if hist_df is None or len(hist_df) < 205:
+                        continue
+                    if isinstance(hist_df.columns, pd.MultiIndex):
+                        hist_df.columns = hist_df.columns.droplevel(1)
+                    ind_df = compute_indicators(hist_df)
+                    last_row = ind_df.iloc[-1]
+                    if last_row['Close'] < last_row.get('MA200', last_row['Close']):
+                        continue
+                    bt_trades = run_backtest_with_params(sym, {"max_amount": 1000, "profit_target": 5.0, "is_auto_watchlist": True}, ind_df, bt_params)
+                    gross_win = sum(t['pnl_eur'] for t in bt_trades if t['pnl_eur'] > 0)
+                    gross_loss = abs(sum(t['pnl_eur'] for t in bt_trades if t['pnl_eur'] <= 0))
+                    pf = (gross_win / gross_loss) if gross_loss > 0 else (99.9 if gross_win > 0 else 0.0)
+                    if pf >= 1.2:
+                        top_10.append(cand)
+                except Exception:
+                    continue
+            self.progress.emit(100, "Sorting results...")
             self.finished_data.emit(top_10)
         except Exception as e:
             import traceback
@@ -143,7 +168,7 @@ class TradingApp(QMainWindow):
     def __init__(self):
         super().__init__()
         TradingApp.instance = self  # <-- SET INSTANCE
-        self.setWindowTitle("pyTrade")
+        self.setWindowTitle(f"pyTrade3 {APP_VERSION} • Build {APP_BUILD}")
         icon_path = os.path.join(os.path.dirname(__file__), "assets", "app_icon.png")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
@@ -257,14 +282,49 @@ class TradingApp(QMainWindow):
 
             self._trigger_auto_reconnect()
         else:
-            # Heartbeat ping every 30s when connected to verify TWS responsiveness
+            # Active IBKR session & account probe every 60s when socket is connected
             now = time.time()
-            if now - getattr(self, 'last_ibkr_ping_time', 0) >= 30:
+            if now - getattr(self, 'last_ibkr_ping_time', 0) >= 60:
                 self.last_ibkr_ping_time = now
                 try:
                     self.ibapi.reqCurrentTime()
                 except Exception as e:
                     logger.debug(f"Heartbeat reqCurrentTime error: {e}")
+
+                def verify_ibkr_session():
+                    if getattr(self, '_verifying_ibkr_session', False):
+                        return
+                    self._verifying_ibkr_session = True
+                    try:
+                        self.ibapi.cancelAccountSummary(9001)
+                        time.sleep(0.3)
+                        self.ibapi.cash_ready_event.clear()
+                        self.ibapi.reqAccountSummary(
+                            9001, "All",
+                            "NetLiquidation,TotalCashValue,AvailableFunds,DailyPnL,UnrealizedPnL,RealizedPnL"
+                        )
+                        if self.ibapi.cash_ready_event.wait(8):
+                            self.ibapi.last_cash_fetch = time.time()
+                            self.ibapi.consecutive_ping_failures = 0
+                        else:
+                            self.ibapi.consecutive_ping_failures = getattr(self.ibapi, 'consecutive_ping_failures', 0) + 1
+                            logger.warning(
+                                f"⚠️ [IBKR WATCHDOG] Account summary probe timed out "
+                                f"({self.ibapi.consecutive_ping_failures} consecutive failures)."
+                            )
+                            if self.ibapi.consecutive_ping_failures >= 2:
+                                self.ibapi.ibkr_backend_connected = False
+                                if not getattr(self.ibapi, 'ibkr_backend_issue_reason', ''):
+                                    self.ibapi.ibkr_backend_issue_reason = (
+                                        "TWS/Gateway vẫn mở nhưng không phản hồi dữ liệu tài khoản "
+                                        "(có thể đã đăng nhập IBKR trên thiết bị khác hoặc treo cửa sổ Re-login)"
+                                    )
+                    except Exception as e:
+                        logger.debug(f"Heartbeat session probe error: {e}")
+                    finally:
+                        self._verifying_ibkr_session = False
+
+                threading.Thread(target=verify_ibkr_session, daemon=True).start()
 
     def _trigger_auto_reconnect(self):
         if self.is_reconnecting:
@@ -308,13 +368,22 @@ class TradingApp(QMainWindow):
                     except Exception as e:
                         logger.error(f"Error requesting positions after auto-reconnect: {e}")
 
+                    cash_ok = False
                     try:
                         self.ibapi.cash_ready_event.clear()
                         self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds,DailyPnL,UnrealizedPnL,RealizedPnL")
                         if self.ibapi.cash_ready_event.wait(8):
                             self.ibapi.last_cash_fetch = time.time()
+                            cash_ok = True
                     except Exception as e:
                         logger.error(f"Error requesting account summary after auto-reconnect: {e}")
+
+                    if not cash_ok and not getattr(self.ibapi, 'ibkr_backend_issue_reason', ''):
+                        self.ibapi.ibkr_backend_connected = False
+                        self.ibapi.ibkr_backend_issue_reason = (
+                            "Đã kết nối socket TWS/Gateway nhưng không lấy được dữ liệu tài khoản "
+                            "(TWS có thể đang ở màn hình Re-login / đăng nhập trên thiết bị khác)"
+                        )
 
                     QTimer.singleShot(0, lambda: self._on_auto_reconnect_success())
                 else:
@@ -330,16 +399,21 @@ class TradingApp(QMainWindow):
         self.connected = True
         attempts = getattr(self, 'reconnect_attempts', 1)
         self.reconnect_attempts = 0
-        self.status_label.setText("Connected")
-        self.status_label.setStyleSheet("color: green; font-weight: bold;")
+        backend_ok = getattr(self.ibapi, 'ibkr_backend_connected', True) and self.ibapi.connected_event.is_set()
+        if backend_ok:
+            self.status_label.setText("Connected")
+            self.status_label.setStyleSheet("color: green; font-weight: bold;")
+            if getattr(self, 'ibkr_alert_sent', False):
+                self._on_ibkr_reconnected()
+            self.ibkr_disconnected_since = None
+        else:
+            self.status_label.setText("IBKR Session Lost")
+            self.status_label.setStyleSheet("color: orange; font-weight: bold;")
         self.conn_btn.setText("Disconnect")
         self.conn_btn.setEnabled(True)
         if not self.auto_trading:
             self.trade_btn.setEnabled(True)
-        if getattr(self, 'ibkr_alert_sent', False):
-            self._on_ibkr_reconnected()
-        self.ibkr_disconnected_since = None
-        logger.info(f"✅ [AUTO-RECONNECT] Successfully reconnected to IBKR TWS/Gateway after {attempts} attempt(s)!")
+        logger.info(f"✅ [AUTO-RECONNECT] Socket connected to IBKR TWS/Gateway after {attempts} attempt(s) (Backend active: {backend_ok})!")
 
     def _on_auto_reconnect_fail(self):
         self.is_reconnecting = False
@@ -356,8 +430,8 @@ class TradingApp(QMainWindow):
     # --------------------------------------------------------------
     def _check_ibkr_watchdog(self):
         """
-        Monitors IBKR connection status and sends an alert email if IBKR is logged out
-        or no signal has been received for too long (default 15 minutes).
+        Monitors IBKR connection status and sends an alert email if IBKR is logged out,
+        session is taken over by another device, or no signal has been received for too long.
         Rule: Excludes Saturday and Sunday.
         """
         now = time.time()
@@ -369,8 +443,8 @@ class TradingApp(QMainWindow):
             self.ibkr_disconnected_since = None
             return
 
-        # Only monitor if auto_connect or auto_trading is enabled (bot is expected to run)
-        if not (self.auto_connect_cb.isChecked() or self.auto_trading):
+        # Monitor whenever auto_connect, auto_trading, or an active connection is expected
+        if not (self.auto_connect_cb.isChecked() or self.auto_trading or self.connected):
             self.ibkr_disconnected_since = None
             return
 
@@ -387,6 +461,12 @@ class TradingApp(QMainWindow):
             except Exception:
                 is_connected = False
 
+        is_backend_active = (
+            is_connected
+            and getattr(self.ibapi, 'ibkr_backend_connected', True)
+            and self.ibapi.connected_event.is_set()
+        )
+
         has_issue = False
         duration_minutes = 0
         issue_reason = ""
@@ -398,16 +478,37 @@ class TradingApp(QMainWindow):
             if elapsed >= timeout_seconds:
                 has_issue = True
                 duration_minutes = int(elapsed // 60)
-                issue_reason = f"Mất kết nối IBKR TWS/Gateway liên tục trong {duration_minutes} phút"
+                issue_reason = f"Mất kết nối Socket tới IBKR TWS/Gateway liên tục trong {duration_minutes} phút"
+        elif not is_backend_active:
+            # Socket is connected to TWS/Gateway, but TWS lost its session with IBKR server (e.g. logged in on another device)
+            self.status_label.setText("IBKR Session Lost")
+            self.status_label.setStyleSheet("color: orange; font-weight: bold;")
+            if not self.ibkr_disconnected_since:
+                self.ibkr_disconnected_since = now
+            elapsed = now - self.ibkr_disconnected_since
+            if elapsed >= timeout_seconds:
+                has_issue = True
+                duration_minutes = int(elapsed // 60)
+                custom_reason = getattr(self.ibapi, 'ibkr_backend_issue_reason', '')
+                issue_reason = custom_reason or (
+                    f"Vẫn kết nối TWS/Gateway nhưng IBKR ngừng hoạt động trong {duration_minutes} phút "
+                    f"(có thể do đăng nhập IBKR trên thiết bị khác / cần Re-login)"
+                )
         else:
-            # Socket is connected, check when was the last signal/heartbeat from IBKR
+            # Both socket and IBKR backend session are marked active; verify data freshness
+            if self.status_label.text() == "IBKR Session Lost":
+                self.status_label.setText("Connected")
+                self.status_label.setStyleSheet("color: green; font-weight: bold;")
             last_update = getattr(self.ibapi, 'last_ibkr_update', 0)
             if last_update > 0:
                 elapsed = now - last_update
                 if elapsed >= timeout_seconds:
                     has_issue = True
                     duration_minutes = int(elapsed // 60)
-                    issue_reason = f"Không nhận được tín hiệu/heartbeat từ IBKR trong {duration_minutes} phút"
+                    issue_reason = (
+                        f"TWS/Gateway vẫn mở nhưng không có phản hồi dữ liệu thực từ IBKR trong {duration_minutes} phút "
+                        f"(kiểm tra xem tài khoản có bị đăng nhập trên thiết bị khác không)"
+                    )
                 else:
                     self.ibkr_disconnected_since = None
                     if getattr(self, 'ibkr_alert_sent', False):
@@ -417,7 +518,7 @@ class TradingApp(QMainWindow):
                 if elapsed >= timeout_seconds:
                     has_issue = True
                     duration_minutes = int(elapsed // 60)
-                    issue_reason = f"Chưa nhận được tín hiệu IBKR ban đầu sau {duration_minutes} phút"
+                    issue_reason = f"Chưa nhận được dữ liệu tài khoản IBKR ban đầu sau {duration_minutes} phút"
 
         if has_issue:
             last_alert = getattr(self, 'last_ibkr_alert_time', 0)
@@ -1356,6 +1457,7 @@ pyTrade3 Watchdog System
             last_rej = row[5] if (len(row) > 5 and row[5] is not None) else 0
             highest_pnl = row[6] if (len(row) > 6 and row[6] is not None) else 0.0
             is_auto = bool(row[7]) if (len(row) > 7 and row[7] is not None) else False
+            bought_strat = row[8] if (len(row) > 8 and row[8]) else None
             
             # 3. Create the bot with the saved manual_mode state
             bot = TradingBot(
@@ -1364,6 +1466,7 @@ pyTrade3 Watchdog System
             )
             bot.last_rejection_time = last_rej
             bot.highest_pnl = highest_pnl
+            bot.bought_strategy = bought_strat
             
             self.bots[sid] = bot
             bot.create_yf_ticker()
@@ -1481,7 +1584,7 @@ pyTrade3 Watchdog System
                 bot.get_market_value()
                 bot.update_position()
                 bot.calculate_technical_indicators()
-                bot.check_trading_conditions()
+                bot.check_trading_conditions(readonly=True)
                 
                 status = bot.get_status()
                 volume_display = f"{bot.today_volume / 1e6:.1f}"
@@ -1769,7 +1872,7 @@ pyTrade3 Watchdog System
                         elif bot.pnl_percent < 0:
                             item.setForeground(QColor("red"))
                     elif col in (22, 24, 27): # ~Max, ~TP and ~SL
-                        current_strat = getattr(bot, 'current_strategy', 'DIP')
+                        current_strat = getattr(bot, 'bought_strategy', None) or getattr(bot, 'current_strategy', 'DIP')
                         stop_cap = -7.0 if current_strat == 'DIP' else -9.0
                         atr = bot.get_atr_14()
                         atr_pct = (atr / bot.market_value * 100) if (atr > 0 and bot.market_value > 0) else 0
@@ -1893,14 +1996,23 @@ pyTrade3 Watchdog System
                         except Exception as e:
                             logger.error(f"Error requesting positions: {e}")
                         
+                        cash_ok = False
                         try:
                             # ---- INITIAL CASH ----
                             self.ibapi.cash_ready_event.clear()
                             self.ibapi.reqAccountSummary(9001, "All", "NetLiquidation,TotalCashValue,AvailableFunds,DailyPnL,UnrealizedPnL,RealizedPnL")
                             if self.ibapi.cash_ready_event.wait(8):
                                 self.ibapi.last_cash_fetch = time.time()
+                                cash_ok = True
                         except Exception as e:
                             logger.error(f"Error requesting account summary: {e}")
+
+                        if not cash_ok and not getattr(self.ibapi, 'ibkr_backend_issue_reason', ''):
+                            self.ibapi.ibkr_backend_connected = False
+                            self.ibapi.ibkr_backend_issue_reason = (
+                                "Đã kết nối socket TWS/Gateway nhưng không lấy được dữ liệu tài khoản "
+                                "(TWS có thể đang ở màn hình Re-login / đăng nhập trên thiết bị khác)"
+                            )
                         
                         QTimer.singleShot(0, lambda: self._on_connect_success())
                     else:
@@ -1913,14 +2025,19 @@ pyTrade3 Watchdog System
             threading.Thread(target=connect_task, daemon=True).start()
 
     def _on_connect_success(self):
-        self.status_label.setText("Connected")
-        self.status_label.setStyleSheet("color: green; font-weight: bold;")
+        backend_ok = getattr(self.ibapi, 'ibkr_backend_connected', True) and self.ibapi.connected_event.is_set()
+        if backend_ok:
+            self.status_label.setText("Connected")
+            self.status_label.setStyleSheet("color: green; font-weight: bold;")
+            if getattr(self, 'ibkr_alert_sent', False):
+                self._on_ibkr_reconnected()
+            self.ibkr_disconnected_since = None
+        else:
+            self.status_label.setText("IBKR Session Lost")
+            self.status_label.setStyleSheet("color: orange; font-weight: bold;")
         self.conn_btn.setText("Disconnect")
         self.conn_btn.setEnabled(True)
         self.trade_btn.setEnabled(True)
-        if getattr(self, 'ibkr_alert_sent', False):
-            self._on_ibkr_reconnected()
-        self.ibkr_disconnected_since = None
 
     def _on_connect_fail(self):
         self.status_label.setText("Conn. failed")

@@ -57,17 +57,17 @@ def compute_indicators(df):
     df['BB_Lower'] = df['BB_Mid'] - 2 * bb_std
     df['BB_PctB'] = (close - df['BB_Lower']) / (df['BB_Upper'] - df['BB_Lower'])
 
-    ema12 = close.ewm(span=12).mean()
-    ema26 = close.ewm(span=26).mean()
+    ema12 = close.ewm(span=12, adjust=False).mean()
+    ema26 = close.ewm(span=26, adjust=False).mean()
     df['MACD'] = ema12 - ema26
-    df['MACD_Signal'] = df['MACD'].ewm(span=9).mean()
+    df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
     df['MACD_Hist'] = df['MACD'] - df['MACD_Signal']
     
     df['MACD_Class'] = 'NEUTRAL'
-    df.loc[(df['MACD'] > df['MACD_Signal']) & (df['MACD_Hist'] > df['MACD_Hist'].shift()), 'MACD_Class'] = 'S_BULL'
-    df.loc[(df['MACD'] > df['MACD_Signal']) & (df['MACD_Hist'] <= df['MACD_Hist'].shift()), 'MACD_Class'] = 'BULL'
-    df.loc[(df['MACD'] < df['MACD_Signal']) & (df['MACD_Hist'] < df['MACD_Hist'].shift()), 'MACD_Class'] = 'S_BEAR'
-    df.loc[(df['MACD'] < df['MACD_Signal']) & (df['MACD_Hist'] >= df['MACD_Hist'].shift()), 'MACD_Class'] = 'BEAR'
+    df.loc[(df['MACD'] > df['MACD_Signal']) & (df['MACD'] > 0), 'MACD_Class'] = 'S_BULL'
+    df.loc[(df['MACD'] > df['MACD_Signal']) & (df['MACD'] <= 0), 'MACD_Class'] = 'BULL'
+    df.loc[(df['MACD'] < df['MACD_Signal']) & (df['MACD'] < 0), 'MACD_Class'] = 'S_BEAR'
+    df.loc[(df['MACD'] < df['MACD_Signal']) & (df['MACD'] >= 0), 'MACD_Class'] = 'BEAR'
 
     plus_dm = high.diff().clip(lower=0)
     minus_dm = (-low.diff()).clip(lower=0)
@@ -82,7 +82,7 @@ def compute_indicators(df):
     df['AvgVol14'] = volume.rolling(14).mean()
     return df
 
-def calculate_score(row, prev_row):
+def calculate_score(row, prev_row, symbol=""):
     price = row['Close']
     rsi = row.get('RSI', 50)
     ma200 = row.get('MA200', price)
@@ -114,10 +114,12 @@ def calculate_score(row, prev_row):
     if 50 <= rsi <= 70: mom_points += 3
     elif 40 <= rsi <= 50: mom_points += 1
 
+    etf_boost = 6 if symbol in ("EGLN.L", "ESE.PA", "SPCX") else 0
+
     if dip_points >= mom_points:
-        return min(12, max(0, dip_points)), "DIP", dip_points
+        return min(12, max(0, dip_points + etf_boost)), "DIP", dip_points
     else:
-        return min(12, max(0, mom_points)), "MOMENTUM", mom_points
+        return min(12, max(0, mom_points + etf_boost)), "MOMENTUM", mom_points
 
 def run_backtest_with_params(symbol, config, data, params):
     profit_target = config["profit_target"]
@@ -136,6 +138,10 @@ def run_backtest_with_params(symbol, config, data, params):
     MOM_BASE_MIN = params.get('mom_base_min', 6)   # MOM: MACD+ADX+Vol+RSI must be >= 6
     DAILY_CHANGE_CAP = params.get('daily_change_cap', 0.05) # None or float (e.g. 0.05 for 5%)
     DAILY_CHANGE_MIN = params.get('daily_change_min', None) # None or float (e.g. -0.05 for -5%)
+    TIME_STOP_DAYS = params.get('time_stop_days', 25)       # Stagnation Time-Stop threshold (days held)
+    TIME_STOP_PNL = params.get('time_stop_pnl', -0.5)       # Exit if held >= 25d and PnL <= -0.5%
+    AW_REQUIRE_MA200 = params.get('aw_require_ma200', True) # Require Price >= MA200 for Watchlist/Auto-Watchlist
+    is_watchlist = bool(config.get("is_watchlist", False) or config.get("is_auto_watchlist", False) or config.get("manual_mode", False))
     
     trades = []
     position = None
@@ -152,8 +158,10 @@ def run_backtest_with_params(symbol, config, data, params):
         rsi = row.get('RSI', 50)
         prev_close = prev_row['Close']
 
-        score, strategy, base_score = calculate_score(row, prev_row)
-        max_stop_cap = 7.0 if strategy == "DIP" else 9.0
+        score, strategy, base_score = calculate_score(row, prev_row, symbol=symbol)
+        # Lock stop loss cap to bought_strategy when in position (synced with trading_bot.py)
+        active_strat = position['strategy'] if position is not None else strategy
+        max_stop_cap = 7.0 if active_strat == "DIP" else 9.0
 
         if atr > 0 and price > 0:
             atr_pct = (atr / price) * 100
@@ -171,12 +179,14 @@ def run_backtest_with_params(symbol, config, data, params):
         
         dyn_max = risk_euro / stop_loss_dist
         
-        is_etf = symbol in ["EGLN.L", "ESE.PA"]
+        is_etf = symbol in ["EGLN.L", "ESE.PA", "SPCX"]
         max_cap_pct = 0.35 if is_etf else 0.18
         cap_limit = global_acc * max_cap_pct
         
         if dyn_max > cap_limit:
             dyn_max = cap_limit
+
+        macd_class = row.get('MACD_Class', 'NEUTRAL')
 
         if position is not None:
             pnl_pct = ((price - position['buy_price']) / position['buy_price']) * 100
@@ -192,13 +202,16 @@ def run_backtest_with_params(symbol, config, data, params):
             if not sell_reason and pnl_pct <= dynamic_stop_loss: sell_reason = "Stop"
             if not sell_reason and rsi >= RSI_EXIT and pnl_pct > 1.0: sell_reason = "RSI"
             
-            macd_class = row.get('MACD_Class', 'NEUTRAL')
             if not sell_reason and macd_class in ('S_BEAR', 'BEAR') and prev_macd_class in ('S_BULL', 'BULL') and pnl_pct > 1.0:
                 sell_reason = "MACD"
+            if not sell_reason and TIME_STOP_DAYS is not None and (date - position['buy_date']).days >= TIME_STOP_DAYS and pnl_pct <= TIME_STOP_PNL:
+                sell_reason = "TimeStop"
             prev_macd_class = macd_class
 
             if sell_reason:
                 trades.append({
+                    'symbol': symbol,
+                    'buy_date': position['buy_date'],
                     'pnl_pct': pnl_pct, 
                     'pnl_eur': position['qty'] * (price - position['buy_price']), 
                     'sell_date': date,
@@ -209,6 +222,7 @@ def run_backtest_with_params(symbol, config, data, params):
                 position = None
             continue
 
+        prev_macd_class = macd_class
         if last_buy_day and (date - last_buy_day).days < 1: continue
         if last_sell_day and (date - last_sell_day).days < 1: continue
         if prev_close > 0:
@@ -217,8 +231,8 @@ def run_backtest_with_params(symbol, config, data, params):
             if DAILY_CHANGE_MIN is not None and chg < DAILY_CHANGE_MIN: continue
         if rsi >= 70: continue
         if i >= 3 and data.iloc[i - 3]['Close'] > 0 and (price - data.iloc[i - 3]['Close']) / data.iloc[i - 3]['Close'] > 0.15: continue
+        if AW_REQUIRE_MA200 and is_watchlist and price < row.get('MA200', price): continue
 
-        score, strategy, base_score = calculate_score(row, prev_row)
         buy_signal = False
         if strategy == "DIP" and score >= DIP_TH and base_score >= DIP_BASE_MIN:
             if prev_close > 0:
@@ -228,16 +242,40 @@ def run_backtest_with_params(symbol, config, data, params):
             if prev_close > 0:
                 chg = (price - prev_close) / prev_close
                 mom_ok = (DAILY_CHANGE_CAP is None or chg <= DAILY_CHANGE_CAP) and (DAILY_CHANGE_MIN is None or chg >= DAILY_CHANGE_MIN)
-                if mom_ok and i >= 2 and data.iloc[i - 2]['Close'] > 0 and (prev_close - data.iloc[i - 2]['Close']) / data.iloc[i - 2]['Close'] <= 0.15:
+                yest_close = data.iloc[i - 2]['Close'] if i >= 2 else prev_close
+                yest_chg = (prev_close - yest_close) / yest_close if yest_close > 0 else 0
+                atr_pct_prev = (atr / prev_close) if (atr > 0 and prev_close > 0) else 0.025
+                daily_threshold = min(0.08, max(0.03, atr_pct_prev * 2.0))
+                yesterday_threshold = min(0.08, max(0.05, atr_pct_prev * 2.5))
+                if mom_ok and chg <= daily_threshold and yest_chg <= yesterday_threshold:
                     buy_signal = True
 
         if buy_signal:
             # Use dyn_max instead of max_amount
             qty = max(1, int(dyn_max / price))
-            position = {'qty': qty, 'buy_price': price, 'highest_pnl': 0.0, 'strategy': strategy}
+            position = {'qty': qty, 'buy_price': price, 'buy_date': date, 'highest_pnl': 0.0, 'strategy': strategy}
             last_buy_day = date
             
     return trades
+
+def filter_sector_concentration(trades, sectors, max_per_sector=6):
+    """Enforces portfolio-level max concurrent open positions per non-ETF sector."""
+    if not trades or max_per_sector is None or max_per_sector >= 99:
+        return trades
+    sorted_trades = sorted(trades, key=lambda x: x['buy_date'])
+    accepted = []
+    open_trades = []
+    for t in sorted_trades:
+        bdate = t['buy_date']
+        open_trades = [ot for ot in open_trades if ot['sell_date'] > bdate]
+        sec = sectors.get(t.get('symbol', ''), 'Unknown')
+        if sec not in ('ETF', 'ETC', 'Unknown', 'N/A', None, ''):
+            sec_count = sum(1 for ot in open_trades if sectors.get(ot.get('symbol', ''), 'Unknown') == sec)
+            if sec_count >= max_per_sector:
+                continue
+        open_trades.append(t)
+        accepted.append(t)
+    return accepted
 
 if __name__ == "__main__":
     cached_data = {}

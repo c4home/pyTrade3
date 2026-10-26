@@ -79,7 +79,7 @@ def run_dailychange_sweep():
         'max_stop': -12.0, 
         'rsi_exit': 80, 
         'prot_act': 5.0, 
-        'prot_drop': 0.5, 
+        'prot_drop': 0.25, 
         'dip_th': 7, 
         'mom_th': 8,
         'dip_base_min': 5,

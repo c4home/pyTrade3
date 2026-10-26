@@ -17,7 +17,7 @@ if __name__ == "__main__":
     print(f"Loaded {len(cached_data)} stocks.")
 
     grids = [
-        {'atr_mul': 1.5, 'stop_mul': 2.3, 'max_stop': -12.0, 'rsi_exit': 80, 'prot_act': 5.0, 'prot_drop': 0.5, 'dip_th': 7, 'mom_th': 8},
+        {'atr_mul': 1.5, 'stop_mul': 2.3, 'max_stop': -12.0, 'rsi_exit': 80, 'prot_act': 5.0, 'prot_drop': 0.25, 'dip_th': 7, 'mom_th': 8},
     ]
 
     default_config = {'limit': 18, 'profit_target': 5.0, 'max_amount': 1000.0}

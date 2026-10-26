@@ -18,6 +18,9 @@ class TradingBot:
     _macro_lock = threading.Lock()
     MACRO_TICKER = "^GSPC"  # S&P 500 Index
     MACRO_DROP_LIMIT = -0.015  # -1.5% drop blocks DIP buys
+    TIME_STOP_DAYS = 25        # Stagnation Time-Stop threshold (days held)
+    TIME_STOP_MAX_PNL = -0.5   # Exit stagnant positions held >= 25d if PnL <= -0.5%
+    MAX_SECTOR_POSITIONS = 6   # Max concurrent open positions per sector (non-ETF)
     
     def __init__(self, ibapi, stock_id, max_amount, profit_target, drop_threshold,manual_mode=False,
                  db_manager=None, csv_manager=None, exchange_manager=None, gui=None, is_auto_watchlist=False):
@@ -31,6 +34,7 @@ class TradingBot:
         self.csv_manager = csv_manager
         self.exchange_manager = exchange_manager
         self.app = gui  # Reference to main app
+        self.gui = gui  # Alias for portfolio-wide checks
 
         self.market_value = 0
         self.smart_score = 0
@@ -104,6 +108,7 @@ class TradingBot:
         
         self.target_price = 0
         self.highest_pnl = 0.0
+        self.bought_strategy = None
         self.last_rejection_time = 0
         self._last_sell_log = {}  # Throttle sell-condition log messages {reason_key: timestamp}
 
@@ -239,35 +244,34 @@ class TradingBot:
     @staticmethod
     def calculate_rsi(close: pd.Series, period: int = 14) -> float:
         delta = close.diff()
-        gain = delta.where(delta > 0, 0)
-        loss = -delta.where(delta < 0, 0)
+        gain = delta.where(delta > 0, 0).rolling(period).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(period).mean()
 
-        # Wilder's smoothing (EMA with alpha=1/period, adjust=False)
-        avg_gain = gain.ewm(alpha=1/period, min_periods=period, adjust=False).mean()
-        avg_loss = loss.ewm(alpha=1/period, min_periods=period, adjust=False).mean()
-
-        rs = avg_gain / avg_loss
+        rs = gain / loss.replace(0, 0.001)
         rsi = 100 - (100 / (1 + rs))
 
-        return rsi.iloc[-1] if len(rsi) > 0 else 50 
+        return float(rsi.iat[-1]) if len(rsi) > 0 and pd.notnull(rsi.iat[-1]) else 50.0
 
     def calculate_adx(self, high, low, close, period=14):
-        """Returns ADX value 0-100. >25 = trending, <20 = choppy."""
-        tr = pd.concat([high - low, 
-                        (high - close.shift()).abs(), 
-                        (low - close.shift()).abs()], axis=1).max(axis=1)
-        atr = tr.ewm(alpha=1/period, adjust=False).mean()
+        """Returns ADX value 0-100 (14-period rolling smoothing synced with backtest engine)."""
+        tr = pd.concat([
+            (high - low).abs(),
+            (high - close.shift()).abs(),
+            (low - close.shift()).abs()
+        ], axis=1).max(axis=1)
 
-        up_move = high.diff()
-        down_move = -low.diff()
-        plus_dm = up_move.where((up_move > down_move) & (up_move > 0), 0)
-        minus_dm = down_move.where((down_move > up_move) & (down_move > 0), 0)
+        plus_dm = high.diff().clip(lower=0)
+        minus_dm = (-low.diff()).clip(lower=0)
+        plus_dm = plus_dm.where(plus_dm >= minus_dm, 0)
+        minus_dm = minus_dm.where(minus_dm > plus_dm, 0)
 
-        plus_di = 100 * (plus_dm.ewm(alpha=1/period, adjust=False).mean() / atr)
-        minus_di = 100 * (minus_dm.ewm(alpha=1/period, adjust=False).mean() / atr)
-        dx = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di)
-        adx = dx.ewm(alpha=1/period, adjust=False).mean()
-        return adx.iloc[-1]
+        atr_smooth = tr.rolling(period).mean().replace(0, 0.001)
+        plus_di = 100 * (plus_dm.rolling(period).mean() / atr_smooth)
+        minus_di = 100 * (minus_dm.rolling(period).mean() / atr_smooth)
+        denom = (plus_di + minus_di).replace(0, 0.001)
+        dx = 100 * (plus_di - minus_di).abs() / denom
+        adx = dx.rolling(period).mean()
+        return float(adx.iat[-1]) if len(adx) > 0 and pd.notnull(adx.iat[-1]) else 0.0
     
     def get_bank_note(self, run_async=True, force=False):
         fallback = None 
@@ -459,15 +463,7 @@ class TradingBot:
                     self.fourteen_day_low  = float(low.rolling(14).min().iat[-1])
                     
                     self.adx_value = self.calculate_adx(high, low, close)
-                     
-                    delta = close.diff()
-                    gain = delta.where(delta > 0, 0)
-                    loss = -delta.where(delta < 0, 0)
-                    avg_gain = gain.ewm(alpha=1/14, adjust=False, min_periods=14).mean()
-                    avg_loss = loss.ewm(alpha=1/14, adjust=False, min_periods=14).mean()
-                    rs = avg_gain / avg_loss.replace(0, 0.001)
-                    rsi_series = 100 - (100 / (1 + rs))
-                    self.rsi_value = float(rsi_series.iat[-1]) if not rsi_series.empty else 50.0
+                    self.rsi_value = self.calculate_rsi(close)
          
                     self.bb_middle = close.rolling(20).mean().iat[-1]
                     ma20 = self.bb_middle
@@ -750,6 +746,10 @@ class TradingBot:
                     self.highest_pnl = 0.0
                     if self.db_manager:
                         self.db_manager.update_highest_pnl(self.stock_id, 0.0)
+                if getattr(self, 'bought_strategy', None) is not None:
+                    self.bought_strategy = None
+                    if self.db_manager and hasattr(self.db_manager, 'update_bought_strategy'):
+                        self.db_manager.update_bought_strategy(self.stock_id, None)
 
         # Calculate invested in EUR for THIS stock only
         if self.quantity > 0 and self.bought_price > 0:
@@ -829,11 +829,16 @@ class TradingBot:
             if self.app and hasattr(self.app, 'pdt_protector'):
                 self.app.pdt_protector.register_day_trade_if_needed(self.stock_id)
 
-            # Update last trade time
+            # Update last trade time & persist strategy state
             if action == "BUY":
                 self.last_buy_time = time.time()
+                if self.db_manager and hasattr(self.db_manager, 'update_bought_strategy') and getattr(self, 'bought_strategy', None):
+                    self.db_manager.update_bought_strategy(self.stock_id, self.bought_strategy)
             elif action == "SELL":
                 self.last_sell_time = time.time()
+                self.bought_strategy = None
+                if self.db_manager and hasattr(self.db_manager, 'update_bought_strategy'):
+                    self.db_manager.update_bought_strategy(self.stock_id, None)
 
         elif status == "Cancelled":
             logger.warning(f"Order {order_id} was cancelled")
@@ -908,9 +913,10 @@ class TradingBot:
         if native_currency != "EUR":
             total_cost_eur = total_cost_eur / rate
 
-        # Use the MINIMUM of max_amount, cash_left, and usable cash
+        # Use the MINIMUM of dynamic max investment (~Max), cash_left, and usable cash
         usable_cash_clamped = max(0.0, usable_cash)
-        effective_limit = min(self.max_amount, self.cash_left, usable_cash_clamped) * self.CASH_BUFFER_MULTIPLIER
+        dynamic_max = getattr(self, 'current_max_investment', 0) or self._calculate_dynamic_max_amount()
+        effective_limit = min(dynamic_max, self.cash_left, usable_cash_clamped) * self.CASH_BUFFER_MULTIPLIER
 
         if total_cost_eur > effective_limit:
             # Recalculate to stay under BOTH max_amount AND available cash
@@ -1478,10 +1484,10 @@ class TradingBot:
                 cls._macro_cache['time'] = now
         return cls._macro_cache
          
-    def check_trading_conditions(self):
+    def check_trading_conditions(self, readonly=False):
         # Skip automated trading if an order was rejected/inactive recently (1 hour cooldown)
         last_rej = getattr(self, 'last_rejection_time', 0) or 0
-        if last_rej > 0:
+        if last_rej > 0 and not readonly:
             if time.time() - last_rej < 3600:
                 return None
 
@@ -1513,8 +1519,14 @@ class TradingBot:
             active_strat = getattr(self, 'bought_strategy', None) or getattr(self, 'current_strategy', 'DIP')
             max_stop_cap = 7.0 if active_strat == 'DIP' else 9.0
             self.dynamic_stop_loss = -max(abs(self.min_stop_loss), min(raw_stop_pct, max_stop_cap))
-        
-        if self.manual_mode:
+
+        if self.quantity > 0 and self.pnl_percent > self.highest_pnl:
+            self.highest_pnl = self.pnl_percent
+            if getattr(self, 'db_manager', None):
+                self.db_manager.update_highest_pnl(self.stock_id, self.highest_pnl)
+
+        # If called from GUI display loop (readonly=True), stop here so UI never mutates prev_macd_signal or trade state
+        if readonly or self.manual_mode:
             return None # Skip all automated buy/sell logic
 
         # -- SELL LOGIC (Exempt from cooldowns, prioritised) --
@@ -1624,7 +1636,14 @@ class TradingBot:
                         self.last_trade_reason = reason_msg
                         return 'SELL'
 
-
+            # 6. Time-Stop Stagnation Exit (free capital & prevent full stop-loss slide if held >= 25d with PnL <= -0.5%)
+            if self.last_buy_time > 0:
+                held_days = (time.time() - self.last_buy_time) / 86400.0
+                if held_days >= self.TIME_STOP_DAYS and self.pnl_percent <= self.TIME_STOP_MAX_PNL:
+                    reason_msg = f"Time-Stop Stagnation Exit after {held_days:.0f}d held (PnL: {self.pnl_percent:.2f}% <= {self.TIME_STOP_MAX_PNL:.1f}%)"
+                    _throttled_sell_log("time_stop", f"[{self.stock_id}] {reason_msg}")
+                    self.last_trade_reason = reason_msg
+                    return 'SELL'
 
             # Update MACD transition tracker
             if self.macd_signal != self.prev_macd_signal:
@@ -1675,10 +1694,31 @@ class TradingBot:
             if three_day_change > 0.15:
                 logger.info(f"[{self.stock_id}] Blocked buy: 3-day cumulative rise ({three_day_change*100:.1f}%) exceeds 15% limit.")
                 return None
+
+        # 6. Auto-Watchlist Downtrend Guard (require Price >= MA200 to prevent Value Traps)
+        if getattr(self, 'is_auto_watchlist', False):
+            ma200_val = self.get_ma200()
+            if ma200_val > 0 and self.market_value < ma200_val:
+                logger.info(f"[{self.stock_id}] Blocked Auto-Watchlist buy: price ({self.market_value:.2f}) < MA200 ({ma200_val:.2f}).")
+                return None
+
+        # 7. Max Sector Exposure Guard (max 6 concurrent open positions per non-ETF sector)
+        if (getattr(self, 'asset_type', 'UNKNOWN') not in ("ETF", "ETC") and
+                getattr(self, 'sector', 'N/A') not in ("N/A", "Unknown", "", None) and
+                hasattr(self, 'app') and self.app and hasattr(self.app, 'bots')):
+            sector_open_count = sum(
+                1 for b in self.app.bots.values()
+                if b.stock_id != self.stock_id
+                and (b.quantity > 0 or b.has_pending_order())
+                and getattr(b, 'sector', 'N/A') == self.sector
+            )
+            if sector_open_count >= self.MAX_SECTOR_POSITIONS:
+                logger.info(f"[{self.stock_id}] Blocked buy: Sector concentration limit ({sector_open_count}/{self.MAX_SECTOR_POSITIONS} open in {self.sector}).")
+                return None
                 
         # Check if we are the highest score in the portfolio among available stocks
-        if hasattr(self, 'gui') and self.gui and hasattr(self.gui, 'bots'):
-            highest_score = max([b.smart_score for b in self.gui.bots.values() if b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500)], default=0)
+        if hasattr(self, 'app') and self.app and hasattr(self.app, 'bots'):
+            highest_score = max([b.smart_score for b in self.app.bots.values() if b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500)], default=0)
             
             if self.smart_score < highest_score:
                 # Do not log continuously to avoid spam, just return None silently
@@ -1687,7 +1727,7 @@ class TradingBot:
             # User Feature Request: If we have the highest score, but another stock tied for the highest
             # score has a closed market, we must WAIT for it to open before buying, to give it priority.
             if self.smart_score == highest_score and self.is_market_open():
-                for b in self.gui.bots.values():
+                for b in self.app.bots.values():
                     if b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500) and b.smart_score == highest_score and not b.is_market_open():
                         # Another top-scoring stock is closed. Wait for it to open.
                         return None
@@ -1720,6 +1760,8 @@ class TradingBot:
                 return None
             
             self.bought_strategy = "DIP"
+            if self.db_manager and hasattr(self.db_manager, 'update_bought_strategy'):
+                self.db_manager.update_bought_strategy(self.stock_id, "DIP")
             self.last_trade_reason = self.score_reason
             return 'BUY'
 
@@ -1746,6 +1788,8 @@ class TradingBot:
                 return None
 
             self.bought_strategy = "MOMENTUM"
+            if self.db_manager and hasattr(self.db_manager, 'update_bought_strategy'):
+                self.db_manager.update_bought_strategy(self.stock_id, "MOMENTUM")
             self.last_trade_reason = self.score_reason
             return 'BUY'
 
@@ -1787,22 +1831,39 @@ class TradingBot:
             if three_day_change > 0.15:
                 return f"3-day cumulative rise ({three_day_change*100:.1f}%) exceeds 15% limit"
 
+        if getattr(self, 'is_auto_watchlist', False):
+            ma200_val = self.get_ma200()
+            if ma200_val > 0 and self.market_value < ma200_val:
+                return f"Auto-Watchlist downtrend guard (price {self.market_value:.2f} < MA200 {ma200_val:.2f})"
+
+        if (getattr(self, 'asset_type', 'UNKNOWN') not in ("ETF", "ETC") and
+                getattr(self, 'sector', 'N/A') not in ("N/A", "Unknown", "", None) and
+                hasattr(self, 'app') and self.app and hasattr(self.app, 'bots')):
+            sector_open_count = sum(
+                1 for b in self.app.bots.values()
+                if b.stock_id != self.stock_id
+                and (b.quantity > 0 or b.has_pending_order())
+                and getattr(b, 'sector', 'N/A') == self.sector
+            )
+            if sector_open_count >= self.MAX_SECTOR_POSITIONS:
+                return f"sector exposure cap reached ({sector_open_count}/{self.MAX_SECTOR_POSITIONS} open in {self.sector})"
+
         # Portfolio priority check
-        if hasattr(self, 'gui') and self.gui and hasattr(self.gui, 'bots'):
+        if hasattr(self, 'app') and self.app and hasattr(self.app, 'bots'):
             highest_score = max(
-                [b.smart_score for b in self.gui.bots.values() if b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500)],
+                [b.smart_score for b in self.app.bots.values() if b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500)],
                 default=0
             )
             if self.smart_score < highest_score:
                 top_stock = next(
-                    (b.stock_id for b in self.gui.bots.values()
+                    (b.stock_id for b in self.app.bots.values()
                      if b.smart_score == highest_score and b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500)),
                     "another stock"
                 )
                 return f"lower portfolio priority (score {self.smart_score}/12 vs {top_stock} at {highest_score}/12)"
 
             if self.smart_score == highest_score and self.is_market_open():
-                for b in self.gui.bots.values():
+                for b in self.app.bots.values():
                     if (b.cash_left >= getattr(b, 'MIN_CASH_FOR_BUY', 500)
                             and b.smart_score == highest_score
                             and not b.is_market_open()):

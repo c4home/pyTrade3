@@ -26,10 +26,16 @@ class IBApi(EWrapper, EClient):
         self.cash_fetch_interval = 20      # seconds
         self.max_cash_cache_age = 10800
         self.last_ibkr_update = 0
+        self.last_socket_ping = 0
+        self.ibkr_backend_connected = False
+        self.ibkr_backend_issue_reason = ""
+        self.broken_farms = set()
+        self.consecutive_ping_failures = 0
 
     def managedAccounts(self, accountsList: str):
         with self.data_lock:
-            self.last_ibkr_update = time.time()
+            if self.ibkr_backend_connected:
+                self.last_ibkr_update = time.time()
             if accountsList:
                 self.account_id = accountsList.split(',')[0]
                 logger.info(f"Connected IBKR Account: {self.account_id}")
@@ -41,10 +47,16 @@ class IBApi(EWrapper, EClient):
 
     def currentTime(self, time_val: int):
         with self.data_lock:
-            self.last_ibkr_update = time.time()
+            # Note: Do NOT update self.last_ibkr_update here because reqCurrentTime()
+            # responds from local TWS clock even when IBKR session is logged out / competing session.
+            self.last_socket_ping = time.time()
 
     def nextValidId(self, orderId: int):
         self.next_order_id = orderId
+        self.ibkr_backend_connected = True
+        self.ibkr_backend_issue_reason = ""
+        self.broken_farms.clear()
+        self.consecutive_ping_failures = 0
         self.connected_event.set()
 
     def get_next_order_id(self):
@@ -56,21 +68,81 @@ class IBApi(EWrapper, EClient):
     
     def connectionClosed(self):
         logger.warning("🚨 IBKR TWS/Gateway socket connection was closed by host.")
+        self.ibkr_backend_connected = False
+        self.ibkr_backend_issue_reason = "TWS/Gateway đã đóng kết nối socket"
         self.connected_event.clear()
         self.cash_ready_event.clear()
 
     def error(self, reqId, errorCode, errorString, advancedOrderRejectJson="", *args, **kwargs):
-        # Explicit connection status codes (e.g. 502, 504, 1100 connection lost/restored)
-        if errorCode in [502, 504, 1100, 1101, 1102]:
-            logger.warning(f"⚠️ IBKR Connection Event {reqId}: [{errorCode}] {errorString}")
-            if errorCode in [502, 504, 1100]:
+        err_lower = (errorString or "").lower()
+        is_competing_or_session_lost = any(
+            kw in err_lower for kw in (
+                "competing",
+                "existing session",
+                "connectivity between ib",
+                "connectivity between trader workstation",
+                "re-login",
+                "not connected",
+                "session is broken",
+            )
+        )
+
+        # 1. Explicit IBKR server connectivity restored (1101, 1102)
+        if errorCode in [1101, 1102]:
+            logger.info(f"✅ IBKR Server Connectivity Restored {reqId}: [{errorCode}] {errorString}")
+            with self.data_lock:
+                self.ibkr_backend_connected = True
+                self.ibkr_backend_issue_reason = ""
+                self.broken_farms.clear()
+                self.consecutive_ping_failures = 0
+                self.last_ibkr_update = time.time()
+            self.connected_event.set()
+            return
+
+        # 2. Explicit connection / backend session lost or competing login (502, 504, 1100, 1300, 2100, 2110, 10197)
+        if errorCode in [502, 504, 1100, 1300, 2100, 2110, 10197] or is_competing_or_session_lost:
+            logger.warning(f"⚠️ IBKR Connection/Session Event {reqId}: [{errorCode}] {errorString}")
+            with self.data_lock:
+                self.ibkr_backend_connected = False
+                self.ibkr_backend_issue_reason = (
+                    f"Vẫn kết nối TWS/Gateway nhưng mất phiên làm việc với máy chủ IBKR "
+                    f"(nghi ngờ đăng nhập trên thiết bị khác / cần Re-login) [{errorCode}: {errorString}]"
+                )
+            if errorCode in [502, 504, 1100, 1300]:
                 self.connected_event.clear()
                 self.cash_ready_event.clear()
             return
 
-        # Ignore minor informational notification codes and order cancellation acknowledgment
-        if errorCode in [2104, 2106, 2158, 10147, 202]:
-            if errorCode in [10147, 202] and hasattr(self, 'order_callbacks'):
+        # 3. Data farm broken (2103: Market data, 2105: HMDS, 2157: Sec-def)
+        if errorCode in [2103, 2105, 2157]:
+            logger.warning(f"⚠️ IBKR Data Farm Broken {reqId}: [{errorCode}] {errorString}")
+            with self.data_lock:
+                self.broken_farms.add(errorCode)
+                # Market data (2103) or Sec-def (2157) breaking typically happens when another device takes over the session
+                if errorCode in [2103, 2157]:
+                    self.ibkr_backend_connected = False
+                    self.ibkr_backend_issue_reason = (
+                        f"Ngắt kết nối dữ liệu với máy chủ IBKR (có thể do đăng nhập trên thiết bị khác) "
+                        f"[{errorCode}: {errorString}]"
+                    )
+            return
+
+        # 4. Data farm restored (2104 -> 2103, 2106 -> 2105, 2158 -> 2157)
+        if errorCode in [2104, 2106, 2158]:
+            farm_map = {2104: 2103, 2106: 2105, 2158: 2157}
+            with self.data_lock:
+                self.broken_farms.discard(farm_map.get(errorCode))
+                if not self.broken_farms and self.next_order_id is not None:
+                    self.ibkr_backend_connected = True
+                    self.ibkr_backend_issue_reason = ""
+                    self.consecutive_ping_failures = 0
+                    self.last_ibkr_update = time.time()
+                    self.connected_event.set()
+            return
+
+        # Ignore minor order cancellation acknowledgment codes
+        if errorCode in [10147, 202]:
+            if hasattr(self, 'order_callbacks'):
                 self.order_callbacks.pop(reqId, None)
             return
 
@@ -88,7 +160,8 @@ class IBApi(EWrapper, EClient):
         
     def accountSummary(self, reqId: int, account: str, tag: str, value: str, currency: str):
         with self.data_lock:
-            self.last_ibkr_update = time.time()
+            if self.ibkr_backend_connected:
+                self.last_ibkr_update = time.time()
             self.account_id = account
             try:
                 val = float(value)
@@ -109,7 +182,8 @@ class IBApi(EWrapper, EClient):
 
     def pnl(self, reqId: int, dailyPnL: float, unrealizedPnL: float, realizedPnL: float):
         with self.data_lock:
-            self.last_ibkr_update = time.time()
+            if self.ibkr_backend_connected:
+                self.last_ibkr_update = time.time()
             if dailyPnL is not None and not math.isnan(dailyPnL):
                 self.daily_pnl = float(dailyPnL)
             if unrealizedPnL is not None and not math.isnan(unrealizedPnL):
@@ -119,13 +193,15 @@ class IBApi(EWrapper, EClient):
 
     def accountSummaryEnd(self, reqId: int):
         with self.data_lock:
-            self.last_ibkr_update = time.time()
+            if self.ibkr_backend_connected:
+                self.last_ibkr_update = time.time()
             self.portfolio_value = self.net_liquidation - self.total_cash
         self.cash_ready_event.set()
 
     def position(self, account: str, contract: Contract, position: float, avgCost: float):
         with self.data_lock:
-            self.last_ibkr_update = time.time()
+            if self.ibkr_backend_connected:
+                self.last_ibkr_update = time.time()
             key = contract.symbol
             if key not in self.positions:
                 self.positions[key] = {}
@@ -140,7 +216,8 @@ class IBApi(EWrapper, EClient):
                         marketValue: float, averageCost: float, unrealizedPNL: float,
                         realizedPNL: float, accountName: str):
         with self.data_lock:
-            self.last_ibkr_update = time.time()
+            if self.ibkr_backend_connected:
+                self.last_ibkr_update = time.time()
             key = contract.symbol
             if key not in self.positions:
                 self.positions[key] = {}
@@ -160,7 +237,8 @@ class IBApi(EWrapper, EClient):
                     avgFillPrice: float, permId: int, parentId: int, lastFillPrice: float,
                     clientId: int, whyHeld: str, mktCapPrice: float):
         with self.data_lock:
-            self.last_ibkr_update = time.time()
+            if self.ibkr_backend_connected:
+                self.last_ibkr_update = time.time()
             self.order_status[orderId] = {
                 'status': status,
                 'filled': filled,

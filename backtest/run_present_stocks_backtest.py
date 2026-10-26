@@ -115,7 +115,7 @@ def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
         import time
         time.sleep(1.0)
 
-    grid = {'atr_mul': 1.5, 'stop_mul': 2.3, 'max_stop': -12.0, 'rsi_exit': 80, 'prot_act': 5.0, 'prot_drop': 0.5, 'dip_th': 7, 'mom_th': 8}
+    grid = {'atr_mul': 1.5, 'stop_mul': 2.3, 'max_stop': -12.0, 'rsi_exit': 80, 'prot_act': 5.0, 'prot_drop': 0.25, 'dip_th': 7, 'mom_th': 8}
     
     trades = []
     stock_stats = {}

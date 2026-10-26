@@ -32,6 +32,10 @@ from ibapi.tag_value import TagValue
 from concurrent.futures import ThreadPoolExecutor
 
 load_dotenv()
+
+APP_VERSION = "v3.3.0"
+APP_BUILD = "20261026_v3"
+
 def _load_env_config():
     """Return a dict with all env vars the app needs."""
     return {

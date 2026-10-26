@@ -111,6 +111,8 @@ Compares current market price against cached bank notes / UBS price targets:
 * **Daily Surge Cap:** No buys if today's change `> +5.0%`.
 * **3-Day Surge Cap:** No buys if 3-day change `> +15.0%`.
 * **Falling Knife Limit:** No DIP buys if today's drop is worse than `-7.0%`.
+* **Auto-Watchlist Quality & Downtrend Guard:** No Auto-Watchlist buys if `Price < MA200`; `MaintenanceRoutineThread` filters Top 10 candidates by `Price >= MA200` and 2Y Backtest `Profit Factor >= 1.2`.
+* **Max Sector Exposure Guard:** No buys if `>= 6` concurrent open positions already exist in the same non-ETF sector (`MAX_SECTOR_POSITIONS = 6`).
 * **Cash & PDT Guards:** Available cash check and Pattern Day Trader limit protection.
 
 ### B. Strategy Regimes
@@ -144,7 +146,7 @@ Sell triggers bypass buy cooldowns and execute in this order of precedence:
 
 2. **Proportional Protective Trailing Stop:**
    * Activates when `highest_pnl >= 5.0%`.
-   * Sells if `pnl_percent <= highest_pnl * 0.5` (locks in 50% of peak gains).
+   * Sells if `pnl_percent <= highest_pnl * 0.75` (locks in 75% of peak gains, max 25% drop).
 
 3. **Dynamic ATR Stop Loss:**
    * Sells if `pnl_percent <= dynamic_stop_loss`.
@@ -154,10 +156,13 @@ Sell triggers bypass buy cooldowns and execute in this order of precedence:
    * Sells if `RSI >= 80` AND `pnl_percent > +1.0%`.
 
 5. **MACD Bearish Crossover Exit:**
-   * Sells on fresh transition from `BULL`/`S_BULL` to `BEAR`/`S_BEAR` AND `pnl_percent > +1.5%`.
+   * Sells on fresh transition from `BULL`/`S_BULL` to `BEAR`/`S_BEAR` AND `pnl_percent > +1.0%`.
 
 6. **Analyst Target Override:**
    * Sells if market price is `10%+` above cached UBS target AND `pnl_percent > +0.5%`.
+
+7. **Time-Stop Stagnation Exit:**
+   * Sells if position is held `>= 25 days` (`TIME_STOP_DAYS = 25`) AND `pnl_percent <= -0.5%` (`TIME_STOP_MAX_PNL = -0.5`), freeing stagnant capital before it slides into a full ATR stop loss.
 
 ---
 

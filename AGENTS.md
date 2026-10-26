@@ -73,6 +73,8 @@ Before executing any **BUY** order, the bot checks and enforces these strict saf
 9. **Portfolio Score Priority:** Capital is allocated to the highest `smart_score` stock across the portfolio first.
 10. **Usable Cash Guard:** Checks `ibapi.available_cash - min_cash >= max_amount` before placing orders.
 11. **PDT (Pattern Day Trader) Protection:** Block buys if a day-trade could trigger a 90-day IBKR account lock.
+12. **Auto-Watchlist Downtrend & Quality Guard:** Block Auto-Watchlist buys when `Price < MA200`, and require `Price >= MA200` + 2Y Backtest `Profit Factor >= 1.2` when scanning Top 10 Auto-Watchlist candidates (`MaintenanceRoutineThread`).
+13. **Max Sector Exposure Guard:** Block buys if `>= 6` concurrent positions are already open in the same non-ETF sector (`MAX_SECTOR_POSITIONS = 6`).
 
 ---
 
@@ -88,13 +90,15 @@ Sell evaluation is prioritized over buys and bypasses buy cooldowns. A sell orde
    └─ Sell if pnl_percent <= highest_pnl * 0.75 floor (locks in 75% of peak gains, max 25% drop)
 
 3. Dynamic ATR Stop Loss              (pnl_percent <= dynamic_stop_loss)
-   └─ DIP Stop Cap: -7.0% | MOMENTUM Stop Cap: -9.0%
+   └─ DIP Stop Cap: -7.0% | MOMENTUM Stop Cap: -9.0% (locked to bought_strategy)
 
 4. RSI Overbought Exit                (RSI >= 80 and pnl_percent > +1.0%)
 
-5. MACD Bearish Reversal Exit         (MACD crosses BEAR/S_BEAR and pnl_percent > +1.5%)
+5. MACD Bearish Reversal Exit         (MACD crosses BEAR/S_BEAR and pnl_percent > +1.0%)
 
 6. Analyst Target Override            (Market price 10%+ above UBS target and pnl_percent > +0.5%)
+
+7. Time-Stop Stagnation Exit          (held_days >= 25 and pnl_percent <= -0.5%)
 ```
 
 ---

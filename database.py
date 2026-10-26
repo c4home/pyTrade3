@@ -2,6 +2,8 @@ import shutil
 from config import *
 # ==================== DATABASE MANAGER ====================
 class DatabaseManager:
+    TARGET_DB_VERSION = 2
+
     def __init__(self, db_path="trading_bot.db"):
         self.db_path = db_path
         self._local = threading.local()  # Thread-local storage for connections
@@ -99,29 +101,11 @@ class DatabaseManager:
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     manual_mode INTEGER DEFAULT 0,
                     last_rejection_time REAL DEFAULT 0,
-                    is_auto_watchlist INTEGER DEFAULT 0
+                    is_auto_watchlist INTEGER DEFAULT 0,
+                    highest_pnl REAL DEFAULT 0.0,
+                    bought_strategy TEXT DEFAULT NULL
                 )
             """)
-            try:
-                cursor.execute("ALTER TABLE stocks ADD COLUMN last_rejection_time REAL DEFAULT 0")
-            except sqlite3.OperationalError:
-                pass  # column already exists
-
-            try:
-                cursor.execute("ALTER TABLE stocks ADD COLUMN is_auto_watchlist INTEGER DEFAULT 0")
-            except sqlite3.OperationalError:
-                pass  # column already exists
-
-            try:
-                cursor.execute("ALTER TABLE stocks ADD COLUMN highest_pnl REAL DEFAULT 0.0")
-            except sqlite3.OperationalError:
-                pass
-
-            try:
-                cursor.execute("ALTER TABLE cached_indicators ADD COLUMN day_before_yesterday_close REAL DEFAULT 0.0")
-            except sqlite3.OperationalError:
-                pass
-
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS trading_history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -181,6 +165,33 @@ class DatabaseManager:
                     stock_id TEXT PRIMARY KEY
                 )
             """)
+
+            # Sequential Schema Migration Pipeline (PRAGMA user_version)
+            cursor.execute("PRAGMA user_version")
+            ver_row = cursor.fetchone()
+            db_version = ver_row[0] if ver_row else 0
+
+            if db_version < 1:
+                for stmt in [
+                    "ALTER TABLE stocks ADD COLUMN last_rejection_time REAL DEFAULT 0",
+                    "ALTER TABLE stocks ADD COLUMN is_auto_watchlist INTEGER DEFAULT 0",
+                    "ALTER TABLE stocks ADD COLUMN highest_pnl REAL DEFAULT 0.0",
+                    "ALTER TABLE cached_indicators ADD COLUMN day_before_yesterday_close REAL DEFAULT 0.0",
+                ]:
+                    try:
+                        cursor.execute(stmt)
+                    except sqlite3.OperationalError:
+                        pass
+                db_version = 1
+
+            if db_version < 2:
+                try:
+                    cursor.execute("ALTER TABLE stocks ADD COLUMN bought_strategy TEXT DEFAULT NULL")
+                except sqlite3.OperationalError:
+                    pass
+                db_version = 2
+
+            cursor.execute(f"PRAGMA user_version = {self.TARGET_DB_VERSION}")
                    
             # Create indexes for faster queries
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_trading_history_stock_id ON trading_history(stock_id)")
@@ -427,8 +438,16 @@ class DatabaseManager:
     def get_all_stocks(self):
         """Get all stocks in watchlist"""
         with self.get_cursor() as cursor:
-            cursor.execute("SELECT stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time, highest_pnl, is_auto_watchlist FROM stocks")
+            cursor.execute("SELECT stock_id, max_amount, profit_target, drop_threshold, manual_mode, last_rejection_time, highest_pnl, is_auto_watchlist, bought_strategy FROM stocks")
             return cursor.fetchall()
+
+    def update_bought_strategy(self, stock_id, strategy):
+        """Persist the entry strategy (DIP or MOMENTUM) so stop loss cap survives restarts"""
+        with self.get_cursor() as cursor:
+            cursor.execute(
+                "UPDATE stocks SET bought_strategy = ? WHERE stock_id = ?",
+                (strategy, stock_id)
+            )
 
     def update_highest_pnl(self, stock_id, pnl):
         """Update highest PnL for trailing stop lock"""

@@ -57,8 +57,14 @@ fi
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/"
 
+# Chạy kiểm tra tự động trước khi deploy
+if [[ -x "${PROJECT_DIR}verify_py.sh" ]]; then
+    echo "🔍 Đang chạy ./verify_py.sh trước khi upload..."
+    "${PROJECT_DIR}verify_py.sh"
+fi
+
 echo "=================================================================="
-echo "🚀 pyTrade3 - Upload Code lên Server"
+echo "🚀 pyTrade3 - Upload Code lên Server OVH"
 echo "=================================================================="
 echo "📂 Thư mục nguồn      : $PROJECT_DIR"
 echo "🎯 Đích đến           : $REMOTE_TARGET"
@@ -67,6 +73,19 @@ if [[ "$DRY_RUN" == true ]]; then
 fi
 echo "🛡️  Dữ liệu loại trừ  : *.db, *.csv, *.log, .env, .venv, cache..."
 echo "------------------------------------------------------------------"
+
+# Tự động sao lưu SQLite DB & CSV trên Server OVH trước khi cập nhật code (giữ 10 bản gần nhất)
+if [[ "$DRY_RUN" == false ]]; then
+    REMOTE_HOST_PART="${REMOTE_TARGET%%:*}"
+    REMOTE_DIR_PART="${REMOTE_TARGET#*:}"
+    echo "💾 Đang tự động sao lưu trading_bot.db & CSV trên Server ($REMOTE_HOST_PART)..."
+    ssh -o ConnectTimeout=10 "$REMOTE_HOST_PART" "mkdir -p '${REMOTE_DIR_PART%/}/backups' && \
+        TS=\$(date +%Y%m%d_%H%M%S) && \
+        if [ -f '${REMOTE_DIR_PART%/}/trading_bot.db' ]; then cp '${REMOTE_DIR_PART%/}/trading_bot.db' \"${REMOTE_DIR_PART%/}/backups/trading_bot_\${TS}.db\"; fi && \
+        if [ -f '${REMOTE_DIR_PART%/}/trading_orders_history.csv' ]; then cp '${REMOTE_DIR_PART%/}/trading_orders_history.csv' \"${REMOTE_DIR_PART%/}/backups/orders_\${TS}.csv\"; fi && \
+        ls -1t '${REMOTE_DIR_PART%/}/backups'/trading_bot_*.db 2>/dev/null | tail -n +11 | xargs -r rm -f && \
+        ls -1t '${REMOTE_DIR_PART%/}/backups'/orders_*.csv 2>/dev/null | tail -n +11 | xargs -r rm -f" || echo "⚠️  Không thể tạo bản backup từ xa (có thể lần đầu deploy), tiếp tục rsync..."
+fi
 
 RSYNC_OPTS=(
     -avz
