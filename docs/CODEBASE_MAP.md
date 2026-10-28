@@ -1,6 +1,6 @@
 # 🗺️ CODEBASE_MAP.md — Bản Đồ Tọa Độ Dòng Code Tự Động (`pyTrade3`)
 
-> **Cập nhật tự động bởi `./verify_py.sh` lúc:** `2026-10-28 10:32:43`
+> **Cập nhật tự động bởi `./verify_py.sh` lúc:** `2026-10-28 10:50:13`
 > Khi cần sửa hàm hoặc class nào, chỉ đọc đúng khoảng dòng (`StartLine` – `EndLine`) dưới đây để tiết kiệm 90% token.
 
 ## 1. Tổng Quan Quy Mô File
@@ -21,9 +21,18 @@
 | `backend/services/portfolio_sizing.py` | 287 | Lean Khối 3: Định cỡ vị thế theo rủi ro (Kelly/ATR), tỷ giá ngoại tệ & phân bổ danh mục |
 | `backend/services/risk_manager.py` | 359 | Lean Khối 4: Người gác cổng sắt thi hành 13 Hard Buy Guards & 7 Sell/Exit Triggers |
 | `backend/services/execution.py` | 183 | Lean Khối 5: Tương tác Broker IBKR socket, quản lý vòng đời lệnh & CSV/DB Audits |
-| `frontend/ui_components.py` | 458 | Khởi tạo giao diện PyQt6 (`UISetupMixin`, `NumericTableWidgetItem`, bảng 30 cột & Dark Theme) |
-| `frontend/workers.py` | 140 | Luồng chạy ngầm `QThread` (`BacktestThread`, `MaintenanceRoutineThread` quét S&P 500) |
-| `frontend/gui.py` | 1217 | Nhạc trưởng giao diện PyQt6 (`TradingApp`), xử lý sự kiện nút bấm, `update_display()` & `trading_loop()` |
+| `frontend/ui_components.py` | 6 | Facade tương thích ngược: Re-export NumericTableWidgetItem & UISetupMixin |
+| `frontend/workers.py` | 9 | Facade tương thích ngược: Re-export BacktestThread & MaintenanceRoutineThread |
+| `frontend/gui.py` | 387 | Nhạc trưởng giao diện PyQt6 (`TradingApp`): Shell mỏng tích hợp các Mixin & điều phối hiển thị |
+| `frontend/components/table_items.py` | 14 | Custom Widget bảng: `NumericTableWidgetItem` hỗ trợ sắp xếp theo giá trị số thực |
+| `frontend/components/ui_setup.py` | 446 | Khởi tạo layout giao diện PyQt6 (`UISetupMixin`), Dark Theme, bảng 30 cột & toolbar |
+| `frontend/renderers/table_renderer.py` | 385 | Render bảng 30 cột (`TableRenderer`): format giá, PnL, màu sắc, font, tooltip & bank acronym |
+| `frontend/renderers/summary_formatter.py` | 80 | Format header tổng quan (`SummaryFormatter`): Total PnL, Daily/Unrealized PnL, Cash & Last Fetch |
+| `frontend/controllers/stock_controller.py` | 238 | Điều phối hành động cổ phiếu (`StockActionsMixin`): Add/Remove stock, Manual Buy/Sell/Hold, Sort |
+| `frontend/controllers/worker_controller.py` | 240 | Điều phối luồng ngầm (`WorkerControllerMixin`): Maintenance Routine S&P500, Backtest & Sync DB Server |
+| `frontend/controllers/trading_orchestrator.py` | 82 | Nhạc trưởng giao dịch tự động (`TradingOrchestrator`): Vòng lặp duyệt lệnh Sell, xếp hạng Smart Score & Buy |
+| `frontend/workers/backtest_worker.py` | 35 | Luồng ngầm Backtest (`BacktestThread`): Chạy mô phỏng chiến lược toàn bộ danh mục |
+| `frontend/workers/maintenance_worker.py` | 121 | Luồng ngầm Maintenance (`MaintenanceRoutineThread`): Quét top 10 cổ phiếu S&P500 lọc MA200 & PF>=1.2 |
 | `backtest/core_backtest_engine.py` | 307 | Lõi mô phỏng Backtest kiểm chứng thuật toán DIP & MOMENTUM |
 | `backtest/run_present_stocks_backtest.py` | 357 | Chạy Backtest toàn bộ danh mục trong SQLite DB và xuất báo cáo so sánh S&P 500 |
 
@@ -298,74 +307,122 @@
 |   └─ `ExecutionService.place_buy_order()` | 55 | 119 | 65 |
 |   └─ `ExecutionService.place_sell_order()` | 121 | 182 | 62 |
 
-### 📄 `frontend/ui_components.py` (458 dòng)
+### 📄 `frontend/gui.py` (387 dòng)
 
 | Thành phần (Class / Hàm) | Dòng bắt đầu | Dòng kết thúc | Số dòng |
 | :--- | ---: | ---: | ---: |
-| class `NumericTableWidgetItem` | 30 | 38 | 9 |
-|   └─ `NumericTableWidgetItem.__init__()` | 31 | 33 | 3 |
-|   └─ `NumericTableWidgetItem.__lt__()` | 35 | 38 | 4 |
-| class `UISetupMixin` | 41 | 458 | 418 |
-|   └─ `UISetupMixin.init_ui()` | 44 | 458 | 415 |
+| class `TradingApp` | 33 | 387 | 355 |
+|   └─ `TradingApp.is_background_busy()` | 46 | 55 | 10 |
+|   └─ `TradingApp.__init__()` | 57 | 120 | 64 |
+|   └─ `TradingApp._send_ibkr_disconnect_email()` | 125 | 126 | 2 |
+|   └─ `TradingApp._send_ibkr_recovery_email()` | 128 | 129 | 2 |
+|   └─ `TradingApp.send_trade_email()` | 131 | 134 | 4 |
+|   └─ `TradingApp._get_usd_to_eur_rate()` | 139 | 140 | 2 |
+|   └─ `TradingApp._calc_portfolio_composition()` | 142 | 143 | 2 |
+|   └─ `TradingApp._calc_total_positions_pnl_eur()` | 145 | 146 | 2 |
+|   └─ `TradingApp._calc_total_daily_pnl_eur()` | 148 | 149 | 2 |
+|   └─ `TradingApp.refresh_cash()` | 151 | 167 | 17 |
+|   └─ `TradingApp.load_stocks()` | 169 | 202 | 34 |
+|   └─ `TradingApp.update_display()` | 204 | 324 | 121 |
+|   └─ `TradingApp.toggle_trading()` | 326 | 344 | 19 |
+|   └─ `TradingApp.manual_refresh_data()` | 346 | 369 | 24 |
+|   └─ `TradingApp.reset_update_btn()` | 371 | 373 | 3 |
+|   └─ `TradingApp.trading_loop()` | 375 | 376 | 2 |
+|   └─ `TradingApp.closeEvent()` | 378 | 387 | 10 |
 
-### 📄 `frontend/workers.py` (140 dòng)
+### 📄 `frontend/components/table_items.py` (14 dòng)
 
 | Thành phần (Class / Hàm) | Dòng bắt đầu | Dòng kết thúc | Số dòng |
 | :--- | ---: | ---: | ---: |
-| class `BacktestThread` | 4 | 33 | 30 |
-|   └─ `BacktestThread.__init__()` | 9 | 11 | 3 |
-|   └─ `BacktestThread.run()` | 13 | 33 | 21 |
-| class `MaintenanceRoutineThread` | 36 | 140 | 105 |
-|   └─ `MaintenanceRoutineThread.__init__()` | 41 | 44 | 4 |
-|   └─ `MaintenanceRoutineThread.run()` | 46 | 140 | 95 |
+| class `NumericTableWidgetItem` | 4 | 14 | 11 |
+|   └─ `NumericTableWidgetItem.__init__()` | 7 | 9 | 3 |
+|   └─ `NumericTableWidgetItem.__lt__()` | 11 | 14 | 4 |
 
-### 📄 `frontend/gui.py` (1217 dòng)
+### 📄 `frontend/components/ui_setup.py` (446 dòng)
 
 | Thành phần (Class / Hàm) | Dòng bắt đầu | Dòng kết thúc | Số dòng |
 | :--- | ---: | ---: | ---: |
-| class `TradingApp` | 20 | 1216 | 1197 |
-|   └─ `TradingApp.is_background_busy()` | 25 | 29 | 5 |
-|   └─ `TradingApp.__init__()` | 31 | 94 | 64 |
-|   └─ `TradingApp._format_last_run()` | 96 | 105 | 10 |
-|   └─ `TradingApp._send_ibkr_disconnect_email()` | 107 | 108 | 2 |
-|   └─ `TradingApp._send_ibkr_recovery_email()` | 110 | 111 | 2 |
-|   └─ `TradingApp._get_usd_to_eur_rate()` | 115 | 116 | 2 |
-|   └─ `TradingApp._calc_portfolio_composition()` | 118 | 119 | 2 |
-|   └─ `TradingApp._calc_total_positions_pnl_eur()` | 121 | 122 | 2 |
-|   └─ `TradingApp._calc_total_daily_pnl_eur()` | 124 | 125 | 2 |
-|   └─ `TradingApp._apply_default_sort()` | 127 | 142 | 16 |
-|   └─ `TradingApp.refresh_cash()` | 144 | 156 | 13 |
-|   └─ `TradingApp.send_trade_email()` | 158 | 159 | 2 |
-|   └─ `TradingApp.save_min_cash()` | 161 | 174 | 14 |
-|   └─ `TradingApp.save_global_risk()` | 176 | 183 | 8 |
-|   └─ `TradingApp.highlight_selected_row()` | 185 | 211 | 27 |
-|   └─ `TradingApp.keyPressEvent()` | 213 | 219 | 7 |
-|   └─ `TradingApp.on_header_clicked()` | 221 | 223 | 3 |
-|   └─ `TradingApp.show_header_context_menu()` | 225 | 239 | 15 |
-|   └─ `TradingApp.load_stocks()` | 241 | 267 | 27 |
-|   └─ `TradingApp.update_display()` | 269 | 751 | 483 |
-|   └─ `TradingApp.toggle_trading()` | 753 | 771 | 19 |
-|   └─ `TradingApp.manual_refresh_data()` | 773 | 798 | 26 |
-|   └─ `TradingApp.reset_update_btn()` | 800 | 802 | 3 |
-|   └─ `TradingApp.trading_loop()` | 804 | 868 | 65 |
-|   └─ `TradingApp.add_stock()` | 870 | 899 | 30 |
-|   └─ `TradingApp.remove_stock()` | 903 | 944 | 42 |
-|   └─ `TradingApp.get_selected_bot()` | 946 | 957 | 12 |
-|   └─ `TradingApp.handle_manual_buy()` | 959 | 966 | 8 |
-|   └─ `TradingApp.handle_manual_sell()` | 968 | 978 | 11 |
-|   └─ `TradingApp.handle_manual_hold()` | 980 | 994 | 15 |
-|   └─ `TradingApp.handle_maintenance_routine()` | 996 | 1014 | 19 |
-|   └─ `TradingApp.on_maint_progress()` | 1016 | 1019 | 4 |
-|   └─ `TradingApp.on_maint_error()` | 1021 | 1030 | 10 |
-|   └─ `TradingApp.on_maint_finished()` | 1032 | 1071 | 40 |
-|   └─ `TradingApp.handle_sync_from_server()` | 1073 | 1113 | 41 |
-|   └─ `TradingApp._on_sync_finished()` | 1115 | 1129 | 15 |
-|   └─ `TradingApp.open_csv()` | 1131 | 1143 | 13 |
-|   └─ `TradingApp.handle_backtest()` | 1145 | 1164 | 20 |
-|   └─ `TradingApp.on_backtest_progress()` | 1166 | 1169 | 4 |
-|   └─ `TradingApp.on_backtest_error()` | 1171 | 1179 | 9 |
-|   └─ `TradingApp.on_backtest_finished()` | 1181 | 1201 | 21 |
-|   └─ `TradingApp.closeEvent()` | 1203 | 1216 | 14 |
+| class `UISetupMixin` | 29 | 446 | 418 |
+|   └─ `UISetupMixin.init_ui()` | 32 | 446 | 415 |
+
+### 📄 `frontend/renderers/table_renderer.py` (385 dòng)
+
+| Thành phần (Class / Hàm) | Dòng bắt đầu | Dòng kết thúc | Số dòng |
+| :--- | ---: | ---: | ---: |
+| class `TableRenderer` | 52 | 385 | 334 |
+|   └─ `TableRenderer.render_row()` | 56 | 233 | 178 |
+|   └─ `TableRenderer._apply_cell_styling()` | 236 | 385 | 150 |
+
+### 📄 `frontend/renderers/summary_formatter.py` (80 dòng)
+
+| Thành phần (Class / Hàm) | Dòng bắt đầu | Dòng kết thúc | Số dòng |
+| :--- | ---: | ---: | ---: |
+| class `SummaryFormatter` | 6 | 80 | 75 |
+|   └─ `SummaryFormatter.get_connection_status()` | 10 | 18 | 9 |
+|   └─ `SummaryFormatter.format_daily_pnl_display()` | 21 | 25 | 5 |
+|   └─ `SummaryFormatter.format_unrealized_pnl_display()` | 28 | 32 | 5 |
+|   └─ `SummaryFormatter.format_portfolio_summary_text()` | 35 | 66 | 32 |
+|   └─ `SummaryFormatter.format_last_fetch_html()` | 69 | 80 | 12 |
+
+### 📄 `frontend/controllers/stock_controller.py` (238 dòng)
+
+| Thành phần (Class / Hàm) | Dòng bắt đầu | Dòng kết thúc | Số dòng |
+| :--- | ---: | ---: | ---: |
+| class `StockActionsMixin` | 17 | 238 | 222 |
+|   └─ `StockActionsMixin._apply_default_sort()` | 20 | 35 | 16 |
+|   └─ `StockActionsMixin.save_min_cash()` | 37 | 50 | 14 |
+|   └─ `StockActionsMixin.save_global_risk()` | 52 | 59 | 8 |
+|   └─ `StockActionsMixin.highlight_selected_row()` | 61 | 83 | 23 |
+|   └─ `StockActionsMixin.keyPressEvent()` | 85 | 90 | 6 |
+|   └─ `StockActionsMixin.on_header_clicked()` | 92 | 94 | 3 |
+|   └─ `StockActionsMixin.show_header_context_menu()` | 96 | 112 | 17 |
+|   └─ `StockActionsMixin.add_stock()` | 114 | 146 | 33 |
+|   └─ `StockActionsMixin.remove_stock()` | 148 | 183 | 36 |
+|   └─ `StockActionsMixin.get_selected_bot()` | 185 | 194 | 10 |
+|   └─ `StockActionsMixin.handle_manual_buy()` | 196 | 207 | 12 |
+|   └─ `StockActionsMixin.handle_manual_sell()` | 209 | 223 | 15 |
+|   └─ `StockActionsMixin.handle_manual_hold()` | 225 | 238 | 14 |
+
+### 📄 `frontend/controllers/worker_controller.py` (240 dòng)
+
+| Thành phần (Class / Hàm) | Dòng bắt đầu | Dòng kết thúc | Số dòng |
+| :--- | ---: | ---: | ---: |
+| class `WorkerControllerMixin` | 23 | 240 | 218 |
+|   └─ `WorkerControllerMixin._format_last_run()` | 26 | 34 | 9 |
+|   └─ `WorkerControllerMixin.handle_maintenance_routine()` | 36 | 54 | 19 |
+|   └─ `WorkerControllerMixin.on_maint_progress()` | 56 | 59 | 4 |
+|   └─ `WorkerControllerMixin.on_maint_error()` | 61 | 68 | 8 |
+|   └─ `WorkerControllerMixin.on_maint_finished()` | 70 | 111 | 42 |
+|   └─ `WorkerControllerMixin.handle_sync_from_server()` | 113 | 152 | 40 |
+|   └─ `WorkerControllerMixin._on_sync_finished()` | 154 | 172 | 19 |
+|   └─ `WorkerControllerMixin.open_csv()` | 174 | 184 | 11 |
+|   └─ `WorkerControllerMixin.handle_backtest()` | 186 | 207 | 22 |
+|   └─ `WorkerControllerMixin.on_backtest_progress()` | 209 | 212 | 4 |
+|   └─ `WorkerControllerMixin.on_backtest_error()` | 214 | 220 | 7 |
+|   └─ `WorkerControllerMixin.on_backtest_finished()` | 222 | 240 | 19 |
+
+### 📄 `frontend/controllers/trading_orchestrator.py` (82 dòng)
+
+| Thành phần (Class / Hàm) | Dòng bắt đầu | Dòng kết thúc | Số dòng |
+| :--- | ---: | ---: | ---: |
+| class `TradingOrchestrator` | 7 | 82 | 76 |
+|   └─ `TradingOrchestrator.run_loop()` | 11 | 82 | 72 |
+
+### 📄 `frontend/workers/backtest_worker.py` (35 dòng)
+
+| Thành phần (Class / Hàm) | Dòng bắt đầu | Dòng kết thúc | Số dòng |
+| :--- | ---: | ---: | ---: |
+| class `BacktestThread` | 8 | 35 | 28 |
+|   └─ `BacktestThread.__init__()` | 13 | 15 | 3 |
+|   └─ `BacktestThread.run()` | 17 | 35 | 19 |
+
+### 📄 `frontend/workers/maintenance_worker.py` (121 dòng)
+
+| Thành phần (Class / Hàm) | Dòng bắt đầu | Dòng kết thúc | Số dòng |
+| :--- | ---: | ---: | ---: |
+| class `MaintenanceRoutineThread` | 6 | 121 | 116 |
+|   └─ `MaintenanceRoutineThread.__init__()` | 11 | 14 | 4 |
+|   └─ `MaintenanceRoutineThread.run()` | 16 | 121 | 106 |
 
 ### 📄 `backtest/core_backtest_engine.py` (307 dòng)
 

@@ -57,6 +57,31 @@ FRONTEND_FILES = [
         "workers.py",
         "gui.py",
     ]
+] + [
+    os.path.join("frontend", "components", f)
+    for f in [
+        "table_items.py",
+        "ui_setup.py",
+    ]
+] + [
+    os.path.join("frontend", "renderers", f)
+    for f in [
+        "table_renderer.py",
+        "summary_formatter.py",
+    ]
+] + [
+    os.path.join("frontend", "controllers", f)
+    for f in [
+        "stock_controller.py",
+        "worker_controller.py",
+        "trading_orchestrator.py",
+    ]
+] + [
+    os.path.join("frontend", "workers", f)
+    for f in [
+        "backtest_worker.py",
+        "maintenance_worker.py",
+    ]
 ]
 ROOT_FILES = [
     "main.py",
@@ -224,9 +249,18 @@ ROLE_DESCRIPTIONS = {
     "backend/notifier.py": "Dịch vụ gửi thông báo Email SMTP (`EmailNotifier`: Trade Fill, IBKR Disconnect & Recovery)",
     "backend/ibkr_watchdog.py": "Quản lý kết nối IBKR (`IBKRWatchdogMixin`), Auto-Reconnect & Watchdog cảnh báo mất kết nối",
     "backend/trading_bot.py": "Lõi thuật toán `TradingBot`: Facade Coordinator điều phối 5 services Lean",
-    "frontend/workers.py": "Luồng chạy ngầm `QThread` (`BacktestThread`, `MaintenanceRoutineThread` quét S&P 500)",
-    "frontend/ui_components.py": "Khởi tạo giao diện PyQt6 (`UISetupMixin`, `NumericTableWidgetItem`, bảng 30 cột & Dark Theme)",
-    "frontend/gui.py": "Nhạc trưởng giao diện PyQt6 (`TradingApp`), xử lý sự kiện nút bấm, `update_display()` & `trading_loop()`",
+    "frontend/components/table_items.py": "Custom Widget bảng: `NumericTableWidgetItem` hỗ trợ sắp xếp theo giá trị số thực",
+    "frontend/components/ui_setup.py": "Khởi tạo layout giao diện PyQt6 (`UISetupMixin`), Dark Theme, bảng 30 cột & toolbar",
+    "frontend/renderers/table_renderer.py": "Render bảng 30 cột (`TableRenderer`): format giá, PnL, màu sắc, font, tooltip & bank acronym",
+    "frontend/renderers/summary_formatter.py": "Format header tổng quan (`SummaryFormatter`): Total PnL, Daily/Unrealized PnL, Cash & Last Fetch",
+    "frontend/controllers/stock_controller.py": "Điều phối hành động cổ phiếu (`StockActionsMixin`): Add/Remove stock, Manual Buy/Sell/Hold, Sort",
+    "frontend/controllers/worker_controller.py": "Điều phối luồng ngầm (`WorkerControllerMixin`): Maintenance Routine S&P500, Backtest & Sync DB Server",
+    "frontend/controllers/trading_orchestrator.py": "Nhạc trưởng giao dịch tự động (`TradingOrchestrator`): Vòng lặp duyệt lệnh Sell, xếp hạng Smart Score & Buy",
+    "frontend/workers/backtest_worker.py": "Luồng ngầm Backtest (`BacktestThread`): Chạy mô phỏng chiến lược toàn bộ danh mục",
+    "frontend/workers/maintenance_worker.py": "Luồng ngầm Maintenance (`MaintenanceRoutineThread`): Quét top 10 cổ phiếu S&P500 lọc MA200 & PF>=1.2",
+    "frontend/workers.py": "Facade tương thích ngược: Re-export BacktestThread & MaintenanceRoutineThread",
+    "frontend/ui_components.py": "Facade tương thích ngược: Re-export NumericTableWidgetItem & UISetupMixin",
+    "frontend/gui.py": "Nhạc trưởng giao diện PyQt6 (`TradingApp`): Shell mỏng tích hợp các Mixin & điều phối hiển thị",
     "main.py": "Điểm khởi chạy ứng dụng Desktop (`QApplication`)",
     "backtest/core_backtest_engine.py": "Lõi mô phỏng Backtest kiểm chứng thuật toán DIP & MOMENTUM",
     "backtest/run_present_stocks_backtest.py": "Chạy Backtest toàn bộ danh mục trong SQLite DB và xuất báo cáo so sánh S&P 500",

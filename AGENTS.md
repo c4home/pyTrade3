@@ -123,3 +123,15 @@ To prevent monolithic debt, `backend/trading_bot.py` is decomposed into 5 dedica
 6. **`backend/services/execution.py`**: IBKR socket broker execution, adaptive orders, order timeout (300s), CSV/DB trade logging.
 7. **`backend/trading_bot.py`**: Facade Coordinator maintaining 100% backward compatibility for `frontend/gui.py`.
 *Full architectural documentation is available in [docs/KIEN_TRUC_BACKEND_5_KHOI.md](file:///Users/canhhung/Documents/pyTrade3/docs/KIEN_TRUC_BACKEND_5_KHOI.md).*
+
+---
+
+## 🖥️ 7. Modular Component-Based Frontend Architecture (`frontend/`)
+
+To prevent GUI monolithic debt, `frontend/` is decoupled into specialized packages coordinated by `TradingApp`:
+1. **`frontend/components/`**: Layout & Custom Widgets (`ui_setup.py` with `UISetupMixin`, `table_items.py` with `NumericTableWidgetItem`).
+2. **`frontend/renderers/`**: Data formatting & View logic (`table_renderer.py` for 30-column rendering/styling, `summary_formatter.py` for PnL & status bar).
+3. **`frontend/controllers/`**: Action handlers & orchestration (`stock_controller.py` with `StockActionsMixin`, `worker_controller.py` with `WorkerControllerMixin`, `trading_orchestrator.py` with `TradingOrchestrator`).
+4. **`frontend/workers/`**: QThread background jobs (`backtest_worker.py` for BacktestThread, `maintenance_worker.py` for MaintenanceRoutineThread).
+5. **`frontend/gui.py`**: Thin Coordinator Shell maintaining 100% backward compatibility for `main.py`.
+6. **`frontend/ui_components.py` & `frontend/workers.py`**: Facades preserving 100% backward compatibility for legacy imports.
