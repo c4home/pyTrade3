@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QAction, QColor
-from PyQt6.QtWidgets import QMainWindow, QMenu, QMessageBox
+from PyQt6.QtWidgets import QMainWindow, QMenu, QMessageBox, QWidget
 
 from backend.config import logger
 from trading_bot import TradingBot
@@ -84,10 +84,13 @@ class StockActionsMixin(_StockMixinBase):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Escape:
-            self.table.clearSelection()
+            if hasattr(self, "table") and self.table:
+                self.table.clearSelection()
             event.accept()
-        else:
+        elif hasattr(super(), "keyPressEvent"):
             super().keyPressEvent(event)
+        elif isinstance(self, QWidget):
+            QWidget.keyPressEvent(self, event)
 
     def on_header_clicked(self, logical_index):
         self.sort_column = logical_index
