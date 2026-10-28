@@ -1,0 +1,17 @@
+{
+  "include": [
+    "backend",
+    "frontend",
+    "backtest",
+    "main.py"
+  ],
+  "extraPaths": [
+    "backend",
+    "backend/services",
+    "frontend"
+  ],
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "off"
+}
+

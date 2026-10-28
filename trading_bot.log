@@ -1539,3 +1539,481 @@ of version 954.1 or newer:  TWS: 7497; IB Gateway: 4002
 2026-08-11 23:10:52 - config - INFO - Attempting UBS web scrape for DECK...
 2026-08-11 23:10:52 - config - WARNING - ⚠️ IBKR Connection Event -1: [504] Not connected
 2026-08-11 23:10:53 - config - WARNING - ⚠️ IBKR Connection Event -1: [504] Not connected
+2026-10-26 14:02:52 - config - INFO - PDT Protector: Loaded 0 day trades from the last 7 days.
+2026-10-26 14:02:53 - config - WARNING - ⚠️ IBKR Connection/Session Event -1: [502] Couldn't connect to TWS. Confirm that "Enable ActiveX and Socket EClients" 
+is enabled and connection port is the same as "Socket Port" on the 
+TWS "Edit->Global Configuration...->API->Settings" menu. Live Trading ports: 
+TWS: 7496; IB Gateway: 4001. Simulated Trading ports for new installations 
+of version 954.1 or newer:  TWS: 7497; IB Gateway: 4002
+2026-10-26 14:02:53 - config - WARNING - 🚨 IBKR TWS/Gateway socket connection was closed by host.
+2026-10-26 14:02:54 - config - INFO - Fetching fresh analyst targets for AMD...
+2026-10-26 14:02:54 - config - INFO - [UBS yfinance] AMD target is stale (93d old). Trying web scrape for fresher data...
+2026-10-26 14:02:54 - config - INFO - Attempting UBS web scrape for AMD...
+2026-10-26 14:02:55 - config - INFO - [UBS Scrape] AMD Target: 730.0 (Date: 2026-07-24)
+2026-10-26 14:02:55 - config - ERROR - [EARNINGS df] AMD: time data "November 3, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:02:55 - config - INFO - Fetching fresh analyst targets for TSLA...
+2026-10-26 14:02:56 - config - INFO - [UBS yfinance] TSLA target $425.0 is fresh (3d old). Using it.
+2026-10-26 14:02:56 - config - ERROR - [EARNINGS df] TSLA: time data "January 27, 2027 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:02:56 - config - INFO - Fetching fresh analyst targets for AAPL...
+2026-10-26 14:02:56 - config - INFO - [UBS yfinance] AAPL target is stale (177d old). Trying web scrape for fresher data...
+2026-10-26 14:02:56 - config - INFO - Attempting UBS web scrape for AAPL...
+2026-10-26 14:02:56 - config - INFO - [UBS Scrape] AAPL Target: 296.0 (Date: 2026-04-30)
+2026-10-26 14:02:56 - config - ERROR - [EARNINGS df] AAPL: time data "November 2, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:02:57 - config - INFO - Fetching fresh analyst targets for EGLN.L...
+2026-10-26 14:02:58 - config - INFO - Attempting UBS web scrape for EGLN.L...
+2026-10-26 14:02:58 - config - INFO - API fetch failed. Using stale fallback for EGLN.L.
+2026-10-26 14:02:58 - config - INFO - Fetching fresh analyst targets for ESE.PA...
+2026-10-26 14:02:59 - config - INFO - Attempting UBS web scrape for ESE.PA...
+2026-10-26 14:02:59 - config - INFO - API fetch failed. Using stale fallback for ESE.PA.
+2026-10-26 14:02:59 - config - INFO - Fetching fresh analyst targets for QCOM...
+2026-10-26 14:02:59 - config - INFO - [UBS yfinance] QCOM target is stale (87d old). Trying web scrape for fresher data...
+2026-10-26 14:02:59 - config - INFO - Attempting UBS web scrape for QCOM...
+2026-10-26 14:02:59 - config - INFO - [UBS Scrape] QCOM Target: 170.0 (Date: 2026-07-30)
+2026-10-26 14:03:00 - config - INFO - Shutting down application...
+2026-10-26 14:03:00 - config - ERROR - [EARNINGS df] TSM: time data "January 14, 2027 at 7 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:03:01 - config - INFO - Fetching fresh analyst targets for TSM...
+2026-10-26 14:03:01 - config - INFO - Attempting UBS web scrape for TSM...
+2026-10-26 14:03:01 - config - ERROR - [EARNINGS df] QCOM: time data "November 4, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:03:01 - config - INFO - Fetching fresh analyst targets for MSFT...
+2026-10-26 14:03:01 - config - INFO - [UBS yfinance] MSFT target $675.0 is fresh (10d old). Using it.
+2026-10-26 14:03:02 - config - ERROR - [EARNINGS df] MSFT: time data "October 28, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:03:02 - config - INFO - Fetching fresh analyst targets for NVDA...
+2026-10-26 14:03:02 - config - INFO - [UBS yfinance] NVDA target is stale (59d old). Trying web scrape for fresher data...
+2026-10-26 14:03:02 - config - INFO - Attempting UBS web scrape for NVDA...
+2026-10-26 14:03:02 - config - INFO - [UBS Scrape] NVDA Target: 300.0 (Date: 2026-08-27)
+2026-10-26 14:03:02 - config - ERROR - [EARNINGS df] NVDA: time data "November 17, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:03:03 - config - INFO - Fetching fresh analyst targets for AMZN...
+2026-10-26 14:03:03 - config - ERROR - [EARNINGS df] AMZN: time data "October 29, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:03:04 - config - ERROR - [EARNINGS df] GOOG: time data "October 28, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:03:04 - config - INFO - Fetching fresh analyst targets for GOOG...
+2026-10-26 14:03:04 - config - INFO - [UBS yfinance] GOOG target $380.0 is fresh (11d old). Using it.
+2026-10-26 14:03:05 - config - ERROR - [EARNINGS df] ARM: time data "November 4, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:03:06 - config - INFO - Fetching fresh analyst targets for ARM...
+2026-10-26 14:03:06 - config - INFO - [UBS yfinance] ARM target is stale (87d old). Trying web scrape for fresher data...
+2026-10-26 14:03:06 - config - INFO - Attempting UBS web scrape for ARM...
+2026-10-26 14:03:06 - config - INFO - [UBS Scrape] ARM Target: 320.0 (Date: 2026-07-30)
+2026-10-26 14:03:07 - config - ERROR - [EARNINGS df] INTC: time data "October 29, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:03:07 - config - INFO - Fetching fresh analyst targets for INTC...
+2026-10-26 14:03:07 - config - INFO - [UBS yfinance] INTC target is stale (75d old). Trying web scrape for fresher data...
+2026-10-26 14:03:07 - config - INFO - Attempting UBS web scrape for INTC...
+2026-10-26 14:03:07 - config - INFO - [UBS Scrape] INTC Target: 103.0 (Date: 2026-10-19)
+2026-10-26 14:03:08 - config - ERROR - [EARNINGS df] ASML: time data "January 27, 2027 at 7 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:03:08 - config - INFO - Fetching fresh analyst targets for ASML...
+2026-10-26 14:03:08 - config - INFO - Attempting UBS web scrape for ASML...
+2026-10-26 14:03:09 - config - INFO - [UBS Scrape] ASML Target: 2400.0 (Date: 2026-10-14)
+2026-10-26 14:03:10 - config - ERROR - [EARNINGS df] MU: time data "December 23, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:03:10 - config - INFO - Fetching fresh analyst targets for MU...
+==================================================================
+☁️  pyTrade3 - Đồng bộ Database & CSV từ Server OVH về Local Mac
+==================================================================
+🌐 Server nguồn : ubuntu@144.217.95.231:/home/ubuntu/pyTrade3
+📂 Thư mục đích : /Users/canhhung/Documents/pyTrade3
+------------------------------------------------------------------
+📸 [1/3] Đang tạo snapshot SQLite an toàn trên Server...
+spawn ssh -o ConnectTimeout=12 ubuntu@144.217.95.231 if command -v sqlite3 >/dev/null 2>&1; then sqlite3 '/home/ubuntu/pyTrade3/trading_bot.db' ".backup '/tmp/trading_bot_sync_snapshot.db'"; else cp '/home/ubuntu/pyTrade3/trading_bot.db' '/tmp/trading_bot_sync_snapshot.db'; fi
+ubuntu@144.217.95.231's password: 
+⬇️  [2/3] Đang tải trading_bot.db từ Server về máy...
+spawn rsync -avz ubuntu@144.217.95.231:/tmp/trading_bot_sync_snapshot.db /Users/canhhung/Documents/pyTrade3/trading_bot.db.sync_tmp
+ubuntu@144.217.95.231's password: 
+Transfer starting: 1 files
+trading_bot.db.sync_tmp
+
+sent 38 bytes  received 87632 bytes  876700000 bytes/sec
+total size is 307200  speedup is 3,50
+⬇️  [3/3] Đang tải trading_orders_history.csv từ Server...
+spawn rsync -avz ubuntu@144.217.95.231:/home/ubuntu/pyTrade3/trading_orders_history.csv /Users/canhhung/Documents/pyTrade3/trading_orders_history.csv
+ubuntu@144.217.95.231's password: 
+Transfer starting: 1 files
+
+sent 16 bytes  received 111 bytes  1270000 bytes/sec
+total size is 143903  speedup is 1133,09
+------------------------------------------------------------------
+✅ Đồng bộ hoàn tất! Dữ liệu từ Server OVH đã được cập nhật vào trading_bot.db.
+==================================================================
+2026-10-26 14:28:43 - config - INFO - PDT Protector: Loaded 0 day trades from the last 7 days.
+2026-10-26 14:28:44 - config - WARNING - ⚠️ IBKR Connection/Session Event -1: [502] Couldn't connect to TWS. Confirm that "Enable ActiveX and Socket EClients" 
+is enabled and connection port is the same as "Socket Port" on the 
+TWS "Edit->Global Configuration...->API->Settings" menu. Live Trading ports: 
+TWS: 7496; IB Gateway: 4001. Simulated Trading ports for new installations 
+of version 954.1 or newer:  TWS: 7497; IB Gateway: 4002
+2026-10-26 14:28:44 - config - WARNING - 🚨 IBKR TWS/Gateway socket connection was closed by host.
+2026-10-26 14:28:46 - config - INFO - Fetching fresh analyst targets for AMD...
+2026-10-26 14:28:46 - config - INFO - [UBS yfinance] AMD target is stale (93d old). Trying web scrape for fresher data...
+2026-10-26 14:28:46 - config - INFO - Attempting UBS web scrape for AMD...
+2026-10-26 14:28:46 - config - INFO - [UBS Scrape] AMD Target: 730.0 (Date: 2026-07-24)
+2026-10-26 14:28:46 - config - ERROR - [EARNINGS df] AMD: time data "November 3, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:47 - config - INFO - Fetching fresh analyst targets for TSLA...
+2026-10-26 14:28:47 - config - INFO - [UBS yfinance] TSLA target $425.0 is fresh (3d old). Using it.
+2026-10-26 14:28:47 - config - ERROR - [EARNINGS df] TSLA: time data "January 27, 2027 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:47 - config - INFO - Fetching fresh analyst targets for AAPL...
+2026-10-26 14:28:47 - config - INFO - [UBS yfinance] AAPL target is stale (177d old). Trying web scrape for fresher data...
+2026-10-26 14:28:47 - config - INFO - Attempting UBS web scrape for AAPL...
+2026-10-26 14:28:48 - config - ERROR - [EARNINGS df] AAPL: time data "November 2, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:48 - config - INFO - [UBS Scrape] AAPL Target: 296.0 (Date: 2026-04-30)
+2026-10-26 14:28:48 - config - INFO - Shutting down application...
+2026-10-26 14:28:48 - config - INFO - Fetching fresh analyst targets for EGLN.L...
+2026-10-26 14:28:49 - config - INFO - Attempting UBS web scrape for EGLN.L...
+2026-10-26 14:28:49 - config - INFO - API fetch failed. Using stale fallback for EGLN.L.
+2026-10-26 14:28:49 - config - INFO - Fetching fresh analyst targets for ESE.PA...
+2026-10-26 14:28:50 - config - INFO - Attempting UBS web scrape for ESE.PA...
+2026-10-26 14:28:50 - config - INFO - API fetch failed. Using stale fallback for ESE.PA.
+2026-10-26 14:28:50 - config - INFO - Fetching fresh analyst targets for QCOM...
+2026-10-26 14:28:50 - config - INFO - [UBS yfinance] QCOM target is stale (87d old). Trying web scrape for fresher data...
+2026-10-26 14:28:50 - config - INFO - Attempting UBS web scrape for QCOM...
+2026-10-26 14:28:50 - config - ERROR - [EARNINGS df] QCOM: time data "November 4, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:50 - config - INFO - [UBS Scrape] QCOM Target: 170.0 (Date: 2026-07-30)
+2026-10-26 14:28:51 - config - INFO - Fetching fresh analyst targets for TSM...
+2026-10-26 14:28:51 - config - INFO - Attempting UBS web scrape for TSM...
+2026-10-26 14:28:51 - config - ERROR - [EARNINGS df] TSM: time data "January 14, 2027 at 7 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:51 - config - INFO - Fetching fresh analyst targets for MSFT...
+2026-10-26 14:28:51 - config - INFO - [UBS yfinance] MSFT target $675.0 is fresh (10d old). Using it.
+2026-10-26 14:28:52 - config - ERROR - [EARNINGS df] MSFT: time data "October 28, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:52 - config - INFO - Fetching fresh analyst targets for NVDA...
+2026-10-26 14:28:52 - config - INFO - [UBS yfinance] NVDA target is stale (59d old). Trying web scrape for fresher data...
+2026-10-26 14:28:52 - config - INFO - Attempting UBS web scrape for NVDA...
+2026-10-26 14:28:52 - config - INFO - [UBS Scrape] NVDA Target: 300.0 (Date: 2026-08-27)
+2026-10-26 14:28:52 - config - ERROR - [EARNINGS df] NVDA: time data "November 17, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:53 - config - INFO - Fetching fresh analyst targets for AMZN...
+2026-10-26 14:28:53 - config - INFO - [UBS yfinance] AMZN target is stale (86d old). Trying web scrape for fresher data...
+2026-10-26 14:28:53 - config - INFO - Attempting UBS web scrape for AMZN...
+2026-10-26 14:28:53 - config - INFO - [UBS Scrape] AMZN Target: 348.0 (Date: 2026-10-26)
+2026-10-26 14:28:53 - config - ERROR - [EARNINGS df] AMZN: time data "October 29, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:53 - config - INFO - Fetching fresh analyst targets for GOOG...
+2026-10-26 14:28:53 - config - INFO - [UBS yfinance] GOOG target $380.0 is fresh (11d old). Using it.
+2026-10-26 14:28:54 - config - ERROR - [EARNINGS df] GOOG: time data "October 28, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:54 - config - INFO - Fetching fresh analyst targets for ARM...
+2026-10-26 14:28:54 - config - INFO - [UBS yfinance] ARM target is stale (87d old). Trying web scrape for fresher data...
+2026-10-26 14:28:54 - config - INFO - Attempting UBS web scrape for ARM...
+2026-10-26 14:28:54 - config - ERROR - [EARNINGS df] ARM: time data "November 4, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:54 - config - INFO - [UBS Scrape] ARM Target: 320.0 (Date: 2026-07-30)
+2026-10-26 14:28:54 - config - INFO - Fetching fresh analyst targets for INTC...
+2026-10-26 14:28:55 - config - INFO - [UBS yfinance] INTC target is stale (75d old). Trying web scrape for fresher data...
+2026-10-26 14:28:55 - config - INFO - Attempting UBS web scrape for INTC...
+2026-10-26 14:28:55 - config - INFO - [UBS Scrape] INTC Target: 103.0 (Date: 2026-10-19)
+2026-10-26 14:28:55 - config - ERROR - [EARNINGS df] INTC: time data "October 29, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:55 - config - INFO - Fetching fresh analyst targets for ASML...
+2026-10-26 14:28:55 - config - INFO - Attempting UBS web scrape for ASML...
+2026-10-26 14:28:56 - config - INFO - [UBS Scrape] ASML Target: 2400.0 (Date: 2026-10-14)
+2026-10-26 14:28:56 - config - ERROR - [EARNINGS df] ASML: time data "January 27, 2027 at 7 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-26 14:28:56 - config - INFO - Fetching fresh analyst targets for MU...
+2026-10-26 14:28:56 - config - INFO - [UBS yfinance] MU target is stale (152d old). Trying web scrape for fresher data...
+2026-10-26 14:28:56 - config - INFO - Attempting UBS web scrape for MU...
+==================================================================
+☁️  pyTrade3 - Đồng bộ Database & CSV từ Server OVH về Local Mac
+==================================================================
+🌐 Server nguồn : ubuntu@144.217.95.231:/home/ubuntu/pyTrade3
+📂 Thư mục đích : /Users/canhhung/Documents/pyTrade3
+------------------------------------------------------------------
+📸 [1/3] Đang tạo snapshot SQLite an toàn trên Server...
+spawn ssh -o ConnectTimeout=12 ubuntu@144.217.95.231 if command -v sqlite3 >/dev/null 2>&1; then sqlite3 '/home/ubuntu/pyTrade3/trading_bot.db' ".backup '/tmp/trading_bot_sync_snapshot.db'"; else cp '/home/ubuntu/pyTrade3/trading_bot.db' '/tmp/trading_bot_sync_snapshot.db'; fi
+ubuntu@144.217.95.231's password: 
+⬇️  [2/3] Đang tải trading_bot.db từ Server về máy...
+spawn rsync -avz ubuntu@144.217.95.231:/tmp/trading_bot_sync_snapshot.db /Users/canhhung/Documents/pyTrade3/trading_bot.db.sync_tmp
+ubuntu@144.217.95.231's password: 
+Transfer starting: 1 files
+trading_bot.db.sync_tmp
+
+sent 38 bytes  received 225 bytes  2630000 bytes/sec
+total size is 4096  speedup is 15,57
+⬇️  [3/3] Đang tải trading_orders_history.csv từ Server...
+spawn rsync -avz ubuntu@144.217.95.231:/home/ubuntu/pyTrade3/trading_orders_history.csv /Users/canhhung/Documents/pyTrade3/trading_orders_history.csv
+ubuntu@144.217.95.231's password: 
+Transfer starting: 1 files
+
+sent 16 bytes  received 111 bytes  1270000 bytes/sec
+total size is 143903  speedup is 1133,09
+------------------------------------------------------------------
+✅ Đồng bộ hoàn tất! Dữ liệu từ Server OVH đã được cập nhật vào trading_bot.db.
+==================================================================
+2026-10-26 15:07:01 - config - INFO - PDT Protector: Loaded 0 day trades from the last 7 days.
+2026-10-26 15:07:01 - config - WARNING - ⚠️ IBKR Connection/Session Event -1: [502] Couldn't connect to TWS. Confirm that "Enable ActiveX and Socket EClients" 
+is enabled and connection port is the same as "Socket Port" on the 
+TWS "Edit->Global Configuration...->API->Settings" menu. Live Trading ports: 
+TWS: 7496; IB Gateway: 4001. Simulated Trading ports for new installations 
+of version 954.1 or newer:  TWS: 7497; IB Gateway: 4002
+2026-10-26 15:07:01 - config - WARNING - 🚨 IBKR TWS/Gateway socket connection was closed by host.
+2026-10-26 15:07:02 - config - WARNING - ⚠️ IBKR Connection/Session Event -1: [504] Not connected
+2026-10-26 15:07:03 - config - WARNING - ⚠️ IBKR Connection/Session Event -1: [504] Not connected
+2026-10-26 15:07:14 - config - INFO - Shutting down application...
+==================================================================
+☁️  pyTrade3 - Đồng bộ Database & CSV từ Server OVH về Local Mac
+==================================================================
+🌐 Server nguồn : ubuntu@144.217.95.231:/home/ubuntu/pyTrade3
+📂 Thư mục đích : /Users/canhhung/Documents/pyTrade3
+------------------------------------------------------------------
+📸 [1/3] Đang tạo snapshot SQLite an toàn trên Server...
+spawn ssh -o ConnectTimeout=12 ubuntu@144.217.95.231 if command -v sqlite3 >/dev/null 2>&1; then sqlite3 '/home/ubuntu/pyTrade3/trading_bot.db' ".backup '/tmp/trading_bot_sync_snapshot.db'"; else cp '/home/ubuntu/pyTrade3/trading_bot.db' '/tmp/trading_bot_sync_snapshot.db'; fi
+ubuntu@144.217.95.231's password: 
+⬇️  [2/3] Đang tải trading_bot.db từ Server về máy...
+spawn rsync -avz ubuntu@144.217.95.231:/tmp/trading_bot_sync_snapshot.db /Users/canhhung/Documents/pyTrade3/trading_bot.db.sync_tmp
+ubuntu@144.217.95.231's password: 
+Transfer starting: 1 files
+trading_bot.db.sync_tmp
+
+sent 38 bytes  received 87742 bytes  877800000 bytes/sec
+total size is 315392  speedup is 3,59
+⬇️  [3/3] Đang tải trading_orders_history.csv từ Server...
+spawn rsync -avz ubuntu@144.217.95.231:/home/ubuntu/pyTrade3/trading_orders_history.csv /Users/canhhung/Documents/pyTrade3/trading_orders_history.csv
+ubuntu@144.217.95.231's password: 
+Transfer starting: 1 files
+trading_orders_history.csv
+
+sent 1274 bytes  received 339 bytes  16130000 bytes/sec
+total size is 144116  speedup is 89,35
+------------------------------------------------------------------
+✅ Đồng bộ hoàn tất! Dữ liệu từ Server OVH đã được cập nhật vào trading_bot.db.
+==================================================================
+2026-10-28 10:27:13 - config - INFO - PDT Protector: Loaded 0 day trades from the last 7 days.
+2026-10-28 10:27:14 - config - WARNING - ⚠️ IBKR Connection/Session Event -1: [502] Couldn't connect to TWS. Confirm that "Enable ActiveX and Socket EClients" 
+is enabled and connection port is the same as "Socket Port" on the 
+TWS "Edit->Global Configuration...->API->Settings" menu. Live Trading ports: 
+TWS: 7496; IB Gateway: 4001. Simulated Trading ports for new installations 
+of version 954.1 or newer:  TWS: 7497; IB Gateway: 4002
+2026-10-28 10:27:14 - config - WARNING - 🚨 IBKR TWS/Gateway socket connection was closed by host.
+2026-10-28 10:27:15 - config - INFO - Fetching fresh analyst targets for AMD...
+2026-10-28 10:27:15 - config - WARNING - ⚠️ IBKR Connection/Session Event -1: [504] Not connected
+2026-10-28 10:27:15 - config - WARNING - ⚠️ IBKR Connection/Session Event -1: [504] Not connected
+2026-10-28 10:27:16 - config - INFO - [UBS yfinance] AMD target is stale (95d old). Trying web scrape for fresher data...
+2026-10-28 10:27:16 - config - INFO - Attempting UBS web scrape for AMD...
+2026-10-28 10:27:16 - config - INFO - [UBS Scrape] AMD Target: 730.0 (Date: 2026-07-24)
+2026-10-28 10:27:16 - config - ERROR - [EARNINGS df] AMD: time data "November 3, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:16 - config - INFO - Fetching fresh analyst targets for TSLA...
+2026-10-28 10:27:17 - config - INFO - [UBS yfinance] TSLA target $425.0 is fresh (5d old). Using it.
+2026-10-28 10:27:17 - config - ERROR - [EARNINGS df] TSLA: time data "January 27, 2027 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:17 - config - INFO - Fetching fresh analyst targets for AAPL...
+2026-10-28 10:27:17 - config - ERROR - [EARNINGS df] AAPL: time data "November 2, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:17 - config - INFO - [UBS yfinance] AAPL target is stale (179d old). Trying web scrape for fresher data...
+2026-10-28 10:27:17 - config - INFO - Attempting UBS web scrape for AAPL...
+2026-10-28 10:27:18 - config - INFO - [UBS Scrape] AAPL Target: 296.0 (Date: 2026-04-30)
+2026-10-28 10:27:18 - config - INFO - Fetching fresh analyst targets for EGLN.L...
+2026-10-28 10:27:18 - config - INFO - Attempting UBS web scrape for EGLN.L...
+2026-10-28 10:27:19 - config - INFO - API fetch failed. Using stale fallback for EGLN.L.
+2026-10-28 10:27:19 - config - INFO - Fetching fresh analyst targets for ESE.PA...
+2026-10-28 10:27:19 - config - INFO - Attempting UBS web scrape for ESE.PA...
+2026-10-28 10:27:20 - config - INFO - API fetch failed. Using stale fallback for ESE.PA.
+2026-10-28 10:27:20 - config - INFO - Fetching fresh analyst targets for QCOM...
+2026-10-28 10:27:20 - config - INFO - [UBS yfinance] QCOM target is stale (89d old). Trying web scrape for fresher data...
+2026-10-28 10:27:20 - config - INFO - Attempting UBS web scrape for QCOM...
+2026-10-28 10:27:20 - config - ERROR - [EARNINGS df] QCOM: time data "November 4, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:20 - config - INFO - [UBS Scrape] QCOM Target: 185.0 (Date: 2026-10-26)
+2026-10-28 10:27:20 - config - INFO - Fetching fresh analyst targets for TSM...
+2026-10-28 10:27:20 - config - INFO - Attempting UBS web scrape for TSM...
+2026-10-28 10:27:21 - config - ERROR - [EARNINGS df] TSM: time data "January 14, 2027 at 7 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:21 - config - INFO - Fetching fresh analyst targets for MSFT...
+2026-10-28 10:27:21 - config - INFO - [UBS yfinance] MSFT target $675.0 is fresh (12d old). Using it.
+2026-10-28 10:27:21 - config - ERROR - [EARNINGS df] MSFT: time data "October 28, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:21 - config - INFO - Fetching fresh analyst targets for NVDA...
+2026-10-28 10:27:21 - config - INFO - [UBS yfinance] NVDA target is stale (61d old). Trying web scrape for fresher data...
+2026-10-28 10:27:21 - config - INFO - Attempting UBS web scrape for NVDA...
+2026-10-28 10:27:21 - config - INFO - [UBS Scrape] NVDA Target: 300.0 (Date: 2026-08-27)
+2026-10-28 10:27:22 - config - ERROR - [EARNINGS df] NVDA: time data "November 17, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:22 - config - INFO - Fetching fresh analyst targets for AMZN...
+2026-10-28 10:27:22 - config - INFO - [UBS yfinance] AMZN target $348.0 is fresh (1d old). Using it.
+2026-10-28 10:27:22 - config - ERROR - [EARNINGS df] AMZN: time data "October 29, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:22 - config - INFO - Fetching fresh analyst targets for GOOG...
+2026-10-28 10:27:22 - config - INFO - [UBS yfinance] GOOG target $380.0 is fresh (13d old). Using it.
+2026-10-28 10:27:23 - config - ERROR - [EARNINGS df] GOOG: time data "October 28, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:23 - config - INFO - Fetching fresh analyst targets for ARM...
+2026-10-28 10:27:23 - config - INFO - [UBS yfinance] ARM target is stale (89d old). Trying web scrape for fresher data...
+2026-10-28 10:27:23 - config - INFO - Attempting UBS web scrape for ARM...
+2026-10-28 10:27:23 - config - INFO - [UBS Scrape] ARM Target: 320.0 (Date: 2026-07-30)
+2026-10-28 10:27:23 - config - ERROR - [EARNINGS df] ARM: time data "November 4, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:23 - config - INFO - Fetching fresh analyst targets for INTC...
+2026-10-28 10:27:23 - config - INFO - [UBS yfinance] INTC target is stale (76d old). Trying web scrape for fresher data...
+2026-10-28 10:27:23 - config - INFO - Attempting UBS web scrape for INTC...
+2026-10-28 10:27:24 - config - INFO - [UBS Scrape] INTC Target: 100.0 (Date: 2026-10-26)
+2026-10-28 10:27:24 - config - ERROR - [EARNINGS df] INTC: time data "October 29, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:24 - config - INFO - Fetching fresh analyst targets for ASML...
+2026-10-28 10:27:24 - config - INFO - Attempting UBS web scrape for ASML...
+2026-10-28 10:27:24 - config - INFO - [UBS Scrape] ASML Target: 2400.0 (Date: 2026-10-14)
+2026-10-28 10:27:25 - config - ERROR - [EARNINGS df] ASML: time data "January 27, 2027 at 7 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:25 - config - INFO - Fetching fresh analyst targets for MU...
+2026-10-28 10:27:25 - config - INFO - [UBS yfinance] MU target is stale (154d old). Trying web scrape for fresher data...
+2026-10-28 10:27:25 - config - INFO - Attempting UBS web scrape for MU...
+2026-10-28 10:27:25 - config - INFO - [UBS Scrape] MU Target: 1625.0 (Date: 2026-05-26)
+2026-10-28 10:27:25 - config - ERROR - [EARNINGS df] MU: time data "December 23, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:25 - config - INFO - Fetching fresh analyst targets for MRNA...
+2026-10-28 10:27:26 - config - INFO - [UBS yfinance] MRNA target is stale (68d old). Trying web scrape for fresher data...
+2026-10-28 10:27:26 - config - INFO - Attempting UBS web scrape for MRNA...
+2026-10-28 10:27:26 - config - ERROR - [EARNINGS df] MRNA: time data "November 6, 2026 at 7 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:26 - config - INFO - [UBS Scrape] MRNA Target: 150.0 (Date: 2026-08-19)
+2026-10-28 10:27:26 - config - INFO - Fetching fresh analyst targets for ABT...
+2026-10-28 10:27:26 - config - INFO - [UBS yfinance] ABT target is stale (91d old). Trying web scrape for fresher data...
+2026-10-28 10:27:26 - config - INFO - Attempting UBS web scrape for ABT...
+2026-10-28 10:27:26 - backend.config - INFO - Shutting down application...
+2026-10-28 10:27:27 - config - ERROR - [EARNINGS df] ABT: time data "January 28, 2027 at 7 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:27 - config - ERROR - [EARNINGS df] BARC.L: time data "February 9, 2027 at 11 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:27 - config - INFO - Fetching fresh analyst targets for BARC.L...
+2026-10-28 10:27:27 - config - INFO - Attempting UBS web scrape for BARC.L...
+2026-10-28 10:27:28 - config - INFO - [UBS Scrape] BARC.L Target: 588.0 (Date: 2026-10-22)
+2026-10-28 10:27:28 - config - ERROR - [EARNINGS df] AIR.PA: time data "October 28, 2026 at 12 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:28 - config - INFO - Fetching fresh analyst targets for AIR.PA...
+2026-10-28 10:27:29 - config - INFO - Attempting UBS web scrape for AIR.PA...
+2026-10-28 10:27:29 - config - INFO - [UBS Scrape] AIR.PA Target: 240.0 (Date: 2026-07-31)
+2026-10-28 10:27:29 - config - ERROR - [EARNINGS df] HO.PA: time data "March 2, 2027 at 11 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:29 - config - INFO - Fetching fresh analyst targets for HO.PA...
+2026-10-28 10:27:30 - config - INFO - Attempting UBS web scrape for HO.PA...
+2026-10-28 10:27:30 - config - INFO - [UBS Scrape] HO.PA Target: 330.0 (Date: 2026-07-09)
+2026-10-28 10:27:31 - config - ERROR - [EARNINGS df] SAF.PA: time data "February 9, 2027 at 11 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:31 - config - INFO - Fetching fresh analyst targets for SAF.PA...
+2026-10-28 10:27:31 - config - INFO - Attempting UBS web scrape for SAF.PA...
+2026-10-28 10:27:31 - config - INFO - [UBS Scrape] SAF.PA Target: 350.0 (Date: 2026-10-07)
+2026-10-28 10:27:32 - config - ERROR - [EARNINGS df] AVGO: time data "December 9, 2026 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:32 - config - INFO - Fetching fresh analyst targets for AVGO...
+2026-10-28 10:27:32 - config - INFO - [UBS yfinance] AVGO target is stale (145d old). Trying web scrape for fresher data...
+2026-10-28 10:27:32 - config - INFO - Attempting UBS web scrape for AVGO...
+2026-10-28 10:27:32 - config - INFO - Fetching fresh analyst targets for JPM...
+2026-10-28 10:27:32 - config - INFO - [UBS yfinance] JPM target $395.0 is fresh (22d old). Using it.
+2026-10-28 10:27:33 - config - ERROR - [EARNINGS df] JPM: time data "January 14, 2027 at 7 AM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:33 - config - INFO - Fetching fresh analyst targets for IBKR...
+2026-10-28 10:27:33 - config - INFO - [UBS yfinance] IBKR target $101.0 is fresh (20d old). Using it.
+2026-10-28 10:27:33 - config - ERROR - [EARNINGS df] IBKR: time data "January 26, 2027 at 3 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:33 - config - INFO - Fetching fresh analyst targets for DVA...
+2026-10-28 10:27:33 - config - INFO - [UBS yfinance] DVA target is stale (109d old). Trying web scrape for fresher data...
+2026-10-28 10:27:33 - config - INFO - Attempting UBS web scrape for DVA...
+2026-10-28 10:27:34 - config - ERROR - [EARNINGS df] DVA: time data "October 29, 2026 at 4 PM" doesn't match format "%B %d, %Y at %I %p". You might want to try:
+    - passing `format` if your strings have a consistent format;
+    - passing `format='ISO8601'` if your strings are all ISO8601 but not necessarily in exactly the same format;
+    - passing `format='mixed'`, and the format will be inferred for each element individually. You might want to use `dayfirst` alongside this.
+2026-10-28 10:27:34 - config - INFO - Fetching fresh analyst targets for VRT...

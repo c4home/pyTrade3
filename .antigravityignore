@@ -5,6 +5,7 @@
 *.db-journal
 *.sqlite
 *.sqlite3
+backups_local/
 
 # Cached backtest datasets & logs
 *.pkl
@@ -20,5 +21,3 @@ __pycache__/
 *.pyo
 .git/
 .DS_Store
-archive/
-scratch/

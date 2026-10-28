@@ -113,7 +113,7 @@ def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
             pass
             
         import time
-        time.sleep(1.0)
+        time.sleep(0.15)
 
     grid = {'atr_mul': 1.5, 'stop_mul': 2.3, 'max_stop': -12.0, 'rsi_exit': 80, 'prot_act': 5.0, 'prot_drop': 0.25, 'dip_th': 7, 'mom_th': 8}
     
@@ -144,7 +144,7 @@ def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
         y1_tc, y2_tc, y3_tc = 0, 0, 0
         dip_cnt, mom_cnt = 0, 0
         dip_pnl_stk, mom_pnl_stk = 0, 0
-        rsi_exits, trail_exits, macd_exits, prot_exits, stop_exits = 0, 0, 0, 0, 0
+        rsi_exits, trail_exits, macd_exits, prot_exits, stop_exits, tstop_exits = 0, 0, 0, 0, 0, 0
         for t in stock_trades:
             sd = pd.to_datetime(t['sell_date'], utc=True)
             if sd <= y1_end:
@@ -170,6 +170,7 @@ def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
             elif reason == 'MACD': macd_exits += 1
             elif reason == 'Protective': prot_exits += 1
             elif reason == 'Stop': stop_exits += 1
+            elif reason == 'TimeStop': tstop_exits += 1
                 
         stock_pnl = y1_pnl + y2_pnl + y3_pnl
         stock_wr = len([t for t in stock_trades if t['pnl_pct'] > 0]) / len(stock_trades) if stock_trades else 0
@@ -192,6 +193,7 @@ def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
             'macd_exits': macd_exits,
             'prot_exits': prot_exits,
             'stop_exits': stop_exits,
+            'tstop_exits': tstop_exits,
             'is_watchlist': c.get('is_watchlist', False)
         }
         
@@ -270,14 +272,14 @@ def run_backtest_for_db_stocks(progress_callback=None, pause_callback=None):
     output_lines.append(f"* **Year 2 Period:** `2025-01-01` to `2025-12-31`  ")
     output_lines.append(f"* **Year 3 Period:** `2026-01-01` to present (`{today_str}`)  ")
     output_lines.append("```text")
-    output_lines.append(f"{'Symbol':<11} | {'Product / Sector':<28} | {'Total':>8} | {'Y1':>8} | {'Y2':>8} | {'Y3':>8} | {'WR':>6} | {'Trades':>6} | {'DIP':>5} | {'MOM':>5} | {'RSI':>5} | {'Trail':>5} | {'MACD':>5} | {'Prot':>5} | {'Stop':>5}")
-    output_lines.append("-" * 159)
+    output_lines.append(f"{'Symbol':<11} | {'Product / Sector':<28} | {'Total':>8} | {'Y1':>8} | {'Y2':>8} | {'Y3':>8} | {'WR':>6} | {'Trades':>6} | {'DIP':>5} | {'MOM':>5} | {'RSI':>5} | {'Trail':>5} | {'MACD':>5} | {'Prot':>5} | {'TStop':>5} | {'Stop':>5}")
+    output_lines.append("-" * 167)
     
     sorted_stats = sorted(stock_stats.items(), key=lambda item: item[1]['pnl'], reverse=True)
     for s, stat in sorted_stats:
         sym_str = f"{s} (W)" if stat.get('is_watchlist') else s
         prod_str = PRODUCT_MAP.get(s, "Equities")
-        output_lines.append(f"{sym_str:11s} | {prod_str:28s} | {stat['pnl']:+8.0f} | {stat['y1_pnl']:+8.0f} | {stat['y2_pnl']:+8.0f} | {stat['y3_pnl']:+8.0f} | {stat['wr']*100:5.1f}% | {stat['trades']:6d} | {stat['dip_cnt']:5d} | {stat['mom_cnt']:5d} | {stat['rsi_exits']:5d} | {stat['trail_exits']:5d} | {stat['macd_exits']:5d} | {stat['prot_exits']:5d} | {stat['stop_exits']:5d}")
+        output_lines.append(f"{sym_str:11s} | {prod_str:28s} | {stat['pnl']:+8.0f} | {stat['y1_pnl']:+8.0f} | {stat['y2_pnl']:+8.0f} | {stat['y3_pnl']:+8.0f} | {stat['wr']*100:5.1f}% | {stat['trades']:6d} | {stat['dip_cnt']:5d} | {stat['mom_cnt']:5d} | {stat['rsi_exits']:5d} | {stat['trail_exits']:5d} | {stat['macd_exits']:5d} | {stat['prot_exits']:5d} | {stat['tstop_exits']:5d} | {stat['stop_exits']:5d}")
     output_lines.append("```\n")
 
     output_lines.append("## BUY AND HOLD SP500 ETF (ESE.PA) COMPARISON")

@@ -10,7 +10,11 @@ wheels/
 *.log
 trading_bot.log
 *.db
+*.db-shm
+*.db-wal
+backups_local/
 .env
+.DS_Store
 
 # Virtual environments
 .venv

@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 > **CRITICAL RULE FOR ALL AI ASSISTANTS & DEVELOPERS**:
-> Before making ANY changes or refactoring in `trading_bot.py`, `core_backtest_engine.py`, `database.py`, `gui.py`, or `main.py`, you **MUST** read this document completely and respect all rules and thresholds defined below.
+> Before making ANY changes or refactoring in `backend/trading_bot.py`, `backtest/core_backtest_engine.py`, `backend/database.py`, `frontend/gui.py`, or `main.py`, you **MUST** read this document completely and respect all rules and thresholds defined below.
 > Do NOT loosen risk boundaries, bypass PDT checks, or modify buy/sell triggers without running full backtests and obtaining explicit user confirmation.
 
 ---
@@ -105,7 +105,21 @@ Sell evaluation is prioritized over buys and bypasses buy cooldowns. A sell orde
 
 ## 🛠️ 5. Rules for AI Agents & Developers
 
-1. **Read Before Modifying:** Always review `AGENTS.md` and `ALGORITHM_RULES.md` before making any code changes.
-2. **Keep Backtester & Live Engine Synced:** Any change to trading logic in `trading_bot.py` **MUST** be mirrored in `core_backtest_engine.py` to keep live results aligned with backtest benchmarks.
+1. **Read Before Modifying:** Always review `AGENTS.md` and `docs/ALGORITHM_RULES.md` before making any code changes.
+2. **Keep Backtester & Live Engine Synced:** Any change to trading logic in `backend/trading_bot.py` **MUST** be mirrored in `backtest/core_backtest_engine.py` to keep live results aligned with backtest benchmarks.
 3. **Database Schema Integrity:** Preserve SQLite database schema (`stocks` table, `highest_pnl`, `max_amount`, `profit_target`).
 4. **Update This File:** Whenever the algorithm, indicators, thresholds, or execution rules change, **UPDATE THIS FILE IMMEDIATELY**.
+
+---
+
+## 🏛️ 6. Lean 5-Stage Architecture (`backend/services/`)
+
+To prevent monolithic debt, `backend/trading_bot.py` is decomposed into 5 dedicated services under `backend/services/` coordinated via Facade:
+1. **`backend/services/models.py`**: Immutable Data Contracts (`MarketSnapshot`, `AlphaSignal`, `RiskDecision`).
+2. **`backend/services/data_feed.py`**: Technical indicators (RSI, ADX, MACD, BB, ATR), volume estimation, market hours.
+3. **`backend/services/alpha_engine.py`**: Multi-factor scoring (DIP & MOMENTUM Smart Score 0-12) & two-gate check.
+4. **`backend/services/portfolio_sizing.py`**: FX rates (`ExchangeRateManager`), dynamic position sizing (Kelly/ATR), asset allocation ceilings (35% ETF / 18% Stock).
+5. **`backend/services/risk_manager.py`**: Iron gatekeeper enforcing 13 Hard Buy Safeguards & 7 Exit Triggers, with integrated PDT protection (`PDTProtector`).
+6. **`backend/services/execution.py`**: IBKR socket broker execution, adaptive orders, order timeout (300s), CSV/DB trade logging.
+7. **`backend/trading_bot.py`**: Facade Coordinator maintaining 100% backward compatibility for `frontend/gui.py`.
+*Full architectural documentation is available in [docs/KIEN_TRUC_BACKEND_5_KHOI.md](file:///Users/canhhung/Documents/pyTrade3/docs/KIEN_TRUC_BACKEND_5_KHOI.md).*

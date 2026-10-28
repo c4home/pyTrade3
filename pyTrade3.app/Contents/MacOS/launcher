@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+# Tìm thư mục chứa pyTrade3.app (chính là /Users/canhhung/Documents/pyTrade3)
+APP_BUNDLE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+cd "$APP_BUNDLE_DIR"
+
+# Tự động đồng bộ DB từ Server OVH trước khi mở App
+if [[ -x "${APP_BUNDLE_DIR}/scripts/sync_from_server.sh" ]]; then
+    "${APP_BUNDLE_DIR}/scripts/sync_from_server.sh" >> "${APP_BUNDLE_DIR}/trading_bot.log" 2>&1 || true
+fi
+
+# Chạy giao diện pyTrade3
+if [[ -x "${APP_BUNDLE_DIR}/.venv/bin/python" ]]; then
+    exec "${APP_BUNDLE_DIR}/.venv/bin/python" "${APP_BUNDLE_DIR}/main.py"
+else
+    exec /usr/bin/env python3 "${APP_BUNDLE_DIR}/main.py"
+fi

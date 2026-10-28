@@ -353,3 +353,934 @@ Order ID,Stock ID,Action,Quantity,Price,Currency,Total Value,Timestamp,Status
 190,ISRG,SELL,3,361.4600,USD,1084.38,28/07/2026 21:10:39,Pending,"Trailing Profit Triggered at 7.29% (Peak: 10.29%,FILLED
 191,IBKR,BUY,11,90.7400,USD,998.14,28/07/2026 21:11:09,Pending,"[DIP] Score: 9/12 {Trend: +3, Analyst: +3 (Strong-Upside),FILLED
 192,SAF.PA,SELL,2,340.6000,EUR,681.20,29/07/2026 14:33:58,Pending,"MACD Bearish Crossover Exit (S_BULL → BEAR,FILLED
+255,MU,SELL,1,970.7400,USD,970.74,14/08/2026 14:22:54,Pending,"Protective Stop Triggered at 3.91% (Peak: 5.22%,FILLED
+256,ORCL,BUY,7,152.9999,USD,1071.00,14/08/2026 14:23:24,Pending,"[MOMENTUM] Score: 12/12 {MACD(S_BULL): +3, ADX>25: +1, RSI(50-70): +3, Analyst: +3 (Strong-Upside),FILLED
+257,TSLA,SELL,1,346.1200,USD,346.12,14/08/2026 14:24:12,Pending,"Trailing Profit Triggered at 8.53% (Peak: 10.05%,FILLED
+258,AVGO,BUY,1,395.9300,USD,395.93,14/08/2026 14:24:42,Pending,"[MOMENTUM] Score: 11/12 {MACD(S_BULL): +3, ProjVol>1.5x: +2, RSI(40-50): +1, Analyst: +2 (Strong-Upside),FILLED
+259,ESE.PA,SELL,127,34.0600,EUR,4325.62,14/08/2026 15:18:08,Pending,"Trailing Profit Triggered at 1.68% (Peak: 2.19%,FILLED
+260,ESE.PA,SELL,127,34.0645,EUR,4326.19,14/08/2026 15:23:09,Pending,"Trailing Profit Triggered at 1.68% (Peak: 2.19%, Trail: 0.50%)"
+261,TSM,SELL,8,424.5330,USD,3396.26,14/08/2026 15:27:16,Pending,"Trailing Profit Triggered at 4.09% (Peak: 5.65%,FILLED
+262,ISRG,BUY,5,400.0300,USD,2000.15,14/08/2026 15:27:46,Pending,"[MOMENTUM] Score: 11/12 {MACD(S_BULL): +3, RSI(50-70): +3, Analyst: +3 (Strong-Upside),FILLED
+263,COST,BUY,1,960.7701,USD,960.77,14/08/2026 15:28:16,Pending,"[MOMENTUM] Score: 10/12 {MACD(S_BULL): +3, RSI(50-70): +3, Analyst: +1 (Fair-Upside),FILLED
+264,NVDA,BUY,3,225.3023,USD,675.91,14/08/2026 15:28:46,Pending,"[MOMENTUM] Score: 10/12 {MACD(S_BULL): +3, RSI(50-70): +3, Analyst: +2 (Strong-Upside),FILLED
+265,ESE.PA,SELL,127,34.0500,EUR,4324.35,14/08/2026 15:29:34,Pending,"Trailing Profit Triggered at 1.68% (Peak: 2.19%, Trail: 0.50%)"
+266,SAF.PA,SELL,2,357.1000,EUR,714.20,18/08/2026 07:17:00,Pending,"Trailing Profit Triggered at 9.51% (Peak: 10.79%,FILLED
+267,SAF.PA,SELL,2,357.7000,EUR,715.40,18/08/2026 07:25:18,Pending,"Trailing Profit Triggered at 9.69% (Peak: 10.79%, Trail: 1.05%)"
+268,SAF.PA,SELL,2,357.6000,EUR,715.20,18/08/2026 07:32:06,Pending,"Trailing Profit Triggered at 9.66% (Peak: 10.79%, Trail: 1.11%)"
+269,SAF.PA,SELL,2,357.3000,EUR,714.60,18/08/2026 07:37:06,Pending,"Trailing Profit Triggered at 9.57% (Peak: 10.79%, Trail: 1.05%)"
+270,SAF.PA,SELL,2,357.3000,EUR,714.60,18/08/2026 07:42:07,Pending,"Trailing Profit Triggered at 9.57% (Peak: 10.79%, Trail: 1.05%)"
+271,SAF.PA,SELL,2,356.7000,EUR,713.40,18/08/2026 07:47:25,Pending,"Trailing Profit Triggered at 9.38% (Peak: 10.79%, Trail: 1.06%)"
+272,SAF.PA,SELL,2,356.5000,EUR,713.00,18/08/2026 07:52:25,Pending,"Trailing Profit Triggered at 9.32% (Peak: 10.79%, Trail: 1.13%)"
+273,SAF.PA,SELL,2,356.1000,EUR,712.20,18/08/2026 07:57:43,Pending,"Trailing Profit Triggered at 9.20% (Peak: 10.79%, Trail: 1.13%)"
+274,SAF.PA,SELL,2,354.4000,EUR,708.80,18/08/2026 08:02:43,Pending,"Trailing Profit Triggered at 8.68% (Peak: 10.79%, Trail: 1.14%)"
+275,SAF.PA,SELL,2,354.0000,EUR,708.00,18/08/2026 08:07:43,Pending,"Trailing Profit Triggered at 8.56% (Peak: 10.79%, Trail: 1.16%)"
+276,SAF.PA,SELL,2,353.8000,EUR,707.60,18/08/2026 08:12:43,Pending,"Trailing Profit Triggered at 8.49% (Peak: 10.79%, Trail: 1.10%)"
+277,SAF.PA,SELL,2,354.2000,EUR,708.40,18/08/2026 08:17:43,Pending,"Trailing Profit Triggered at 8.62% (Peak: 10.79%, Trail: 1.16%)"
+278,SAF.PA,SELL,2,354.0000,EUR,708.00,18/08/2026 08:22:43,Pending,"Trailing Profit Triggered at 8.56% (Peak: 10.79%, Trail: 1.16%)"
+279,SAF.PA,SELL,2,354.5000,EUR,709.00,18/08/2026 08:27:43,Pending,"Trailing Profit Triggered at 8.71% (Peak: 10.79%, Trail: 1.16%)"
+280,SAF.PA,SELL,2,355.1000,EUR,710.20,18/08/2026 08:32:43,Pending,"Trailing Profit Triggered at 8.89% (Peak: 10.79%, Trail: 1.16%)"
+281,SAF.PA,SELL,2,354.4000,EUR,708.80,18/08/2026 08:37:44,Pending,"Trailing Profit Triggered at 8.68% (Peak: 10.79%, Trail: 1.16%)"
+282,SAF.PA,SELL,2,354.5000,EUR,709.00,18/08/2026 08:42:44,Pending,"Trailing Profit Triggered at 8.74% (Peak: 10.79%, Trail: 1.16%)"
+283,SAF.PA,SELL,2,354.9000,EUR,709.80,18/08/2026 08:47:44,Pending,"Trailing Profit Triggered at 8.83% (Peak: 10.79%, Trail: 1.06%)"
+284,SAF.PA,SELL,2,355.0000,EUR,710.00,18/08/2026 08:52:44,Pending,"Trailing Profit Triggered at 8.86% (Peak: 10.79%, Trail: 1.16%)"
+285,SAF.PA,SELL,2,355.3000,EUR,710.60,18/08/2026 08:57:44,Pending,"Trailing Profit Triggered at 8.95% (Peak: 10.79%, Trail: 1.05%)"
+286,SAF.PA,SELL,2,355.7000,EUR,711.40,18/08/2026 09:02:44,Pending,"Trailing Profit Triggered at 9.08% (Peak: 10.79%, Trail: 1.16%)"
+287,SAF.PA,SELL,2,355.2000,EUR,710.40,18/08/2026 09:08:02,Pending,"Trailing Profit Triggered at 8.92% (Peak: 10.79%, Trail: 1.16%)"
+288,SAF.PA,SELL,2,355.4000,EUR,710.80,18/08/2026 09:13:02,Pending,"Trailing Profit Triggered at 8.98% (Peak: 10.79%, Trail: 1.05%)"
+289,SAF.PA,SELL,2,355.4000,EUR,710.80,18/08/2026 09:18:02,Pending,"Trailing Profit Triggered at 8.98% (Peak: 10.79%, Trail: 1.05%)"
+290,SAF.PA,SELL,2,355.7000,EUR,711.40,18/08/2026 09:23:02,Pending,"Trailing Profit Triggered at 9.08% (Peak: 10.79%, Trail: 1.05%)"
+291,SAF.PA,SELL,2,355.3000,EUR,710.60,18/08/2026 09:28:02,Pending,"Trailing Profit Triggered at 8.95% (Peak: 10.79%, Trail: 1.05%)"
+292,SAF.PA,SELL,2,355.2000,EUR,710.40,18/08/2026 09:33:03,Pending,"Trailing Profit Triggered at 8.92% (Peak: 10.79%, Trail: 1.04%)"
+293,SAF.PA,SELL,2,355.1000,EUR,710.20,18/08/2026 09:38:03,Pending,"Trailing Profit Triggered at 8.89% (Peak: 10.79%, Trail: 1.06%)"
+294,SAF.PA,SELL,2,355.2000,EUR,710.40,18/08/2026 09:43:03,Pending,"Trailing Profit Triggered at 8.92% (Peak: 10.79%, Trail: 1.04%)"
+295,SAF.PA,SELL,2,355.0000,EUR,710.00,18/08/2026 09:48:21,Pending,"Trailing Profit Triggered at 8.86% (Peak: 10.79%, Trail: 1.06%)"
+296,SAF.PA,SELL,2,355.1000,EUR,710.20,18/08/2026 09:53:21,Pending,"Trailing Profit Triggered at 8.89% (Peak: 10.79%, Trail: 1.06%)"
+297,SAF.PA,SELL,2,355.0000,EUR,710.00,18/08/2026 09:58:21,Pending,"Trailing Profit Triggered at 8.86% (Peak: 10.79%, Trail: 1.06%)"
+298,SAF.PA,SELL,2,355.4000,EUR,710.80,18/08/2026 10:03:21,Pending,"Trailing Profit Triggered at 8.98% (Peak: 10.79%, Trail: 1.05%)"
+299,SAF.PA,SELL,2,355.6000,EUR,711.20,18/08/2026 10:08:21,Pending,"Trailing Profit Triggered at 9.05% (Peak: 10.79%, Trail: 1.04%)"
+300,SAF.PA,SELL,2,355.8000,EUR,711.60,18/08/2026 10:13:21,Pending,"Trailing Profit Triggered at 9.11% (Peak: 10.79%, Trail: 1.05%)"
+301,SAF.PA,SELL,2,355.9000,EUR,711.80,18/08/2026 10:18:39,Pending,"Trailing Profit Triggered at 9.14% (Peak: 10.79%, Trail: 1.05%)"
+302,SAF.PA,SELL,2,356.3000,EUR,712.60,18/08/2026 10:23:58,Pending,"Trailing Profit Triggered at 9.26% (Peak: 10.79%, Trail: 1.03%)"
+303,SAF.PA,SELL,2,355.8000,EUR,711.60,18/08/2026 10:28:58,Pending,"Trailing Profit Triggered at 9.11% (Peak: 10.79%, Trail: 1.05%)"
+304,SAF.PA,SELL,2,355.9000,EUR,711.80,18/08/2026 10:33:58,Pending,"Trailing Profit Triggered at 9.14% (Peak: 10.79%, Trail: 1.05%)"
+305,SAF.PA,SELL,2,356.0000,EUR,712.00,18/08/2026 10:38:58,Pending,"Trailing Profit Triggered at 9.17% (Peak: 10.79%, Trail: 1.05%)"
+306,SAF.PA,SELL,2,356.2000,EUR,712.40,18/08/2026 10:43:58,Pending,"Trailing Profit Triggered at 9.23% (Peak: 10.79%, Trail: 1.05%)"
+307,SAF.PA,SELL,2,356.1000,EUR,712.20,18/08/2026 10:49:16,Pending,"Trailing Profit Triggered at 9.20% (Peak: 10.79%, Trail: 1.04%)"
+308,SAF.PA,SELL,2,356.1000,EUR,712.20,18/08/2026 10:54:16,Pending,"Trailing Profit Triggered at 9.20% (Peak: 10.79%, Trail: 1.05%)"
+309,SAF.PA,SELL,2,356.0000,EUR,712.00,18/08/2026 10:59:16,Pending,"Trailing Profit Triggered at 9.17% (Peak: 10.79%, Trail: 1.05%)"
+310,SAF.PA,SELL,2,356.0000,EUR,712.00,18/08/2026 11:04:16,Pending,"Trailing Profit Triggered at 9.17% (Peak: 10.79%, Trail: 1.05%)"
+311,SAF.PA,SELL,2,355.7000,EUR,711.40,18/08/2026 11:09:16,Pending,"Trailing Profit Triggered at 9.08% (Peak: 10.79%, Trail: 1.04%)"
+312,SAF.PA,SELL,2,356.0000,EUR,712.00,18/08/2026 11:14:16,Pending,"Trailing Profit Triggered at 9.17% (Peak: 10.79%, Trail: 1.04%)"
+313,SAF.PA,SELL,2,355.6000,EUR,711.20,18/08/2026 11:19:35,Pending,"Trailing Profit Triggered at 9.05% (Peak: 10.79%, Trail: 1.05%)"
+314,SAF.PA,SELL,2,355.4000,EUR,710.80,18/08/2026 11:24:35,Pending,"Trailing Profit Triggered at 8.98% (Peak: 10.79%, Trail: 1.04%)"
+315,SAF.PA,SELL,2,354.8000,EUR,709.60,18/08/2026 11:29:35,Pending,"Trailing Profit Triggered at 8.80% (Peak: 10.79%, Trail: 1.06%)"
+316,SAF.PA,SELL,2,354.6000,EUR,709.20,18/08/2026 11:34:35,Pending,"Trailing Profit Triggered at 8.74% (Peak: 10.79%, Trail: 1.06%)"
+317,SAF.PA,SELL,2,354.5000,EUR,709.00,18/08/2026 11:39:53,Pending,"Trailing Profit Triggered at 8.71% (Peak: 10.79%, Trail: 1.04%)"
+318,SAF.PA,SELL,2,354.3000,EUR,708.60,18/08/2026 11:44:53,Pending,"Trailing Profit Triggered at 8.68% (Peak: 10.79%, Trail: 1.06%)"
+319,SAF.PA,SELL,2,354.5000,EUR,709.00,18/08/2026 11:49:53,Pending,"Trailing Profit Triggered at 8.71% (Peak: 10.79%, Trail: 1.04%)"
+320,SAF.PA,SELL,2,354.8000,EUR,709.60,18/08/2026 11:54:53,Pending,"Trailing Profit Triggered at 8.80% (Peak: 10.79%, Trail: 1.04%)"
+321,SAF.PA,SELL,2,355.3000,EUR,710.60,18/08/2026 11:59:53,Pending,"Trailing Profit Triggered at 8.95% (Peak: 10.79%, Trail: 1.04%)"
+322,SAF.PA,SELL,2,354.9000,EUR,709.80,18/08/2026 12:04:53,Pending,"Trailing Profit Triggered at 8.83% (Peak: 10.79%, Trail: 1.06%)"
+323,SAF.PA,SELL,2,355.1000,EUR,710.20,18/08/2026 12:10:11,Pending,"Trailing Profit Triggered at 8.89% (Peak: 10.79%, Trail: 1.06%)"
+324,SAF.PA,SELL,2,355.1000,EUR,710.20,18/08/2026 12:15:30,Pending,"Trailing Profit Triggered at 8.89% (Peak: 10.79%, Trail: 1.06%)"
+325,SAF.PA,SELL,2,354.9000,EUR,709.80,18/08/2026 12:20:30,Pending,"Trailing Profit Triggered at 8.83% (Peak: 10.79%, Trail: 1.06%)"
+326,SAF.PA,SELL,2,355.0000,EUR,710.00,18/08/2026 12:25:30,Pending,"Trailing Profit Triggered at 8.86% (Peak: 10.79%, Trail: 1.04%)"
+327,SAF.PA,SELL,2,355.3000,EUR,710.60,18/08/2026 12:30:30,Pending,"Trailing Profit Triggered at 8.95% (Peak: 10.79%, Trail: 1.05%)"
+328,SAF.PA,SELL,2,355.0000,EUR,710.00,18/08/2026 12:35:30,Pending,"Trailing Profit Triggered at 8.86% (Peak: 10.79%, Trail: 1.06%)"
+329,SAF.PA,SELL,2,355.2000,EUR,710.40,18/08/2026 12:40:30,Pending,"Trailing Profit Triggered at 8.92% (Peak: 10.79%, Trail: 1.05%)"
+330,SAF.PA,SELL,2,354.9000,EUR,709.80,18/08/2026 12:45:30,Pending,"Trailing Profit Triggered at 8.83% (Peak: 10.79%, Trail: 1.06%)"
+331,SAF.PA,SELL,2,355.0000,EUR,710.00,18/08/2026 12:50:30,Pending,"Trailing Profit Triggered at 8.86% (Peak: 10.79%, Trail: 1.06%)"
+332,SAF.PA,SELL,2,354.9000,EUR,709.80,18/08/2026 12:55:30,Pending,"Trailing Profit Triggered at 8.83% (Peak: 10.79%, Trail: 1.06%)"
+333,SAF.PA,SELL,2,355.0000,EUR,710.00,18/08/2026 13:00:30,Pending,"Trailing Profit Triggered at 8.89% (Peak: 10.79%, Trail: 1.04%)"
+334,SAF.PA,SELL,2,355.1000,EUR,710.20,18/08/2026 13:05:30,Pending,"Trailing Profit Triggered at 8.89% (Peak: 10.79%, Trail: 1.06%)"
+335,SAF.PA,SELL,2,354.9000,EUR,709.80,18/08/2026 13:10:30,Pending,"Trailing Profit Triggered at 8.83% (Peak: 10.79%, Trail: 1.06%)"
+336,SAF.PA,SELL,2,355.3000,EUR,710.60,18/08/2026 13:15:31,Pending,"Trailing Profit Triggered at 8.98% (Peak: 10.79%, Trail: 1.05%)"
+337,SAF.PA,SELL,2,354.6000,EUR,709.20,18/08/2026 13:20:31,Pending,"Trailing Profit Triggered at 8.74% (Peak: 10.79%, Trail: 1.06%)"
+338,SAF.PA,SELL,2,354.9000,EUR,709.80,18/08/2026 13:25:31,Pending,"Trailing Profit Triggered at 8.80% (Peak: 10.79%, Trail: 1.04%)"
+339,SAF.PA,SELL,2,354.9000,EUR,709.80,18/08/2026 13:30:49,Pending,"Trailing Profit Triggered at 8.83% (Peak: 10.79%, Trail: 1.04%)"
+340,SAF.PA,SELL,2,354.5000,EUR,709.00,18/08/2026 13:35:50,Pending,"Trailing Profit Triggered at 8.71% (Peak: 10.79%, Trail: 1.04%)"
+341,SAF.PA,SELL,2,353.9000,EUR,707.80,18/08/2026 13:40:50,Pending,"Trailing Profit Triggered at 8.52% (Peak: 10.79%, Trail: 1.04%)"
+342,SAF.PA,SELL,2,354.3000,EUR,708.60,18/08/2026 13:45:51,Pending,"Trailing Profit Triggered at 8.49% (Peak: 10.79%, Trail: 1.06%)"
+343,SAF.PA,SELL,2,354.7000,EUR,709.40,18/08/2026 13:51:10,Pending,"Trailing Profit Triggered at 8.77% (Peak: 10.79%, Trail: 1.06%)"
+344,SAF.PA,SELL,2,354.8000,EUR,709.60,18/08/2026 13:56:11,Pending,"Trailing Profit Triggered at 8.80% (Peak: 10.79%, Trail: 1.04%)"
+345,SAF.PA,SELL,2,354.3000,EUR,708.60,18/08/2026 14:01:30,Pending,"Trailing Profit Triggered at 8.65% (Peak: 10.79%, Trail: 1.06%)"
+346,SAF.PA,SELL,2,353.8000,EUR,707.60,18/08/2026 14:06:30,Pending,"Trailing Profit Triggered at 8.65% (Peak: 10.79%, Trail: 1.06%)"
+347,SAF.PA,SELL,2,353.3000,EUR,706.60,18/08/2026 14:11:31,Pending,"Trailing Profit Triggered at 8.31% (Peak: 10.79%, Trail: 1.06%)"
+348,SAF.PA,SELL,2,354.2000,EUR,708.40,18/08/2026 14:16:32,Pending,"Trailing Profit Triggered at 8.62% (Peak: 10.79%, Trail: 1.06%)"
+349,SAF.PA,SELL,2,353.5000,EUR,707.00,18/08/2026 14:21:32,Pending,"Trailing Profit Triggered at 8.40% (Peak: 10.79%, Trail: 1.05%)"
+350,SAF.PA,SELL,2,353.1000,EUR,706.20,18/08/2026 14:26:33,Pending,"Trailing Profit Triggered at 8.28% (Peak: 10.79%, Trail: 1.06%)"
+351,SAF.PA,SELL,2,353.2000,EUR,706.40,18/08/2026 14:31:33,Pending,"Trailing Profit Triggered at 8.34% (Peak: 10.79%, Trail: 1.06%)"
+352,SAF.PA,SELL,2,353.3000,EUR,706.60,18/08/2026 14:36:34,Pending,"Trailing Profit Triggered at 8.34% (Peak: 10.79%, Trail: 1.06%)"
+353,SAF.PA,SELL,2,353.8000,EUR,707.60,18/08/2026 14:41:35,Pending,"Trailing Profit Triggered at 8.49% (Peak: 10.79%, Trail: 1.06%)"
+354,SAF.PA,SELL,2,353.4000,EUR,706.80,18/08/2026 14:46:36,Pending,"Trailing Profit Triggered at 8.37% (Peak: 10.79%, Trail: 1.06%)"
+355,SAF.PA,SELL,2,353.1000,EUR,706.20,18/08/2026 14:51:36,Pending,"Trailing Profit Triggered at 8.28% (Peak: 10.79%, Trail: 1.07%)"
+356,SAF.PA,SELL,2,353.2000,EUR,706.40,18/08/2026 14:56:55,Pending,"Trailing Profit Triggered at 8.31% (Peak: 10.79%, Trail: 1.06%)"
+357,SAF.PA,SELL,2,352.8000,EUR,705.60,18/08/2026 15:02:14,Pending,"Trailing Profit Triggered at 8.19% (Peak: 10.79%, Trail: 1.07%)"
+358,SAF.PA,SELL,2,353.6000,EUR,707.20,18/08/2026 15:07:14,Pending,"Trailing Profit Triggered at 8.46% (Peak: 10.79%, Trail: 1.05%)"
+359,SAF.PA,SELL,2,352.7000,EUR,705.40,18/08/2026 15:12:15,Pending,"Trailing Profit Triggered at 8.16% (Peak: 10.79%, Trail: 1.05%)"
+360,SAF.PA,SELL,2,352.4000,EUR,704.80,18/08/2026 15:17:16,Pending,"Trailing Profit Triggered at 8.03% (Peak: 10.79%, Trail: 1.06%)"
+361,SAF.PA,SELL,2,352.3000,EUR,704.60,18/08/2026 15:22:17,Pending,"Trailing Profit Triggered at 8.03% (Peak: 10.79%, Trail: 1.07%)"
+362,SAF.PA,SELL,2,352.8000,EUR,705.60,18/08/2026 15:27:17,Pending,"Trailing Profit Triggered at 8.19% (Peak: 10.79%, Trail: 1.06%)"
+363,SAF.PA,SELL,2,355.0000,EUR,710.00,19/08/2026 10:59:28,Pending,"Trailing Profit Triggered at 8.86% (Peak: 9.90%, Trail: 1.02%)"
+364,SAF.PA,SELL,2,355.0000,EUR,710.00,19/08/2026 11:44:41,Pending,"Trailing Profit Triggered at 8.86% (Peak: 9.90%, Trail: 1.02%)"
+365,SAF.PA,SELL,2,354.8000,EUR,709.60,19/08/2026 11:49:59,Pending,"Trailing Profit Triggered at 8.80% (Peak: 9.90%, Trail: 1.04%)"
+366,SAF.PA,SELL,2,354.6000,EUR,709.20,19/08/2026 11:54:59,Pending,"Trailing Profit Triggered at 8.74% (Peak: 9.90%, Trail: 1.02%)"
+367,SAF.PA,SELL,2,353.8000,EUR,707.60,19/08/2026 11:59:59,Pending,"Trailing Profit Triggered at 8.49% (Peak: 9.90%, Trail: 1.04%)"
+368,SAF.PA,SELL,2,353.9000,EUR,707.80,19/08/2026 12:04:59,Pending,"Trailing Profit Triggered at 8.52% (Peak: 9.90%, Trail: 1.04%)"
+369,SAF.PA,SELL,2,354.0000,EUR,708.00,19/08/2026 12:09:59,Pending,"Trailing Profit Triggered at 8.56% (Peak: 9.90%, Trail: 1.04%)"
+370,SAF.PA,SELL,2,354.1000,EUR,708.20,19/08/2026 12:14:59,Pending,"Trailing Profit Triggered at 8.59% (Peak: 9.90%, Trail: 1.04%)"
+371,SAF.PA,SELL,2,354.1000,EUR,708.20,19/08/2026 12:19:59,Pending,"Trailing Profit Triggered at 8.59% (Peak: 9.90%, Trail: 1.04%)"
+372,SAF.PA,SELL,2,354.1000,EUR,708.20,19/08/2026 12:24:59,Pending,"Trailing Profit Triggered at 8.59% (Peak: 9.90%, Trail: 1.02%)"
+373,SAF.PA,SELL,2,354.1000,EUR,708.20,19/08/2026 12:30:00,Pending,"Trailing Profit Triggered at 8.59% (Peak: 9.90%, Trail: 1.04%)"
+374,SAF.PA,SELL,2,354.2000,EUR,708.40,19/08/2026 12:35:00,Pending,"Trailing Profit Triggered at 8.62% (Peak: 9.90%, Trail: 1.02%)"
+375,SAF.PA,SELL,2,354.1000,EUR,708.20,19/08/2026 12:40:00,Pending,"Trailing Profit Triggered at 8.59% (Peak: 9.90%, Trail: 1.02%)"
+376,SAF.PA,SELL,2,354.0000,EUR,708.00,19/08/2026 12:45:00,Pending,"Trailing Profit Triggered at 8.56% (Peak: 9.90%, Trail: 1.02%)"
+377,SAF.PA,SELL,2,354.7000,EUR,709.40,19/08/2026 12:50:00,Pending,"Trailing Profit Triggered at 8.80% (Peak: 9.90%, Trail: 1.04%)"
+378,SAF.PA,SELL,2,354.8000,EUR,709.60,19/08/2026 12:55:00,Pending,"Trailing Profit Triggered at 8.80% (Peak: 9.90%, Trail: 1.04%)"
+379,SAF.PA,SELL,2,355.0000,EUR,710.00,19/08/2026 13:00:00,Pending,"Trailing Profit Triggered at 8.86% (Peak: 9.90%, Trail: 1.02%)"
+380,SAF.PA,SELL,2,354.6000,EUR,709.20,19/08/2026 13:05:00,Pending,"Trailing Profit Triggered at 8.74% (Peak: 9.90%, Trail: 1.04%)"
+381,SAF.PA,SELL,2,354.4000,EUR,708.80,19/08/2026 13:10:00,Pending,"Trailing Profit Triggered at 8.68% (Peak: 9.90%, Trail: 1.04%)"
+382,SAF.PA,SELL,2,353.9000,EUR,707.80,19/08/2026 13:15:00,Pending,"Trailing Profit Triggered at 8.52% (Peak: 9.90%, Trail: 1.04%)"
+383,SAF.PA,SELL,2,353.5000,EUR,707.00,19/08/2026 13:20:00,Pending,"Trailing Profit Triggered at 8.40% (Peak: 9.90%, Trail: 1.05%)"
+384,SAF.PA,SELL,2,353.5000,EUR,707.00,19/08/2026 13:25:00,Pending,"Trailing Profit Triggered at 8.40% (Peak: 9.90%, Trail: 1.02%)"
+385,SAF.PA,SELL,2,353.3000,EUR,706.60,19/08/2026 13:30:00,Pending,"Trailing Profit Triggered at 8.34% (Peak: 9.90%, Trail: 1.02%)"
+386,SAF.PA,SELL,2,353.1000,EUR,706.20,19/08/2026 13:35:01,Pending,"Trailing Profit Triggered at 8.28% (Peak: 9.90%, Trail: 1.05%)"
+387,SAF.PA,SELL,2,352.9000,EUR,705.80,19/08/2026 13:40:02,Pending,"Trailing Profit Triggered at 8.22% (Peak: 9.90%, Trail: 1.03%)"
+388,SAF.PA,SELL,2,353.2000,EUR,706.40,19/08/2026 13:45:02,Pending,"Trailing Profit Triggered at 8.31% (Peak: 9.90%, Trail: 1.03%)"
+389,AVGO,SELL,1,363.5850,USD,363.58,19/08/2026 13:45:51,Pending,FILLED
+390,SAF.PA,SELL,2,351.1000,EUR,702.20,19/08/2026 13:50:15,Pending,"Trailing Profit Triggered at 7.67% (Peak: 9.90%, Trail: 1.04%)"
+391,SAF.PA,SELL,2,350.9000,EUR,701.80,19/08/2026 13:55:34,Pending,"Trailing Profit Triggered at 7.61% (Peak: 9.90%, Trail: 1.05%)"
+392,SAF.PA,SELL,2,350.9000,EUR,701.80,19/08/2026 14:00:34,Pending,"Trailing Profit Triggered at 7.61% (Peak: 9.90%, Trail: 1.06%)"
+393,SAF.PA,SELL,2,350.5000,EUR,701.00,19/08/2026 14:05:35,Pending,"Trailing Profit Triggered at 7.48% (Peak: 9.90%, Trail: 1.07%)"
+394,SAF.PA,SELL,2,350.8000,EUR,701.60,19/08/2026 14:10:36,Pending,"Trailing Profit Triggered at 7.57% (Peak: 9.90%, Trail: 1.07%)"
+395,SAF.PA,SELL,2,350.8000,EUR,701.60,19/08/2026 14:15:36,Pending,"Trailing Profit Triggered at 7.57% (Peak: 9.90%, Trail: 1.07%)"
+396,SAF.PA,SELL,2,350.8000,EUR,701.60,19/08/2026 14:20:37,Pending,"Trailing Profit Triggered at 7.57% (Peak: 9.90%, Trail: 1.09%)"
+397,SAF.PA,SELL,2,351.1000,EUR,702.20,19/08/2026 14:25:38,Pending,"Trailing Profit Triggered at 7.70% (Peak: 9.90%, Trail: 1.07%)"
+398,SAF.PA,SELL,2,350.6000,EUR,701.20,19/08/2026 14:30:39,Pending,"Trailing Profit Triggered at 7.51% (Peak: 9.90%, Trail: 1.07%)"
+399,SAF.PA,SELL,2,351.1000,EUR,702.20,19/08/2026 14:35:40,Pending,"Trailing Profit Triggered at 7.57% (Peak: 9.90%, Trail: 1.07%)"
+400,SAF.PA,SELL,2,351.0000,EUR,702.00,19/08/2026 14:40:58,Pending,"Trailing Profit Triggered at 7.64% (Peak: 9.90%, Trail: 1.09%)"
+401,SAF.PA,SELL,2,351.2000,EUR,702.40,19/08/2026 14:46:17,Pending,"Trailing Profit Triggered at 7.70% (Peak: 9.90%, Trail: 1.06%)"
+402,SAF.PA,SELL,2,351.0000,EUR,702.00,19/08/2026 14:51:17,Pending,"Trailing Profit Triggered at 7.64% (Peak: 9.90%, Trail: 1.07%)"
+403,SAF.PA,SELL,2,351.1000,EUR,702.20,19/08/2026 14:56:18,Pending,"Trailing Profit Triggered at 7.67% (Peak: 9.90%, Trail: 1.07%)"
+404,SAF.PA,SELL,2,351.1000,EUR,702.20,19/08/2026 15:01:19,Pending,"Trailing Profit Triggered at 7.67% (Peak: 9.90%, Trail: 1.09%)"
+405,SAF.PA,SELL,2,351.0000,EUR,702.00,19/08/2026 15:06:19,Pending,"Trailing Profit Triggered at 7.64% (Peak: 9.90%, Trail: 1.07%)"
+406,SAF.PA,SELL,2,350.4000,EUR,700.80,19/08/2026 15:11:20,Pending,"Trailing Profit Triggered at 7.45% (Peak: 9.90%, Trail: 1.07%)"
+407,SAF.PA,SELL,2,349.5000,EUR,699.00,19/08/2026 15:16:21,Pending,"Trailing Profit Triggered at 7.18% (Peak: 9.90%, Trail: 1.09%)"
+408,SAF.PA,SELL,2,349.4000,EUR,698.80,19/08/2026 15:21:22,Pending,"Trailing Profit Triggered at 7.15% (Peak: 9.90%, Trail: 1.07%)"
+409,SAF.PA,SELL,2,349.7000,EUR,699.40,19/08/2026 15:26:22,Pending,"Trailing Profit Triggered at 7.24% (Peak: 9.90%, Trail: 1.10%)"
+410,SAF.PA,SELL,2,347.3000,EUR,694.60,20/08/2026 10:35:36,Pending,"Trailing Profit Triggered at 6.50% (Peak: 7.54%, Trail: 1.03%)"
+411,SAF.PA,SELL,2,347.3000,EUR,694.60,20/08/2026 10:40:36,Pending,"Trailing Profit Triggered at 6.50% (Peak: 7.54%, Trail: 1.04%)"
+412,SAF.PA,SELL,2,347.2000,EUR,694.40,20/08/2026 10:45:36,Pending,"Trailing Profit Triggered at 6.47% (Peak: 7.54%, Trail: 1.04%)"
+413,SAF.PA,SELL,2,347.2000,EUR,694.40,20/08/2026 10:50:37,Pending,"Trailing Profit Triggered at 6.47% (Peak: 7.54%, Trail: 1.06%)"
+414,SAF.PA,SELL,2,347.2000,EUR,694.40,20/08/2026 11:39:26,Pending,"Trailing Profit Triggered at 6.47% (Peak: 7.54%, Trail: 1.06%)"
+415,SAF.PA,SELL,2,346.8000,EUR,693.60,20/08/2026 11:44:26,Pending,"Trailing Profit Triggered at 6.35% (Peak: 7.54%, Trail: 1.04%)"
+416,SAF.PA,SELL,2,346.5000,EUR,693.00,20/08/2026 11:49:44,Pending,"Trailing Profit Triggered at 6.26% (Peak: 7.54%, Trail: 1.05%)"
+417,SAF.PA,SELL,2,346.4000,EUR,692.80,20/08/2026 11:54:44,Pending,"Trailing Profit Triggered at 6.23% (Peak: 7.54%, Trail: 1.05%)"
+418,SAF.PA,SELL,2,347.0000,EUR,694.00,20/08/2026 12:00:38,Pending,"Trailing Profit Triggered at 6.41% (Peak: 7.54%, Trail: 1.05%)"
+419,SAF.PA,SELL,2,347.0000,EUR,694.00,20/08/2026 12:05:38,Pending,"Trailing Profit Triggered at 6.41% (Peak: 7.54%, Trail: 1.05%)"
+420,SAF.PA,SELL,2,347.0000,EUR,694.00,20/08/2026 12:10:38,Pending,"Trailing Profit Triggered at 6.41% (Peak: 7.54%, Trail: 1.05%)"
+421,SAF.PA,SELL,2,346.8000,EUR,693.60,20/08/2026 12:15:38,Pending,"Trailing Profit Triggered at 6.35% (Peak: 7.54%, Trail: 1.05%)"
+422,SAF.PA,SELL,2,346.3000,EUR,692.60,20/08/2026 12:20:38,Pending,"Trailing Profit Triggered at 6.19% (Peak: 7.54%, Trail: 1.05%)"
+423,SAF.PA,SELL,2,346.6000,EUR,693.20,20/08/2026 12:25:38,Pending,"Trailing Profit Triggered at 6.29% (Peak: 7.54%, Trail: 1.05%)"
+424,SAF.PA,SELL,2,346.2000,EUR,692.40,20/08/2026 12:30:39,Pending,"Trailing Profit Triggered at 6.16% (Peak: 7.54%, Trail: 1.05%)"
+425,SAF.PA,SELL,2,345.9000,EUR,691.80,20/08/2026 12:35:39,Pending,"Trailing Profit Triggered at 6.07% (Peak: 7.54%, Trail: 1.06%)"
+426,SAF.PA,SELL,2,346.1000,EUR,692.20,20/08/2026 12:40:39,Pending,"Trailing Profit Triggered at 6.13% (Peak: 7.54%, Trail: 1.06%)"
+427,SAF.PA,SELL,2,345.7000,EUR,691.40,20/08/2026 12:45:39,Pending,"Trailing Profit Triggered at 6.01% (Peak: 7.54%, Trail: 1.06%)"
+428,SAF.PA,SELL,2,346.0000,EUR,692.00,20/08/2026 12:50:39,Pending,"Trailing Profit Triggered at 6.10% (Peak: 7.54%, Trail: 1.06%)"
+429,SAF.PA,SELL,2,345.8000,EUR,691.60,20/08/2026 12:55:39,Pending,"Trailing Profit Triggered at 6.04% (Peak: 7.54%, Trail: 1.08%)"
+430,SAF.PA,SELL,2,346.1000,EUR,692.20,20/08/2026 13:00:39,Pending,"Trailing Profit Triggered at 6.13% (Peak: 7.54%, Trail: 1.06%)"
+431,SAF.PA,SELL,2,346.4000,EUR,692.80,20/08/2026 13:05:39,Pending,"Trailing Profit Triggered at 6.23% (Peak: 7.54%, Trail: 1.08%)"
+432,SAF.PA,SELL,2,346.5000,EUR,693.00,20/08/2026 13:10:39,Pending,"Trailing Profit Triggered at 6.26% (Peak: 7.54%, Trail: 1.06%)"
+433,SAF.PA,SELL,2,346.7000,EUR,693.40,20/08/2026 13:15:39,Pending,"Trailing Profit Triggered at 6.32% (Peak: 7.54%, Trail: 1.08%)"
+434,SAF.PA,SELL,2,346.6000,EUR,693.20,20/08/2026 13:20:39,Pending,"Trailing Profit Triggered at 6.29% (Peak: 7.54%, Trail: 1.06%)"
+435,SAF.PA,SELL,2,346.1000,EUR,692.20,20/08/2026 13:25:39,Pending,"Trailing Profit Triggered at 6.13% (Peak: 7.54%, Trail: 1.06%)"
+436,SAF.PA,SELL,2,346.0000,EUR,692.00,20/08/2026 13:30:58,Pending,"Trailing Profit Triggered at 6.10% (Peak: 7.54%, Trail: 1.06%)"
+437,SAF.PA,SELL,2,346.2000,EUR,692.40,20/08/2026 13:35:59,Pending,"Trailing Profit Triggered at 6.16% (Peak: 7.54%, Trail: 1.08%)"
+438,SAF.PA,SELL,2,346.6000,EUR,693.20,20/08/2026 13:41:00,Pending,"Trailing Profit Triggered at 6.29% (Peak: 7.54%, Trail: 1.06%)"
+439,SAF.PA,SELL,2,346.0000,EUR,692.00,20/08/2026 13:46:00,Pending,"Trailing Profit Triggered at 6.10% (Peak: 7.54%, Trail: 1.06%)"
+440,SAF.PA,SELL,2,345.9000,EUR,691.80,20/08/2026 13:51:01,Pending,"Trailing Profit Triggered at 6.07% (Peak: 7.54%, Trail: 1.08%)"
+441,SAF.PA,SELL,2,344.8000,EUR,689.60,20/08/2026 13:56:20,Pending,"Trailing Profit Triggered at 5.73% (Peak: 7.54%, Trail: 1.07%)"
+442,SAF.PA,SELL,2,344.5000,EUR,689.00,20/08/2026 14:01:20,Pending,"Trailing Profit Triggered at 5.64% (Peak: 7.54%, Trail: 1.08%)"
+443,SAF.PA,SELL,2,344.3000,EUR,688.60,20/08/2026 14:06:21,Pending,"Trailing Profit Triggered at 5.58% (Peak: 7.54%, Trail: 1.08%)"
+444,SAF.PA,SELL,2,344.1000,EUR,688.20,20/08/2026 14:11:22,Pending,"Trailing Profit Triggered at 5.52% (Peak: 7.54%, Trail: 1.08%)"
+445,SAF.PA,SELL,2,343.7000,EUR,687.40,20/08/2026 14:16:23,Pending,"Trailing Profit Triggered at 5.40% (Peak: 7.54%, Trail: 1.08%)"
+446,SAF.PA,SELL,2,343.2000,EUR,686.40,20/08/2026 14:21:23,Pending,"Trailing Profit Triggered at 5.24% (Peak: 7.54%, Trail: 1.11%)"
+447,SAF.PA,SELL,2,344.2000,EUR,688.40,20/08/2026 14:26:24,Pending,"Trailing Profit Triggered at 5.55% (Peak: 7.54%, Trail: 1.11%)"
+448,SAF.PA,SELL,2,344.3000,EUR,688.60,20/08/2026 14:31:25,Pending,"Trailing Profit Triggered at 5.58% (Peak: 7.54%, Trail: 1.09%)"
+449,SAF.PA,SELL,2,345.1000,EUR,690.20,20/08/2026 14:36:44,Pending,"Trailing Profit Triggered at 5.83% (Peak: 7.54%, Trail: 1.09%)"
+450,SAF.PA,SELL,2,345.3000,EUR,690.60,20/08/2026 14:41:45,Pending,"Trailing Profit Triggered at 5.89% (Peak: 7.54%, Trail: 1.11%)"
+451,SAF.PA,SELL,2,344.6000,EUR,689.20,20/08/2026 14:47:04,Pending,"Trailing Profit Triggered at 5.67% (Peak: 7.54%, Trail: 1.09%)"
+452,SAF.PA,SELL,2,344.6000,EUR,689.20,20/08/2026 14:52:04,Pending,"Trailing Profit Triggered at 5.67% (Peak: 7.54%, Trail: 1.09%)"
+453,SAF.PA,SELL,2,344.8000,EUR,689.60,20/08/2026 14:57:05,Pending,"Trailing Profit Triggered at 5.73% (Peak: 7.54%, Trail: 1.11%)"
+454,SAF.PA,SELL,2,344.7000,EUR,689.40,20/08/2026 15:02:05,Pending,"Trailing Profit Triggered at 5.70% (Peak: 7.54%, Trail: 1.11%)"
+455,SAF.PA,SELL,2,344.7000,EUR,689.40,20/08/2026 15:07:06,Pending,"Trailing Profit Triggered at 5.70% (Peak: 7.54%, Trail: 1.09%)"
+456,SAF.PA,SELL,2,344.2000,EUR,688.40,20/08/2026 15:12:07,Pending,"Trailing Profit Triggered at 5.55% (Peak: 7.54%, Trail: 1.09%)"
+457,SAF.PA,SELL,2,344.4000,EUR,688.80,20/08/2026 15:17:07,Pending,"Trailing Profit Triggered at 5.61% (Peak: 7.54%, Trail: 1.09%)"
+458,SAF.PA,SELL,2,344.0000,EUR,688.00,20/08/2026 15:22:08,Pending,"Trailing Profit Triggered at 5.49% (Peak: 7.54%, Trail: 1.11%)"
+459,SAF.PA,SELL,2,343.7000,EUR,687.40,20/08/2026 15:27:09,Pending,"Trailing Profit Triggered at 5.40% (Peak: 7.54%, Trail: 1.11%)"
+460,SAF.PA,SELL,2,339.9000,EUR,679.80,21/08/2026 07:36:09,Pending,"Trailing Profit Triggered at 4.23% (Peak: 5.40%, Trail: 1.14%)"
+461,SAF.PA,SELL,2,340.3000,EUR,680.60,21/08/2026 10:51:09,Pending,"Trailing Profit Triggered at 4.35% (Peak: 5.40%,FILLED
+462,SAF.PA,SELL,2,340.3000,EUR,680.60,21/08/2026 10:56:09,Pending,"Trailing Profit Triggered at 4.35% (Peak: 5.40%, Trail: 1.01%)"
+463,SAF.PA,SELL,2,340.4000,EUR,680.80,21/08/2026 11:01:09,Pending,"Trailing Profit Triggered at 4.35% (Peak: 5.40%, Trail: 1.01%)"
+464,AMZN,SELL,5,258.9600,USD,1294.80,21/08/2026 14:00:00,Pending,FILLED
+465,MU,BUY,1,977.9350,USD,977.93,21/08/2026 14:00:30,Pending,"[MOMENTUM] Score: 12/12 {MACD(S_BULL): +3, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +2 (Strong-Upside),FILLED
+466,TSM,BUY,1,420.0350,USD,420.04,21/08/2026 14:01:00,Pending,"[MOMENTUM] Score: 12/12 {MACD(S_BULL): +3, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +3 (Strong-Upside),FILLED
+467,SAF.PA,SELL,2,339.6000,EUR,679.20,24/08/2026 13:56:20,Pending,"Trailing Profit Triggered at 4.14% (Peak: 5.12%,FILLED
+468,NVDA,SELL,3,209.7500,USD,629.25,24/08/2026 14:00:09,Pending,FILLED
+469,WMT,BUY,9,104.7600,USD,942.84,24/08/2026 14:00:39,Pending,"[DIP] Score: 10/12 {RSI<40: +2, BB<0.1: +2, Trend: +1, Analyst: +3 (Strong-Upside),FILLED
+470,MU,SELL,1,889.8500,USD,889.85,24/08/2026 14:04:09,Pending,FILLED
+471,INTC,BUY,11,85.5350,USD,940.89,24/08/2026 14:04:39,Pending,"[DIP] Score: 12/12 {RSI<40: +2, BB<0.2: +1, Trend: +3, Analyst: +3 (Strong-Upside),FILLED
+472,SAF.PA,SELL,2,339.6000,EUR,679.20,24/08/2026 14:36:09,Pending,"Trailing Profit Triggered at 4.14% (Peak: 5.12%, Trail: 0.97%)"
+473,SAF.PA,SELL,2,339.1000,EUR,678.20,24/08/2026 14:41:09,Pending,"Trailing Profit Triggered at 3.99% (Peak: 5.12%, Trail: 0.97%)"
+474,SAF.PA,SELL,2,339.5000,EUR,679.00,24/08/2026 14:46:10,Pending,"Trailing Profit Triggered at 4.11% (Peak: 5.12%, Trail: 0.97%)"
+475,SAF.PA,SELL,2,339.6000,EUR,679.20,24/08/2026 15:20:38,Pending,"Trailing Profit Triggered at 4.14% (Peak: 5.12%, Trail: 0.97%)"
+476,SAF.PA,SELL,2,345.5000,EUR,691.00,25/08/2026 14:01:43,Pending,"Trailing Profit Triggered at 5.95% (Peak: 6.93%, Trail: 0.97%)"
+477,SAF.PA,SELL,2,345.1000,EUR,690.20,25/08/2026 14:06:43,Pending,"Trailing Profit Triggered at 5.83% (Peak: 6.93%, Trail: 0.97%)"
+478,SAF.PA,SELL,2,345.1000,EUR,690.20,25/08/2026 14:11:44,Pending,"Trailing Profit Triggered at 5.83% (Peak: 6.93%, Trail: 0.97%)"
+479,SAF.PA,SELL,2,345.1000,EUR,690.20,25/08/2026 14:17:02,Pending,"Trailing Profit Triggered at 5.83% (Peak: 6.93%, Trail: 0.97%)"
+480,SAF.PA,SELL,2,345.5000,EUR,691.00,25/08/2026 14:23:51,Pending,"Trailing Profit Triggered at 5.95% (Peak: 6.93%, Trail: 0.97%)"
+481,SAF.PA,SELL,2,345.5000,EUR,691.00,25/08/2026 14:38:29,Pending,"Trailing Profit Triggered at 5.95% (Peak: 6.93%, Trail: 0.97%)"
+482,SAF.PA,SELL,2,345.2000,EUR,690.40,25/08/2026 14:43:48,Pending,"Trailing Profit Triggered at 5.86% (Peak: 6.93%, Trail: 0.97%)"
+483,SAF.PA,SELL,2,344.9000,EUR,689.80,25/08/2026 14:48:49,Pending,"Trailing Profit Triggered at 5.77% (Peak: 6.93%, Trail: 0.97%)"
+484,SAF.PA,SELL,2,344.7000,EUR,689.40,25/08/2026 14:54:08,Pending,"Trailing Profit Triggered at 5.70% (Peak: 6.93%, Trail: 0.97%)"
+485,SAF.PA,SELL,2,344.9000,EUR,689.80,25/08/2026 14:59:26,Pending,"Trailing Profit Triggered at 5.77% (Peak: 6.93%, Trail: 0.97%)"
+486,SAF.PA,SELL,2,345.1000,EUR,690.20,25/08/2026 15:04:27,Pending,"Trailing Profit Triggered at 5.83% (Peak: 6.93%, Trail: 0.97%)"
+487,SAF.PA,SELL,2,345.4000,EUR,690.80,25/08/2026 15:19:05,Pending,"Trailing Profit Triggered at 5.92% (Peak: 6.93%, Trail: 0.97%)"
+488,SAF.PA,SELL,2,344.9000,EUR,689.80,25/08/2026 15:24:05,Pending,"Trailing Profit Triggered at 5.77% (Peak: 6.93%, Trail: 0.97%)"
+489,SAF.PA,SELL,2,345.5000,EUR,691.00,25/08/2026 15:29:06,Pending,"Trailing Profit Triggered at 5.95% (Peak: 6.93%, Trail: 0.97%)"
+490,IBKR,SELL,11,96.7300,USD,1064.03,26/08/2026 14:00:02,Pending,"Trailing Profit Triggered at 6.48% (Peak: 8.08%,FILLED
+491,ARM,BUY,4,242.4800,USD,969.92,26/08/2026 14:00:32,Pending,"[DIP] Score: 11/12 {RSI<40: +2, Trend: +3, Analyst: +3 (Strong-Upside),FILLED
+492,SAF.PA,SELL,2,348.3000,EUR,696.60,27/08/2026 13:06:57,Pending,"Trailing Profit Triggered at 6.81% (Peak: 7.85%, Trail: 1.00%)"
+493,SAF.PA,SELL,2,348.0000,EUR,696.00,27/08/2026 13:11:57,Pending,"Trailing Profit Triggered at 6.72% (Peak: 7.85%, Trail: 1.00%)"
+494,SAF.PA,SELL,2,348.3000,EUR,696.60,27/08/2026 13:17:15,Pending,"Trailing Profit Triggered at 6.81% (Peak: 7.85%, Trail: 1.00%)"
+495,SAF.PA,SELL,2,348.4000,EUR,696.80,27/08/2026 13:22:51,Pending,"Trailing Profit Triggered at 6.84% (Peak: 7.85%, Trail: 1.00%)"
+496,SAF.PA,SELL,2,348.3000,EUR,696.60,27/08/2026 13:28:45,Pending,"Trailing Profit Triggered at 6.81% (Peak: 7.85%, Trail: 1.00%)"
+497,SAF.PA,SELL,2,348.1000,EUR,696.20,27/08/2026 13:33:46,Pending,"Trailing Profit Triggered at 6.75% (Peak: 7.85%, Trail: 1.00%)"
+498,SAF.PA,SELL,2,347.5000,EUR,695.00,27/08/2026 13:38:46,Pending,"Trailing Profit Triggered at 6.56% (Peak: 7.85%, Trail: 1.01%)"
+499,SAF.PA,SELL,2,347.1000,EUR,694.20,27/08/2026 13:43:47,Pending,"Trailing Profit Triggered at 6.44% (Peak: 7.85%, Trail: 1.01%)"
+500,SAF.PA,SELL,2,347.3000,EUR,694.60,27/08/2026 13:48:47,Pending,"Trailing Profit Triggered at 6.50% (Peak: 7.85%, Trail: 1.01%)"
+501,SAF.PA,SELL,2,346.7000,EUR,693.40,27/08/2026 13:53:48,Pending,"Trailing Profit Triggered at 6.32% (Peak: 7.85%, Trail: 1.02%)"
+502,SAF.PA,SELL,2,345.7000,EUR,691.40,27/08/2026 13:58:49,Pending,"Trailing Profit Triggered at 6.01% (Peak: 7.85%, Trail: 1.02%)"
+503,SAF.PA,SELL,2,345.5000,EUR,691.00,27/08/2026 14:03:50,Pending,"Trailing Profit Triggered at 5.95% (Peak: 7.85%, Trail: 1.05%)"
+504,SAF.PA,SELL,2,345.4000,EUR,690.80,27/08/2026 14:08:50,Pending,"Trailing Profit Triggered at 5.92% (Peak: 7.85%, Trail: 1.05%)"
+505,SAF.PA,SELL,2,345.1000,EUR,690.20,27/08/2026 14:13:51,Pending,"Trailing Profit Triggered at 5.83% (Peak: 7.85%, Trail: 1.05%)"
+506,SAF.PA,SELL,2,345.2000,EUR,690.40,27/08/2026 14:18:51,Pending,"Trailing Profit Triggered at 5.86% (Peak: 7.85%, Trail: 1.05%)"
+507,ARM,SELL,4,262.0850,USD,1048.34,27/08/2026 14:22:04,Pending,"Trailing Profit Triggered at 7.97% (Peak: 9.71%,FILLED
+508,TSLA,BUY,3,350.8000,USD,1052.40,27/08/2026 14:22:34,Pending,"[MOMENTUM] Score: 10/12 {MACD(BULL): +2, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +1 (Fair-Upside),FILLED
+509,SAF.PA,SELL,2,343.4000,EUR,686.80,27/08/2026 14:23:58,Pending,"Trailing Profit Triggered at 5.31% (Peak: 7.85%, Trail: 1.06%)"
+510,SAF.PA,SELL,2,342.8000,EUR,685.60,27/08/2026 14:28:58,Pending,"Trailing Profit Triggered at 5.12% (Peak: 7.85%, Trail: 1.07%)"
+511,SAF.PA,SELL,2,343.3000,EUR,686.60,27/08/2026 14:33:59,Pending,"Trailing Profit Triggered at 5.27% (Peak: 7.85%, Trail: 1.07%)"
+512,SAF.PA,SELL,2,342.4000,EUR,684.80,27/08/2026 14:38:59,Pending,"Trailing Profit Triggered at 5.00% (Peak: 7.85%, Trail: 1.08%)"
+513,INTC,SELL,11,91.0900,USD,1001.99,27/08/2026 14:39:47,Pending,"Trailing Profit Triggered at 6.29% (Peak: 8.20%,FILLED
+514,MU,BUY,1,924.9700,USD,924.97,27/08/2026 14:40:17,Pending,"[MOMENTUM] Score: 12/12 {MACD(S_BULL): +3, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +2 (Strong-Upside),FILLED
+515,SAF.PA,SELL,2,343.1000,EUR,686.20,27/08/2026 14:44:24,Pending,"Trailing Profit Triggered at 5.21% (Peak: 7.85%, Trail: 1.07%)"
+516,SAF.PA,SELL,2,342.4000,EUR,684.80,27/08/2026 14:49:25,Pending,"Trailing Profit Triggered at 5.00% (Peak: 7.85%, Trail: 1.08%)"
+517,SAF.PA,SELL,2,342.5000,EUR,685.00,27/08/2026 14:54:25,Pending,"Trailing Profit Triggered at 5.03% (Peak: 7.85%, Trail: 1.08%)"
+518,SAF.PA,SELL,2,342.8000,EUR,685.60,27/08/2026 14:59:26,Pending,"Trailing Profit Triggered at 5.12% (Peak: 7.85%, Trail: 1.08%)"
+519,SAF.PA,SELL,2,343.4000,EUR,686.80,27/08/2026 15:04:27,Pending,"Trailing Profit Triggered at 5.24% (Peak: 7.85%, Trail: 1.07%)"
+520,SAF.PA,SELL,2,343.1000,EUR,686.20,27/08/2026 15:09:28,Pending,"Trailing Profit Triggered at 5.21% (Peak: 7.85%, Trail: 1.07%)"
+521,SAF.PA,SELL,2,343.0000,EUR,686.00,27/08/2026 15:14:46,Pending,"Trailing Profit Triggered at 5.18% (Peak: 7.85%, Trail: 1.08%)"
+522,SAF.PA,SELL,2,342.6000,EUR,685.20,27/08/2026 15:20:05,Pending,"Trailing Profit Triggered at 5.06% (Peak: 7.85%, Trail: 1.08%)"
+523,SAF.PA,SELL,2,342.3000,EUR,684.60,27/08/2026 15:25:24,Pending,"Trailing Profit Triggered at 4.97% (Peak: 7.85%, Trail: 1.08%)"
+524,MCD,SELL,4,261.3400,USD,1045.36,27/08/2026 17:46:19,Pending,FILLED
+525,MA,BUY,2,592.0700,USD,1184.14,27/08/2026 17:46:49,Pending,"[MOMENTUM] Score: 11/12 {MACD(S_BULL): +3, ADX>35: +2, RSI(50-70): +3, Analyst: +1 (Fair-Upside),FILLED
+526,COP,BUY,9,129.1700,USD,1162.53,27/08/2026 17:47:19,Pending,"[MOMENTUM] Score: 10/12 {MACD(S_BULL): +3, ADX>25: +1, RSI(50-70): +3, Analyst: +1 (Fair-Upside),REJECTED
+527,SAF.PA,SELL,2,344.1000,EUR,688.20,28/08/2026 14:19:03,Pending,"Trailing Profit Triggered at 5.52% (Peak: 6.56%, Trail: 1.02%)"
+528,SAF.PA,SELL,2,344.1000,EUR,688.20,28/08/2026 15:06:27,Pending,"Trailing Profit Triggered at 5.52% (Peak: 6.56%, Trail: 1.02%)"
+529,SAF.PA,SELL,2,344.0000,EUR,688.00,28/08/2026 15:27:24,Pending,"Trailing Profit Triggered at 5.49% (Peak: 6.56%, Trail: 1.02%)"
+530,ORCL,SELL,7,140.2000,USD,981.40,01/09/2026 18:35:47,Pending,FILLED
+531,GE,BUY,3,331.7300,USD,995.19,01/09/2026 18:36:17,Pending,"[DIP] Score: 11/12 {RSI<40: +2, BB<0.1: +2, Trend: +3, Analyst: +2 (Strong-Upside),FILLED
+532,COST,SELL,1,920.3101,USD,920.31,02/09/2026 19:32:08,Pending,FILLED
+533,ARM,BUY,3,235.8050,USD,707.41,02/09/2026 19:32:38,Pending,"[DIP] Score: 12/12 {RSI<40: +2, BB<0.2: +1, Trend: +3, Analyst: +3 (Strong-Upside),FILLED
+534,TSLA,SELL,3,378.6150,USD,1135.84,03/09/2026 19:45:54,Pending,"Trailing Profit Triggered at 7.86% (Peak: 9.40%,FILLED
+535,DELL,BUY,2,513.2500,USD,1026.50,03/09/2026 19:46:24,Pending,"[MOMENTUM] Score: 11/12 {MACD(S_BULL): +3, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +1 (Fair-Upside),FILLED
+536,ARM,SELL,3,250.3650,USD,751.10,04/09/2026 14:50:07,Pending,"Protective Stop Triggered at 6.02% (Peak: 8.12%,FILLED
+537,ORCL,BUY,6,158.2900,USD,949.74,04/09/2026 14:50:37,Pending,"[MOMENTUM] Score: 12/12 {MACD(S_BULL): +3, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +3 (Strong-Upside),FILLED
+538,MA,SELL,2,570.1100,USD,1140.22,08/09/2026 14:42:41,Pending,FILLED
+539,MU,SELL,1,1012.5000,USD,1012.50,08/09/2026 18:49:14,Pending,"Trailing Profit Triggered at 9.30% (Peak: 10.94%,FILLED
+540,DELL,SELL,2,553.0700,USD,1106.14,09/09/2026 14:39:22,Pending,"Trailing Profit Triggered at 7.47% (Peak: 9.01%,FILLED
+541,VRT,BUY,3,275.5900,USD,826.77,09/09/2026 14:39:52,Pending,"[MOMENTUM] Score: 12/12 {MACD(BULL): +2, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +2 (Strong-Upside),FILLED
+542,TSM,SELL,1,434.3043,USD,434.30,09/09/2026 15:11:21,Pending,"Trailing Profit Triggered at 3.15% (Peak: 4.31%,FILLED
+543,AMZN,BUY,2,251.0800,USD,502.16,09/09/2026 15:11:51,Pending,"[DIP] Score: 12/12 {BB<0: +3, Trend: +3, Analyst: +3 (Strong-Upside),FILLED
+544,VRT,SELL,3,245.7677,USD,737.30,10/09/2026 14:00:02,Pending,ATR Stop Loss Triggered at -9.0%
+545,VRT,SELL,3,248.5350,USD,745.61,10/09/2026 14:05:02,Pending,ATR Stop Loss Triggered at -9.0%
+546,VRT,SELL,3,249.0550,USD,747.16,10/09/2026 14:10:03,Pending,ATR Stop Loss Triggered at -9.0%
+547,VRT,SELL,3,248.2500,USD,744.75,10/09/2026 14:15:03,Pending,ATR Stop Loss Triggered at -9.0%
+548,VRT,SELL,3,249.6940,USD,749.08,10/09/2026 14:20:04,Pending,ATR Stop Loss Triggered at -9.0%
+549,VRT,SELL,3,251.1875,USD,753.56,10/09/2026 14:33:30,Pending,ATR Stop Loss Triggered at -9.0%
+550,VRT,SELL,3,250.6469,USD,751.94,10/09/2026 14:48:44,Pending,ATR Stop Loss Triggered at -9.0%
+551,VRT,SELL,3,249.7300,USD,749.19,10/09/2026 14:53:44,Pending,ATR Stop Loss Triggered at -9.0%
+552,VRT,SELL,3,250.2200,USD,750.66,10/09/2026 14:58:45,Pending,ATR Stop Loss Triggered at -9.0%
+553,VRT,SELL,3,250.0700,USD,750.21,10/09/2026 15:03:46,Pending,ATR Stop Loss Triggered at -9.0%
+554,VRT,SELL,3,250.9900,USD,752.97,10/09/2026 15:09:58,Pending,ATR Stop Loss Triggered at -9.0%
+555,VRT,SELL,3,250.6700,USD,752.01,10/09/2026 15:16:48,Pending,ATR Stop Loss Triggered at -9.0%
+556,VRT,SELL,3,250.7250,USD,752.18,10/09/2026 15:21:48,Pending,ATR Stop Loss Triggered at -9.0%
+557,VRT,SELL,3,251.1600,USD,753.48,10/09/2026 15:31:02,Pending,ATR Stop Loss Triggered at -9.0%
+558,VRT,SELL,3,251.0950,USD,753.29,10/09/2026 15:47:34,Pending,ATR Stop Loss Triggered at -9.0%
+559,VRT,SELL,3,250.7600,USD,752.28,10/09/2026 15:52:52,Pending,ATR Stop Loss Triggered at -9.0%
+560,VRT,SELL,3,249.9400,USD,749.82,10/09/2026 15:57:53,Pending,ATR Stop Loss Triggered at -9.0%
+561,VRT,SELL,3,250.8800,USD,752.64,10/09/2026 16:02:53,Pending,ATR Stop Loss Triggered at -9.0%
+562,VRT,SELL,3,249.9063,USD,749.72,10/09/2026 16:08:12,Pending,ATR Stop Loss Triggered at -9.0%
+563,VRT,SELL,3,248.7900,USD,746.37,10/09/2026 16:13:30,Pending,ATR Stop Loss Triggered at -9.0%
+564,VRT,SELL,3,248.1100,USD,744.33,10/09/2026 16:18:49,Pending,ATR Stop Loss Triggered at -9.0%
+565,VRT,SELL,3,247.7900,USD,743.37,10/09/2026 16:23:50,Pending,ATR Stop Loss Triggered at -9.0%
+566,VRT,SELL,3,247.1900,USD,741.57,10/09/2026 16:28:50,Pending,ATR Stop Loss Triggered at -9.0%
+567,VRT,SELL,3,247.2900,USD,741.87,10/09/2026 16:33:50,Pending,ATR Stop Loss Triggered at -9.0%
+568,VRT,SELL,3,246.7600,USD,740.28,10/09/2026 16:39:09,Pending,ATR Stop Loss Triggered at -9.0%
+569,VRT,SELL,3,247.5500,USD,742.65,10/09/2026 16:44:09,Pending,ATR Stop Loss Triggered at -9.0%
+570,VRT,SELL,3,247.7150,USD,743.14,10/09/2026 16:49:10,Pending,ATR Stop Loss Triggered at -9.0%
+571,VRT,SELL,3,248.2100,USD,744.63,10/09/2026 16:54:10,Pending,ATR Stop Loss Triggered at -9.0%
+572,VRT,SELL,3,247.5600,USD,742.68,10/09/2026 16:59:47,Pending,ATR Stop Loss Triggered at -9.0%
+573,VRT,SELL,3,247.0100,USD,741.03,10/09/2026 17:04:47,Pending,ATR Stop Loss Triggered at -9.0%
+574,VRT,SELL,3,247.7450,USD,743.23,10/09/2026 17:10:06,Pending,ATR Stop Loss Triggered at -9.0%
+575,VRT,SELL,3,247.7300,USD,743.19,10/09/2026 17:15:06,Pending,ATR Stop Loss Triggered at -9.0%
+576,VRT,SELL,3,247.1500,USD,741.45,10/09/2026 17:20:07,Pending,ATR Stop Loss Triggered at -9.0%
+577,VRT,SELL,3,247.2034,USD,741.61,10/09/2026 17:25:07,Pending,ATR Stop Loss Triggered at -9.0%
+578,VRT,SELL,3,247.3050,USD,741.91,10/09/2026 17:30:08,Pending,ATR Stop Loss Triggered at -9.0%
+579,VRT,SELL,3,247.1350,USD,741.40,10/09/2026 17:35:08,Pending,ATR Stop Loss Triggered at -9.0%
+580,VRT,SELL,3,247.0300,USD,741.09,10/09/2026 17:40:09,Pending,ATR Stop Loss Triggered at -9.0%
+581,VRT,SELL,3,247.1000,USD,741.30,10/09/2026 17:45:09,Pending,ATR Stop Loss Triggered at -9.0%
+582,VRT,SELL,3,246.7950,USD,740.38,10/09/2026 17:50:10,Pending,ATR Stop Loss Triggered at -9.0%
+583,VRT,SELL,3,247.8330,USD,743.50,10/09/2026 17:55:10,Pending,ATR Stop Loss Triggered at -9.0%
+584,VRT,SELL,3,248.1650,USD,744.49,10/09/2026 18:00:29,Pending,ATR Stop Loss Triggered at -9.0%
+585,VRT,SELL,3,248.5700,USD,745.71,10/09/2026 18:05:29,Pending,ATR Stop Loss Triggered at -9.0%
+586,VRT,SELL,3,248.6500,USD,745.95,10/09/2026 18:10:30,Pending,ATR Stop Loss Triggered at -9.0%
+587,VRT,SELL,3,249.0597,USD,747.18,10/09/2026 18:15:30,Pending,ATR Stop Loss Triggered at -9.0%
+588,VRT,SELL,3,249.5550,USD,748.66,10/09/2026 18:20:48,Pending,ATR Stop Loss Triggered at -9.0%
+589,VRT,SELL,3,249.1450,USD,747.44,10/09/2026 18:25:49,Pending,ATR Stop Loss Triggered at -9.0%
+590,VRT,SELL,3,248.4650,USD,745.39,10/09/2026 18:30:49,Pending,ATR Stop Loss Triggered at -9.0%
+591,VRT,SELL,3,248.3000,USD,744.90,10/09/2026 18:35:50,Pending,ATR Stop Loss Triggered at -9.0%
+592,VRT,SELL,3,247.8500,USD,743.55,10/09/2026 18:41:08,Pending,ATR Stop Loss Triggered at -9.0%
+593,VRT,SELL,3,248.0350,USD,744.11,10/09/2026 18:46:09,Pending,ATR Stop Loss Triggered at -9.0%
+594,VRT,SELL,3,247.6750,USD,743.03,10/09/2026 18:51:27,Pending,ATR Stop Loss Triggered at -9.0%
+595,VRT,SELL,3,247.7600,USD,743.28,10/09/2026 18:56:28,Pending,ATR Stop Loss Triggered at -9.0%
+596,VRT,SELL,3,247.9668,USD,743.90,10/09/2026 19:01:28,Pending,ATR Stop Loss Triggered at -9.0%
+597,VRT,SELL,3,247.3950,USD,742.19,10/09/2026 19:06:47,Pending,ATR Stop Loss Triggered at -9.0%
+598,VRT,SELL,3,247.3800,USD,742.14,10/09/2026 19:12:06,Pending,ATR Stop Loss Triggered at -9.0%
+599,VRT,SELL,3,247.6242,USD,742.87,10/09/2026 19:17:06,Pending,ATR Stop Loss Triggered at -9.0%
+600,VRT,SELL,3,247.4700,USD,742.41,10/09/2026 19:22:07,Pending,ATR Stop Loss Triggered at -9.0%
+601,VRT,SELL,3,248.2200,USD,744.66,10/09/2026 19:27:07,Pending,ATR Stop Loss Triggered at -9.0%
+602,VRT,SELL,3,247.6100,USD,742.83,10/09/2026 19:32:07,Pending,ATR Stop Loss Triggered at -9.0%
+603,VRT,SELL,3,246.9700,USD,740.91,10/09/2026 19:37:08,Pending,ATR Stop Loss Triggered at -9.0%
+604,VRT,SELL,3,247.7950,USD,743.38,10/09/2026 19:42:08,Pending,ATR Stop Loss Triggered at -9.0%
+605,VRT,SELL,3,248.3450,USD,745.04,10/09/2026 19:47:09,Pending,ATR Stop Loss Triggered at -9.0%
+606,VRT,SELL,3,247.9650,USD,743.89,10/09/2026 19:52:28,Pending,ATR Stop Loss Triggered at -9.0%
+607,VRT,SELL,3,247.6900,USD,743.07,10/09/2026 19:57:28,Pending,ATR Stop Loss Triggered at -9.0%
+608,VRT,SELL,3,236.8800,USD,710.64,14/09/2026 15:24:27,Pending,FILLED
+609,TSM,BUY,2,419.3925,USD,838.78,14/09/2026 15:24:57,Pending,"[MOMENTUM] Score: 11/12 {MACD(S_BULL): +3, ProjVol>1.5x: +2, RSI(40-50): +1, Analyst: +2 (Strong-Upside),FILLED
+610,ORCL,SELL,6,144.1200,USD,864.72,14/09/2026 15:26:03,Pending,FILLED
+611,BARC.L,BUY,1,475.2740,GBP,475.27,14/09/2026 15:26:33,Pending,"[DIP] Score: 12/12 {RSI<40: +2, BB<0: +3, Trend: +3, Analyst: +2 (Strong-Upside), Bank Target: +3 (20%+ Upside vs 600.0)}"
+612,AVGO,BUY,2,345.7600,USD,691.52,14/09/2026 15:27:03,Pending,"[DIP] Score: 11/12 {RSI<40: +2, BB<0: +3, Analyst: +3 (Strong-Upside),FILLED
+613,GE,SELL,3,312.2500,USD,936.75,15/09/2026 14:01:50,Pending,FILLED
+614,AMD,BUY,2,512.3900,USD,1024.78,15/09/2026 14:02:20,Pending,"[MOMENTUM] Score: 12/12 {MACD(S_BULL): +3, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +3 (Strong-Upside),FILLED
+615,WMT,SELL,9,108.3333,USD,975.00,15/09/2026 19:28:11,Pending,"Trailing Profit Triggered at 3.30% (Peak: 4.15%,FILLED
+616,UNH,BUY,3,376.8200,USD,1130.46,15/09/2026 19:28:41,Pending,"[DIP] Score: 12/12 {RSI<40: +2, BB<0: +3, Trend: +3, Analyst: +2 (Strong-Upside),FILLED
+617,DVA,SELL,4,192.8350,USD,771.34,17/09/2026 14:21:30,Pending,"Trailing Profit Triggered at 6.57% (Peak: 7.84%,FILLED
+618,COP,BUY,6,131.9008,USD,791.40,17/09/2026 14:22:01,Pending,"[MOMENTUM] Score: 12/12 {ADX>25: +1, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +3 (Strong-Upside),FILLED
+619,AMD,SELL,2,544.7520,USD,1089.50,18/09/2026 14:42:59,Pending,"Trailing Profit Triggered at 6.17% (Peak: 7.70%,FILLED
+620,ARM,BUY,4,265.8350,USD,1063.34,18/09/2026 14:43:29,Pending,"[MOMENTUM] Score: 10/12 {MACD(BULL): +2, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +1 (Fair-Upside),FILLED
+621,ARM,SELL,4,324.5260,USD,1298.10,22/09/2026 14:47:26,Pending,"Trailing Profit Triggered at 21.96% (Peak: 23.51%,FILLED
+622,MU,BUY,1,1071.1500,USD,1071.15,22/09/2026 14:47:56,Pending,"[MOMENTUM] Score: 12/12 {MACD(S_BULL): +3, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +2 (Strong-Upside),FILLED
+623,AMZN,SELL,2,255.7599,USD,511.52,22/09/2026 15:06:47,Pending,"MACD Bearish Crossover Exit (BULL → S_BEAR,FILLED
+624,NVDA,BUY,3,228.6970,USD,686.09,22/09/2026 15:07:17,Pending,"[MOMENTUM] Score: 12/12 {MACD(S_BULL): +3, ProjVol>Avg: +1, RSI(50-70): +3, Analyst: +3 (Strong-Upside),FILLED
+625,AVGO,SELL,2,357.6298,USD,715.26,23/09/2026 14:00:05,Pending,"Trailing Profit Triggered at 3.27% (Peak: 5.26%,FILLED
+626,JPM,BUY,2,338.6403,USD,677.28,23/09/2026 14:00:35,Pending,"[DIP] Score: 11/12 {RSI<40: +2, BB<0: +3, Trend: +3, Analyst: +1 (Fair-Upside),FILLED
+627,TSM,SELL,2,447.4200,USD,894.84,23/09/2026 14:07:24,Pending,"Trailing Profit Triggered at 6.52% (Peak: 7.62%,FILLED
+628,MCD,BUY,4,239.5200,USD,958.08,23/09/2026 14:07:54,Pending,"[DIP] Score: 12/12 {RSI<25: +4, BB<0: +3, Analyst: +3 (Strong-Upside),FILLED
+629,ESE.PA,SELL,127,34.3724,EUR,4365.29,23/09/2026 14:24:39,Pending,"Trailing Profit Triggered at 2.61% (Peak: 3.12%,FILLED
+630,ESE.PA,SELL,127,34.3296,EUR,4359.86,23/09/2026 14:29:39,Pending,"Trailing Profit Triggered at 2.49% (Peak: 3.12%, Trail: 0.50%)"
+631,ESE.PA,SELL,127,34.3580,EUR,4363.47,23/09/2026 14:34:40,Pending,"Trailing Profit Triggered at 2.58% (Peak: 3.12%, Trail: 0.50%)"
+632,ESE.PA,SELL,127,34.3396,EUR,4361.13,23/09/2026 14:39:41,Pending,"Trailing Profit Triggered at 2.52% (Peak: 3.12%, Trail: 0.50%)"
+633,ESE.PA,SELL,127,34.3592,EUR,4363.62,23/09/2026 14:44:41,Pending,"Trailing Profit Triggered at 2.58% (Peak: 3.12%, Trail: 0.50%)"
+634,ESE.PA,SELL,127,34.3614,EUR,4363.90,23/09/2026 14:49:42,Pending,"Trailing Profit Triggered at 2.58% (Peak: 3.12%, Trail: 0.50%)"
+635,ESE.PA,SELL,127,34.3405,EUR,4361.24,23/09/2026 14:54:43,Pending,"Trailing Profit Triggered at 2.52% (Peak: 3.12%, Trail: 0.50%)"
+636,ESE.PA,SELL,127,34.3451,EUR,4361.83,23/09/2026 14:59:43,Pending,"Trailing Profit Triggered at 2.55% (Peak: 3.12%, Trail: 0.50%)"
+637,ESE.PA,SELL,127,34.3629,EUR,4364.09,23/09/2026 15:04:44,Pending,"Trailing Profit Triggered at 2.58% (Peak: 3.12%, Trail: 0.50%)"
+638,ESE.PA,SELL,127,34.3677,EUR,4364.70,23/09/2026 15:09:45,Pending,"Trailing Profit Triggered at 2.61% (Peak: 3.12%, Trail: 0.50%)"
+639,ESE.PA,SELL,127,34.3734,EUR,4365.42,23/09/2026 15:14:46,Pending,"Trailing Profit Triggered at 2.61% (Peak: 3.12%, Trail: 0.50%)"
+640,ESE.PA,SELL,127,34.3614,EUR,4363.90,23/09/2026 15:19:46,Pending,"Trailing Profit Triggered at 2.58% (Peak: 3.12%, Trail: 0.50%)"
+641,ESE.PA,SELL,127,34.3714,EUR,4365.17,23/09/2026 15:25:05,Pending,"Trailing Profit Triggered at 2.61% (Peak: 3.12%, Trail: 0.50%)"
+642,ESE.PA,SELL,127,34.1730,EUR,4339.97,24/09/2026 07:41:22,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+643,ESE.PA,SELL,127,34.1737,EUR,4340.06,24/09/2026 08:04:23,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+644,ESE.PA,SELL,127,34.1501,EUR,4337.06,24/09/2026 08:09:23,Pending,"Trailing Profit Triggered at 1.95% (Peak: 2.52%, Trail: 0.50%)"
+645,ESE.PA,SELL,127,34.1324,EUR,4334.81,24/09/2026 08:14:23,Pending,"Trailing Profit Triggered at 1.89% (Peak: 2.52%, Trail: 0.50%)"
+646,ESE.PA,SELL,127,34.1397,EUR,4335.74,24/09/2026 08:19:23,Pending,"Trailing Profit Triggered at 1.92% (Peak: 2.52%, Trail: 0.50%)"
+647,ESE.PA,SELL,127,34.1145,EUR,4332.54,24/09/2026 08:24:23,Pending,"Trailing Profit Triggered at 1.83% (Peak: 2.52%, Trail: 0.50%)"
+648,ESE.PA,SELL,127,34.1007,EUR,4330.79,24/09/2026 08:29:23,Pending,"Trailing Profit Triggered at 1.80% (Peak: 2.52%, Trail: 0.50%)"
+649,ESE.PA,SELL,127,34.1120,EUR,4332.22,24/09/2026 08:34:23,Pending,"Trailing Profit Triggered at 1.83% (Peak: 2.52%, Trail: 0.50%)"
+650,ESE.PA,SELL,127,34.1138,EUR,4332.45,24/09/2026 08:39:23,Pending,"Trailing Profit Triggered at 1.83% (Peak: 2.52%, Trail: 0.50%)"
+651,ESE.PA,SELL,127,34.0960,EUR,4330.19,24/09/2026 08:44:24,Pending,"Trailing Profit Triggered at 1.80% (Peak: 2.52%, Trail: 0.50%)"
+652,ESE.PA,SELL,127,34.1161,EUR,4332.74,24/09/2026 08:49:24,Pending,"Trailing Profit Triggered at 1.86% (Peak: 2.52%, Trail: 0.50%)"
+653,ESE.PA,SELL,127,34.0978,EUR,4330.42,24/09/2026 08:54:24,Pending,"Trailing Profit Triggered at 1.80% (Peak: 2.52%, Trail: 0.50%)"
+654,ESE.PA,SELL,127,34.1229,EUR,4333.61,24/09/2026 08:59:24,Pending,"Trailing Profit Triggered at 1.86% (Peak: 2.52%, Trail: 0.50%)"
+655,ESE.PA,SELL,127,34.1116,EUR,4332.17,24/09/2026 09:04:24,Pending,"Trailing Profit Triggered at 1.83% (Peak: 2.52%, Trail: 0.50%)"
+656,ESE.PA,SELL,127,34.1116,EUR,4332.17,24/09/2026 09:09:24,Pending,"Trailing Profit Triggered at 1.83% (Peak: 2.52%, Trail: 0.50%)"
+657,ESE.PA,SELL,127,34.1152,EUR,4332.63,24/09/2026 09:14:24,Pending,"Trailing Profit Triggered at 1.86% (Peak: 2.52%, Trail: 0.50%)"
+658,ESE.PA,SELL,127,34.1314,EUR,4334.69,24/09/2026 09:19:42,Pending,"Trailing Profit Triggered at 1.89% (Peak: 2.52%, Trail: 0.50%)"
+659,ESE.PA,SELL,127,34.1502,EUR,4337.08,24/09/2026 09:24:42,Pending,"Trailing Profit Triggered at 1.95% (Peak: 2.52%, Trail: 0.50%)"
+660,ESE.PA,SELL,127,34.1392,EUR,4335.68,24/09/2026 09:30:00,Pending,"Trailing Profit Triggered at 1.92% (Peak: 2.52%, Trail: 0.50%)"
+661,ESE.PA,SELL,127,34.1496,EUR,4337.00,24/09/2026 09:35:00,Pending,"Trailing Profit Triggered at 1.95% (Peak: 2.52%, Trail: 0.50%)"
+662,ESE.PA,SELL,127,34.1520,EUR,4337.30,24/09/2026 09:40:00,Pending,"Trailing Profit Triggered at 1.95% (Peak: 2.52%, Trail: 0.50%)"
+663,ESE.PA,SELL,127,34.1491,EUR,4336.94,24/09/2026 09:45:01,Pending,"Trailing Profit Triggered at 1.95% (Peak: 2.52%, Trail: 0.50%)"
+664,ESE.PA,SELL,127,34.1338,EUR,4334.99,24/09/2026 09:50:01,Pending,"Trailing Profit Triggered at 1.89% (Peak: 2.52%, Trail: 0.50%)"
+665,ESE.PA,SELL,127,34.1321,EUR,4334.78,24/09/2026 09:55:01,Pending,"Trailing Profit Triggered at 1.89% (Peak: 2.52%, Trail: 0.50%)"
+666,ESE.PA,SELL,127,34.0934,EUR,4329.86,24/09/2026 10:00:01,Pending,"Trailing Profit Triggered at 1.80% (Peak: 2.52%, Trail: 0.50%)"
+667,ESE.PA,SELL,127,34.1021,EUR,4330.97,24/09/2026 10:05:01,Pending,"Trailing Profit Triggered at 1.80% (Peak: 2.52%, Trail: 0.50%)"
+668,ESE.PA,SELL,127,34.1203,EUR,4333.28,24/09/2026 10:10:01,Pending,"Trailing Profit Triggered at 1.86% (Peak: 2.52%, Trail: 0.50%)"
+669,ESE.PA,SELL,127,34.1450,EUR,4336.42,24/09/2026 10:15:01,Pending,"Trailing Profit Triggered at 1.95% (Peak: 2.52%, Trail: 0.50%)"
+670,ESE.PA,SELL,127,34.1446,EUR,4336.36,24/09/2026 10:20:01,Pending,"Trailing Profit Triggered at 1.92% (Peak: 2.52%, Trail: 0.50%)"
+671,ESE.PA,SELL,127,34.1354,EUR,4335.20,24/09/2026 10:25:01,Pending,"Trailing Profit Triggered at 1.92% (Peak: 2.52%, Trail: 0.50%)"
+672,ESE.PA,SELL,127,34.1487,EUR,4336.88,24/09/2026 10:30:01,Pending,"Trailing Profit Triggered at 1.95% (Peak: 2.52%, Trail: 0.50%)"
+673,ESE.PA,SELL,127,34.1706,EUR,4339.67,24/09/2026 10:35:02,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+674,ESE.PA,SELL,127,34.1584,EUR,4338.12,24/09/2026 10:40:38,Pending,"Trailing Profit Triggered at 1.98% (Peak: 2.52%, Trail: 0.50%)"
+675,ESE.PA,SELL,127,34.1624,EUR,4338.62,24/09/2026 10:45:56,Pending,"Trailing Profit Triggered at 1.98% (Peak: 2.52%, Trail: 0.50%)"
+676,ESE.PA,SELL,127,34.1660,EUR,4339.08,24/09/2026 10:50:56,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+677,ESE.PA,SELL,127,34.1653,EUR,4338.99,24/09/2026 10:55:56,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+678,ESE.PA,SELL,127,34.1746,EUR,4340.17,24/09/2026 11:10:50,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+679,ESE.PA,SELL,127,34.1710,EUR,4339.72,24/09/2026 11:18:50,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+680,ESE.PA,SELL,127,34.1600,EUR,4338.32,24/09/2026 11:24:08,Pending,"Trailing Profit Triggered at 1.98% (Peak: 2.52%, Trail: 0.50%)"
+681,ESE.PA,SELL,127,34.1575,EUR,4338.00,24/09/2026 11:29:09,Pending,"Trailing Profit Triggered at 1.98% (Peak: 2.52%, Trail: 0.50%)"
+682,ESE.PA,SELL,127,34.1747,EUR,4340.19,24/09/2026 11:37:27,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+683,ESE.PA,SELL,127,34.1739,EUR,4340.09,24/09/2026 11:42:27,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+684,ESE.PA,SELL,127,34.1700,EUR,4339.59,24/09/2026 11:47:27,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+685,ESE.PA,SELL,127,34.1666,EUR,4339.16,24/09/2026 11:52:27,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+686,ESE.PA,SELL,127,34.1620,EUR,4338.57,24/09/2026 11:57:27,Pending,"Trailing Profit Triggered at 1.98% (Peak: 2.52%, Trail: 0.50%)"
+687,ESE.PA,SELL,127,34.1573,EUR,4337.98,24/09/2026 12:02:27,Pending,"Trailing Profit Triggered at 1.98% (Peak: 2.52%, Trail: 0.50%)"
+688,ESE.PA,SELL,127,34.1445,EUR,4336.35,24/09/2026 12:07:45,Pending,"Trailing Profit Triggered at 1.92% (Peak: 2.52%, Trail: 0.50%)"
+689,ESE.PA,SELL,127,34.1661,EUR,4339.09,24/09/2026 12:54:28,Pending,"Trailing Profit Triggered at 2.01% (Peak: 2.52%, Trail: 0.50%)"
+690,ESE.PA,SELL,127,34.2200,EUR,4345.94,25/09/2026 14:21:12,Pending,"Trailing Profit Triggered at 2.16% (Peak: 2.70%, Trail: 0.50%)"
+691,ESE.PA,SELL,127,34.2347,EUR,4347.81,25/09/2026 14:29:31,Pending,"Trailing Profit Triggered at 2.19% (Peak: 2.70%, Trail: 0.50%)"
+692,ESE.PA,SELL,127,34.2085,EUR,4344.48,25/09/2026 14:34:32,Pending,"Trailing Profit Triggered at 2.13% (Peak: 2.70%, Trail: 0.50%)"
+693,ESE.PA,SELL,127,34.2560,EUR,4350.51,28/09/2026 15:00:54,Pending,"Trailing Profit Triggered at 2.28% (Peak: 2.79%, Trail: 0.50%)"
+694,ESE.PA,SELL,127,34.2480,EUR,4349.50,28/09/2026 15:05:54,Pending,"Trailing Profit Triggered at 2.25% (Peak: 2.79%, Trail: 0.50%)"
+695,ESE.PA,SELL,127,34.2303,EUR,4347.25,28/09/2026 15:10:55,Pending,"Trailing Profit Triggered at 2.19% (Peak: 2.79%, Trail: 0.50%)"
+696,ESE.PA,SELL,127,34.2218,EUR,4346.17,28/09/2026 15:15:56,Pending,"Trailing Profit Triggered at 2.13% (Peak: 2.79%, Trail: 0.50%)"
+697,ESE.PA,SELL,127,34.2435,EUR,4348.92,28/09/2026 15:21:14,Pending,"Trailing Profit Triggered at 2.22% (Peak: 2.79%, Trail: 0.50%)"
+698,ESE.PA,SELL,127,34.2584,EUR,4350.82,28/09/2026 15:28:58,Pending,"Trailing Profit Triggered at 2.28% (Peak: 2.79%, Trail: 0.50%)"
+699,ESE.PA,SELL,127,34.2244,EUR,4346.50,30/09/2026 11:23:08,Pending,"Trailing Profit Triggered at 2.16% (Peak: 2.67%, Trail: 0.50%)"
+700,ESE.PA,SELL,127,34.2198,EUR,4345.91,30/09/2026 11:28:08,Pending,"Trailing Profit Triggered at 2.16% (Peak: 2.67%, Trail: 0.50%)"
+701,ESE.PA,SELL,127,34.2177,EUR,4345.65,30/09/2026 11:33:09,Pending,"Trailing Profit Triggered at 2.16% (Peak: 2.67%, Trail: 0.50%)"
+702,ESE.PA,SELL,127,34.2243,EUR,4346.49,30/09/2026 11:38:09,Pending,"Trailing Profit Triggered at 2.16% (Peak: 2.67%, Trail: 0.50%)"
+703,ESE.PA,SELL,127,34.3400,EUR,4361.18,01/10/2026 14:15:28,Pending,"Trailing Profit Triggered at 2.52% (Peak: 3.06%, Trail: 0.50%)"
+704,ESE.PA,SELL,127,34.2696,EUR,4352.24,01/10/2026 14:20:29,Pending,"Trailing Profit Triggered at 2.31% (Peak: 3.06%, Trail: 0.50%)"
+705,ESE.PA,SELL,127,34.3182,EUR,4358.41,01/10/2026 14:25:29,Pending,"Trailing Profit Triggered at 2.46% (Peak: 3.06%, Trail: 0.50%)"
+706,ESE.PA,SELL,127,34.3138,EUR,4357.85,01/10/2026 14:30:30,Pending,"Trailing Profit Triggered at 2.43% (Peak: 3.06%, Trail: 0.50%)"
+707,ESE.PA,SELL,127,34.2952,EUR,4355.49,01/10/2026 14:35:31,Pending,"Trailing Profit Triggered at 2.40% (Peak: 3.06%, Trail: 0.50%)"
+708,ESE.PA,SELL,127,34.2883,EUR,4354.61,01/10/2026 14:40:31,Pending,"Trailing Profit Triggered at 2.37% (Peak: 3.06%, Trail: 0.50%)"
+709,ESE.PA,SELL,127,34.3014,EUR,4356.28,01/10/2026 14:45:32,Pending,"Trailing Profit Triggered at 2.40% (Peak: 3.06%, Trail: 0.50%)"
+710,ESE.PA,SELL,127,34.3389,EUR,4361.04,01/10/2026 14:50:51,Pending,"Trailing Profit Triggered at 2.52% (Peak: 3.06%, Trail: 0.50%)"
+711,ESE.PA,SELL,127,34.3497,EUR,4362.41,01/10/2026 14:56:46,Pending,"Trailing Profit Triggered at 2.55% (Peak: 3.06%, Trail: 0.50%)"
+712,ESE.PA,SELL,127,34.3500,EUR,4362.45,01/10/2026 15:07:47,Pending,"Trailing Profit Triggered at 2.55% (Peak: 3.06%, Trail: 0.50%)"
+713,ESE.PA,SELL,127,34.3507,EUR,4362.54,01/10/2026 15:12:48,Pending,"Trailing Profit Triggered at 2.55% (Peak: 3.06%, Trail: 0.50%)"
+714,ESE.PA,SELL,127,34.3230,EUR,4359.02,01/10/2026 15:17:48,Pending,"Trailing Profit Triggered at 2.49% (Peak: 3.06%, Trail: 0.50%)"
+715,ESE.PA,SELL,127,34.3450,EUR,4361.82,01/10/2026 15:22:49,Pending,"Trailing Profit Triggered at 2.55% (Peak: 3.06%, Trail: 0.50%)"
+716,ESE.PA,SELL,127,34.3337,EUR,4360.38,01/10/2026 15:27:50,Pending,"Trailing Profit Triggered at 2.49% (Peak: 3.06%, Trail: 0.50%)"
+717,NVDA,SELL,3,235.2800,USD,705.84,02/10/2026 15:07:22,Pending,"Trailing Profit Triggered at 2.71% (Peak: 3.81%,FILLED
+718,V,BUY,2,359.7000,USD,719.40,02/10/2026 15:07:52,Pending,"[DIP] Score: 10/12 {RSI<40: +2, BB<0.1: +2, Trend: +3, Analyst: +1 (Fair-Upside),FILLED
+719,ESE.PA,SELL,127,34.7209,EUR,4409.55,02/10/2026 15:26:09,Pending,"Trailing Profit Triggered at 3.66% (Peak: 4.19%, Trail: 0.50%)"
+720,ESE.PA,SELL,127,35.3008,EUR,4483.20,07/10/2026 11:45:11,Pending,"Trailing Profit Triggered at 5.39% (Peak: 5.89%,FILLED
+721,ESE.PA,SELL,127,35.3155,EUR,4485.07,07/10/2026 11:50:48,Pending,"Trailing Profit Triggered at 5.39% (Peak: 5.89%, Trail: 0.50%)"
+722,ESE.PA,SELL,127,35.3000,EUR,4483.10,07/10/2026 11:55:48,Pending,"Trailing Profit Triggered at 5.39% (Peak: 5.89%, Trail: 0.50%)"
+723,ESE.PA,SELL,127,35.3047,EUR,4483.70,07/10/2026 12:03:12,Pending,"Trailing Profit Triggered at 5.39% (Peak: 5.89%, Trail: 0.50%)"
+724,ESE.PA,SELL,127,35.2999,EUR,4483.09,07/10/2026 12:08:12,Pending,"Trailing Profit Triggered at 5.39% (Peak: 5.89%, Trail: 0.50%)"
+725,ESE.PA,SELL,127,35.3000,EUR,4483.10,07/10/2026 13:36:39,Pending,"Trailing Profit Triggered at 5.39% (Peak: 5.89%, Trail: 0.50%)"
+726,ESE.PA,SELL,127,35.2956,EUR,4482.54,07/10/2026 13:44:04,Pending,"Trailing Profit Triggered at 5.39% (Peak: 5.89%, Trail: 0.50%)"
+727,ESE.PA,SELL,127,35.2947,EUR,4482.43,07/10/2026 13:49:04,Pending,"Trailing Profit Triggered at 5.36% (Peak: 5.89%, Trail: 0.50%)"
+728,ESE.PA,SELL,127,35.2500,EUR,4476.75,07/10/2026 13:54:05,Pending,"Trailing Profit Triggered at 5.24% (Peak: 5.89%, Trail: 0.50%)"
+729,ESE.PA,SELL,127,35.2590,EUR,4477.89,07/10/2026 13:59:06,Pending,"Trailing Profit Triggered at 5.27% (Peak: 5.89%, Trail: 0.50%)"
+730,ESE.PA,SELL,127,35.2524,EUR,4477.05,07/10/2026 14:04:07,Pending,"Trailing Profit Triggered at 5.24% (Peak: 5.89%, Trail: 0.50%)"
+731,ESE.PA,SELL,127,35.2451,EUR,4476.13,07/10/2026 14:09:08,Pending,"Trailing Profit Triggered at 5.24% (Peak: 5.89%, Trail: 0.50%)"
+732,ESE.PA,SELL,127,35.2544,EUR,4477.31,07/10/2026 14:14:09,Pending,"Trailing Profit Triggered at 5.24% (Peak: 5.89%, Trail: 0.50%)"
+733,ESE.PA,SELL,127,35.2100,EUR,4471.67,07/10/2026 14:19:09,Pending,"Trailing Profit Triggered at 5.12% (Peak: 5.89%, Trail: 0.50%)"
+734,ESE.PA,SELL,127,35.2501,EUR,4476.76,07/10/2026 14:24:10,Pending,"Trailing Profit Triggered at 5.24% (Peak: 5.89%, Trail: 0.50%)"
+735,ESE.PA,SELL,127,35.2431,EUR,4475.87,07/10/2026 14:29:11,Pending,"Trailing Profit Triggered at 5.21% (Peak: 5.89%, Trail: 0.50%)"
+736,ESE.PA,SELL,127,35.2555,EUR,4477.45,07/10/2026 14:34:11,Pending,"Trailing Profit Triggered at 5.27% (Peak: 5.89%, Trail: 0.50%)"
+737,ESE.PA,SELL,127,35.2452,EUR,4476.14,07/10/2026 14:39:12,Pending,"Trailing Profit Triggered at 5.24% (Peak: 5.89%, Trail: 0.50%)"
+738,ESE.PA,SELL,127,35.2263,EUR,4473.74,07/10/2026 14:44:12,Pending,"Trailing Profit Triggered at 5.18% (Peak: 5.89%, Trail: 0.50%)"
+739,ESE.PA,SELL,127,35.2300,EUR,4474.21,07/10/2026 14:49:32,Pending,"Trailing Profit Triggered at 5.18% (Peak: 5.89%, Trail: 0.50%)"
+740,ESE.PA,SELL,127,35.2225,EUR,4473.26,07/10/2026 14:54:51,Pending,"Trailing Profit Triggered at 5.15% (Peak: 5.89%, Trail: 0.50%)"
+741,ESE.PA,SELL,127,35.2000,EUR,4470.40,07/10/2026 15:00:09,Pending,"Trailing Profit Triggered at 5.09% (Peak: 5.89%, Trail: 0.50%)"
+742,ESE.PA,SELL,127,35.1946,EUR,4469.71,07/10/2026 15:05:10,Pending,"Trailing Profit Triggered at 5.06% (Peak: 5.89%, Trail: 0.50%)"
+743,ESE.PA,SELL,127,35.1969,EUR,4470.01,07/10/2026 15:10:11,Pending,"Trailing Profit Triggered at 5.09% (Peak: 5.89%, Trail: 0.50%)"
+744,ESE.PA,SELL,127,35.1999,EUR,4470.39,07/10/2026 15:15:11,Pending,"Trailing Profit Triggered at 5.09% (Peak: 5.89%, Trail: 0.50%)"
+745,ESE.PA,SELL,127,35.1926,EUR,4469.46,07/10/2026 15:20:12,Pending,"Trailing Profit Triggered at 5.06% (Peak: 5.89%, Trail: 0.50%)"
+746,ESE.PA,SELL,127,35.1950,EUR,4469.76,07/10/2026 15:25:13,Pending,"Trailing Profit Triggered at 5.12% (Peak: 5.89%, Trail: 0.50%)"
+747,V,SELL,2,376.5800,USD,753.16,08/10/2026 19:04:24,Pending,"Trailing Profit Triggered at 4.57% (Peak: 5.51%,FILLED
+748,ISRG,SELL,5,422.2650,USD,2111.33,09/10/2026 14:52:35,Pending,"Trailing Profit Triggered at 5.50% (Peak: 6.82%,FILLED
+749,AMZN,BUY,4,260.2900,USD,1041.16,09/10/2026 14:53:05,Pending,"[MOMENTUM] Score: 12/12 {MACD(S_BULL): +3, ProjVol>Avg: +1, RSI(50-70): +3, Analyst: +2 (Strong-Upside),FILLED
+750,MU,SELL,1,986.3500,USD,986.35,12/10/2026 14:00:16,Pending,FILLED
+751,ISRG,BUY,2,425.0050,USD,850.01,12/10/2026 14:00:46,Pending,"[MOMENTUM] Score: 10/12 {MACD(S_BULL): +3, ProjVol>Avg: +1, RSI(50-70): +3, Analyst: +1 (Fair-Upside),FILLED
+752,GOOG,BUY,3,350.0200,USD,1050.06,12/10/2026 14:01:16,Pending,"[MOMENTUM] Score: 10/12 {MACD(S_BULL): +3, ProjVol>1.5x: +2, RSI(50-70): +3, Analyst: +1 (Fair-Upside),FILLED
+753,ESE.PA,SELL,127,35.3101,EUR,4484.38,14/10/2026 15:08:22,Pending,"Trailing Profit Triggered at 5.42% (Peak: 5.95%, Trail: 0.50%)"
+754,ESE.PA,SELL,127,35.3209,EUR,4485.75,14/10/2026 15:21:12,Pending,"Trailing Profit Triggered at 5.45% (Peak: 5.95%, Trail: 0.50%)"
+755,ESE.PA,SELL,127,35.3194,EUR,4485.56,14/10/2026 15:26:48,Pending,"Trailing Profit Triggered at 5.45% (Peak: 5.95%, Trail: 0.50%)"
+756,ESE.PA,SELL,127,34.8042,EUR,4420.13,15/10/2026 07:30:03,Pending,"Trailing Profit Triggered at 3.89% (Peak: 5.39%, Trail: 0.50%)"
+757,ESE.PA,SELL,127,34.7977,EUR,4419.31,15/10/2026 07:35:03,Pending,"Trailing Profit Triggered at 3.89% (Peak: 5.39%, Trail: 0.50%)"
+758,ESE.PA,SELL,127,34.8173,EUR,4421.80,15/10/2026 07:40:21,Pending,"Trailing Profit Triggered at 3.95% (Peak: 5.39%, Trail: 0.50%)"
+759,ESE.PA,SELL,127,34.8261,EUR,4422.91,15/10/2026 07:45:21,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+760,ESE.PA,SELL,127,34.8047,EUR,4420.20,15/10/2026 07:50:22,Pending,"Trailing Profit Triggered at 3.89% (Peak: 5.39%, Trail: 0.50%)"
+761,ESE.PA,SELL,127,34.8165,EUR,4421.70,15/10/2026 07:55:22,Pending,"Trailing Profit Triggered at 3.95% (Peak: 5.39%, Trail: 0.50%)"
+762,ESE.PA,SELL,127,34.8486,EUR,4425.77,15/10/2026 08:00:22,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+763,ESE.PA,SELL,127,34.8439,EUR,4425.18,15/10/2026 08:05:22,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+764,ESE.PA,SELL,127,34.8345,EUR,4423.98,15/10/2026 08:10:22,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+765,ESE.PA,SELL,127,34.8464,EUR,4425.49,15/10/2026 08:15:40,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+766,ESE.PA,SELL,127,34.8000,EUR,4419.60,15/10/2026 08:20:40,Pending,"Trailing Profit Triggered at 3.89% (Peak: 5.39%, Trail: 0.50%)"
+767,ESE.PA,SELL,127,34.7939,EUR,4418.83,15/10/2026 08:25:40,Pending,"Trailing Profit Triggered at 3.86% (Peak: 5.39%, Trail: 0.50%)"
+768,ESE.PA,SELL,127,34.8010,EUR,4419.73,15/10/2026 08:30:40,Pending,"Trailing Profit Triggered at 3.89% (Peak: 5.39%, Trail: 0.50%)"
+769,ESE.PA,SELL,127,34.7809,EUR,4417.17,15/10/2026 08:35:40,Pending,"Trailing Profit Triggered at 3.83% (Peak: 5.39%, Trail: 0.50%)"
+770,ESE.PA,SELL,127,34.7769,EUR,4416.67,15/10/2026 08:40:40,Pending,"Trailing Profit Triggered at 3.83% (Peak: 5.39%, Trail: 0.50%)"
+771,ESE.PA,SELL,127,34.7706,EUR,4415.87,15/10/2026 08:45:41,Pending,"Trailing Profit Triggered at 3.80% (Peak: 5.39%, Trail: 0.50%)"
+772,ESE.PA,SELL,127,34.7953,EUR,4419.00,15/10/2026 08:50:41,Pending,"Trailing Profit Triggered at 3.89% (Peak: 5.39%, Trail: 0.50%)"
+773,ESE.PA,SELL,127,34.8095,EUR,4420.81,15/10/2026 08:55:41,Pending,"Trailing Profit Triggered at 3.92% (Peak: 5.39%, Trail: 0.50%)"
+774,ESE.PA,SELL,127,34.8001,EUR,4419.61,15/10/2026 09:00:41,Pending,"Trailing Profit Triggered at 3.89% (Peak: 5.39%, Trail: 0.50%)"
+775,ESE.PA,SELL,127,34.8335,EUR,4423.85,15/10/2026 09:05:41,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+776,ESE.PA,SELL,127,34.8458,EUR,4425.42,15/10/2026 09:10:41,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+777,ESE.PA,SELL,127,34.8388,EUR,4424.53,15/10/2026 09:15:41,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+778,ESE.PA,SELL,127,34.8305,EUR,4423.47,15/10/2026 09:20:41,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+779,ESE.PA,SELL,127,34.8290,EUR,4423.28,15/10/2026 09:25:41,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+780,ESE.PA,SELL,127,34.8400,EUR,4424.68,15/10/2026 09:30:41,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+781,ESE.PA,SELL,127,34.8369,EUR,4424.29,15/10/2026 09:35:41,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+782,ESE.PA,SELL,127,34.8200,EUR,4422.14,15/10/2026 09:40:42,Pending,"Trailing Profit Triggered at 3.95% (Peak: 5.39%, Trail: 0.50%)"
+783,ESE.PA,SELL,127,34.7862,EUR,4417.85,15/10/2026 09:45:42,Pending,"Trailing Profit Triggered at 3.86% (Peak: 5.39%, Trail: 0.50%)"
+784,ESE.PA,SELL,127,34.7972,EUR,4419.24,15/10/2026 09:50:42,Pending,"Trailing Profit Triggered at 3.89% (Peak: 5.39%, Trail: 0.50%)"
+785,ESE.PA,SELL,127,34.7976,EUR,4419.30,15/10/2026 09:55:42,Pending,"Trailing Profit Triggered at 3.89% (Peak: 5.39%, Trail: 0.50%)"
+786,ESE.PA,SELL,127,34.8139,EUR,4421.37,15/10/2026 10:00:42,Pending,"Trailing Profit Triggered at 3.92% (Peak: 5.39%, Trail: 0.50%)"
+787,ESE.PA,SELL,127,34.8090,EUR,4420.74,15/10/2026 10:05:42,Pending,"Trailing Profit Triggered at 3.92% (Peak: 5.39%, Trail: 0.50%)"
+788,ESE.PA,SELL,127,34.8170,EUR,4421.76,15/10/2026 10:11:00,Pending,"Trailing Profit Triggered at 3.95% (Peak: 5.39%, Trail: 0.50%)"
+789,ESE.PA,SELL,127,34.8263,EUR,4422.94,15/10/2026 10:16:18,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+790,ESE.PA,SELL,127,34.8113,EUR,4421.03,15/10/2026 10:21:18,Pending,"Trailing Profit Triggered at 3.92% (Peak: 5.39%, Trail: 0.50%)"
+791,ESE.PA,SELL,127,34.8283,EUR,4423.19,15/10/2026 10:26:18,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+792,ESE.PA,SELL,127,34.8410,EUR,4424.81,15/10/2026 10:31:18,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+793,ESE.PA,SELL,127,34.8503,EUR,4425.99,15/10/2026 10:36:18,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+794,ESE.PA,SELL,127,34.8483,EUR,4425.73,15/10/2026 10:41:19,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+795,ESE.PA,SELL,127,34.8464,EUR,4425.49,15/10/2026 10:46:19,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+796,ESE.PA,SELL,127,34.8347,EUR,4424.01,15/10/2026 10:51:19,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+797,ESE.PA,SELL,127,34.8425,EUR,4425.00,15/10/2026 10:56:19,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+798,ESE.PA,SELL,127,34.8335,EUR,4423.85,15/10/2026 11:01:19,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+799,ESE.PA,SELL,127,34.8200,EUR,4422.14,15/10/2026 11:06:19,Pending,"Trailing Profit Triggered at 3.95% (Peak: 5.39%, Trail: 0.50%)"
+800,ESE.PA,SELL,127,34.8251,EUR,4422.79,15/10/2026 11:11:19,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+801,ESE.PA,SELL,127,34.8300,EUR,4423.41,15/10/2026 11:16:37,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+802,ESE.PA,SELL,127,34.7950,EUR,4418.96,15/10/2026 11:21:55,Pending,"Trailing Profit Triggered at 3.86% (Peak: 5.39%, Trail: 0.50%)"
+803,ESE.PA,SELL,127,34.8108,EUR,4420.97,15/10/2026 11:26:55,Pending,"Trailing Profit Triggered at 3.92% (Peak: 5.39%, Trail: 0.50%)"
+804,ESE.PA,SELL,127,34.8127,EUR,4421.21,15/10/2026 11:31:55,Pending,"Trailing Profit Triggered at 3.92% (Peak: 5.39%, Trail: 0.50%)"
+805,ESE.PA,SELL,127,34.8141,EUR,4421.39,15/10/2026 11:36:55,Pending,"Trailing Profit Triggered at 3.92% (Peak: 5.39%, Trail: 0.50%)"
+806,ESE.PA,SELL,127,34.8235,EUR,4422.58,15/10/2026 11:41:55,Pending,"Trailing Profit Triggered at 3.95% (Peak: 5.39%, Trail: 0.50%)"
+807,ESE.PA,SELL,127,34.8274,EUR,4423.08,15/10/2026 11:47:14,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+808,ESE.PA,SELL,127,34.8482,EUR,4425.72,15/10/2026 11:52:14,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+809,ESE.PA,SELL,127,34.8485,EUR,4425.76,15/10/2026 11:57:32,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+810,ESE.PA,SELL,127,34.8600,EUR,4427.22,15/10/2026 12:02:32,Pending,"Trailing Profit Triggered at 4.07% (Peak: 5.39%, Trail: 0.50%)"
+811,ESE.PA,SELL,127,34.8519,EUR,4426.19,15/10/2026 12:07:32,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+812,ESE.PA,SELL,127,34.8554,EUR,4426.64,15/10/2026 12:12:32,Pending,"Trailing Profit Triggered at 4.07% (Peak: 5.39%, Trail: 0.50%)"
+813,ESE.PA,SELL,127,34.8363,EUR,4424.21,15/10/2026 12:17:32,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+814,ESE.PA,SELL,127,34.8300,EUR,4423.41,15/10/2026 12:22:32,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+815,ESE.PA,SELL,127,34.8382,EUR,4424.45,15/10/2026 12:27:32,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+816,ESE.PA,SELL,127,34.8408,EUR,4424.78,15/10/2026 12:32:50,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+817,ESE.PA,SELL,127,34.8551,EUR,4426.60,15/10/2026 12:37:51,Pending,"Trailing Profit Triggered at 4.07% (Peak: 5.39%, Trail: 0.50%)"
+818,ESE.PA,SELL,127,34.8700,EUR,4428.49,15/10/2026 12:42:51,Pending,"Trailing Profit Triggered at 4.10% (Peak: 5.39%, Trail: 0.50%)"
+819,ESE.PA,SELL,127,34.8496,EUR,4425.90,15/10/2026 12:47:51,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+820,ESE.PA,SELL,127,34.8547,EUR,4426.55,15/10/2026 12:52:51,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+821,ESE.PA,SELL,127,34.8300,EUR,4423.41,15/10/2026 12:58:09,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+822,ESE.PA,SELL,127,34.8721,EUR,4428.76,15/10/2026 13:03:09,Pending,"Trailing Profit Triggered at 4.10% (Peak: 5.39%, Trail: 0.50%)"
+823,ESE.PA,SELL,127,34.8638,EUR,4427.70,15/10/2026 13:08:09,Pending,"Trailing Profit Triggered at 4.07% (Peak: 5.39%, Trail: 0.50%)"
+824,ESE.PA,SELL,127,34.8357,EUR,4424.13,15/10/2026 13:13:09,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+825,ESE.PA,SELL,127,34.8400,EUR,4424.68,15/10/2026 13:18:09,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+826,ESE.PA,SELL,127,34.8652,EUR,4427.88,15/10/2026 13:23:09,Pending,"Trailing Profit Triggered at 4.10% (Peak: 5.39%, Trail: 0.50%)"
+827,ESE.PA,SELL,127,34.8346,EUR,4423.99,15/10/2026 13:28:09,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+828,ESE.PA,SELL,127,34.8313,EUR,4423.57,15/10/2026 13:33:10,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+829,ESE.PA,SELL,127,34.8100,EUR,4420.87,15/10/2026 13:38:11,Pending,"Trailing Profit Triggered at 3.92% (Peak: 5.39%, Trail: 0.50%)"
+830,ESE.PA,SELL,127,34.7800,EUR,4417.06,15/10/2026 13:43:11,Pending,"Trailing Profit Triggered at 3.83% (Peak: 5.39%, Trail: 0.50%)"
+831,ESE.PA,SELL,127,34.7984,EUR,4419.40,15/10/2026 13:48:12,Pending,"Trailing Profit Triggered at 3.89% (Peak: 5.39%, Trail: 0.50%)"
+832,ESE.PA,SELL,127,34.7895,EUR,4418.27,15/10/2026 13:53:30,Pending,"Trailing Profit Triggered at 3.86% (Peak: 5.39%, Trail: 0.50%)"
+833,ESE.PA,SELL,127,34.8166,EUR,4421.71,15/10/2026 13:58:31,Pending,"Trailing Profit Triggered at 3.95% (Peak: 5.39%, Trail: 0.50%)"
+834,ESE.PA,SELL,127,34.7885,EUR,4418.14,15/10/2026 14:03:32,Pending,"Trailing Profit Triggered at 3.86% (Peak: 5.39%, Trail: 0.50%)"
+835,ESE.PA,SELL,127,34.7330,EUR,4411.09,15/10/2026 14:08:51,Pending,"Trailing Profit Triggered at 3.69% (Peak: 5.39%, Trail: 0.50%)"
+836,ESE.PA,SELL,127,34.7000,EUR,4406.90,15/10/2026 14:13:51,Pending,"Trailing Profit Triggered at 3.60% (Peak: 5.39%, Trail: 0.50%)"
+837,ESE.PA,SELL,127,34.8101,EUR,4420.88,15/10/2026 14:18:52,Pending,"Trailing Profit Triggered at 3.92% (Peak: 5.39%, Trail: 0.50%)"
+838,ESE.PA,SELL,127,34.8050,EUR,4420.24,15/10/2026 14:24:11,Pending,"Trailing Profit Triggered at 3.92% (Peak: 5.39%, Trail: 0.50%)"
+839,ESE.PA,SELL,127,34.8235,EUR,4422.58,15/10/2026 14:29:29,Pending,"Trailing Profit Triggered at 3.95% (Peak: 5.39%, Trail: 0.50%)"
+840,ESE.PA,SELL,127,34.8360,EUR,4424.17,15/10/2026 14:34:48,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+841,ESE.PA,SELL,127,34.8564,EUR,4426.76,15/10/2026 14:40:06,Pending,"Trailing Profit Triggered at 4.07% (Peak: 5.39%, Trail: 0.50%)"
+842,COP,SELL,6,140.9400,USD,845.64,15/10/2026 14:43:19,Pending,"Trailing Profit Triggered at 6.63% (Peak: 7.71%,FILLED
+843,ESE.PA,SELL,127,34.8300,EUR,4423.41,15/10/2026 14:45:19,Pending,"Trailing Profit Triggered at 3.98% (Peak: 5.39%, Trail: 0.50%)"
+844,ESE.PA,SELL,127,34.8361,EUR,4424.18,15/10/2026 14:50:20,Pending,"Trailing Profit Triggered at 4.04% (Peak: 5.39%, Trail: 0.50%)"
+845,ESE.PA,SELL,127,34.8389,EUR,4424.54,15/10/2026 14:55:21,Pending,"Trailing Profit Triggered at 4.01% (Peak: 5.39%, Trail: 0.50%)"
+846,ESE.PA,SELL,127,34.8975,EUR,4431.98,15/10/2026 15:00:22,Pending,"Trailing Profit Triggered at 4.19% (Peak: 5.39%, Trail: 0.50%)"
+847,ESE.PA,SELL,127,34.9047,EUR,4432.90,15/10/2026 15:05:22,Pending,"Trailing Profit Triggered at 4.19% (Peak: 5.39%, Trail: 0.50%)"
+848,ESE.PA,SELL,127,34.9307,EUR,4436.20,15/10/2026 15:10:23,Pending,"Trailing Profit Triggered at 4.28% (Peak: 5.39%, Trail: 0.50%)"
+849,ESE.PA,SELL,127,34.9708,EUR,4441.29,15/10/2026 15:15:24,Pending,"Trailing Profit Triggered at 4.37% (Peak: 5.39%, Trail: 0.50%)"
+850,ESE.PA,SELL,127,35.0113,EUR,4446.43,15/10/2026 15:20:43,Pending,"Trailing Profit Triggered at 4.52% (Peak: 5.39%, Trail: 0.50%)"
+851,ESE.PA,SELL,127,34.9872,EUR,4443.37,15/10/2026 15:25:43,Pending,"Trailing Profit Triggered at 4.46% (Peak: 5.39%, Trail: 0.50%)"
+852,UNH,SELL,3,408.3300,USD,1224.99,15/10/2026 19:16:44,Pending,"Trailing Profit Triggered at 8.28% (Peak: 9.76%,FILLED
+853,ESE.PA,SELL,127,34.8629,EUR,4427.59,16/10/2026 14:12:37,Pending,"Trailing Profit Triggered at 4.07% (Peak: 4.58%, Trail: 0.50%)"
+854,ESE.PA,SELL,127,34.8633,EUR,4427.64,16/10/2026 14:23:21,Pending,"Trailing Profit Triggered at 4.07% (Peak: 4.58%, Trail: 0.50%)"
+855,ESE.PA,SELL,127,34.8506,EUR,4426.03,16/10/2026 14:28:22,Pending,"Trailing Profit Triggered at 4.04% (Peak: 4.58%, Trail: 0.50%)"
+856,ESE.PA,SELL,127,34.8614,EUR,4427.40,16/10/2026 14:35:11,Pending,"Trailing Profit Triggered at 4.07% (Peak: 4.58%, Trail: 0.50%)"
+857,ESE.PA,SELL,127,34.8634,EUR,4427.65,16/10/2026 14:41:05,Pending,"Trailing Profit Triggered at 4.07% (Peak: 4.58%, Trail: 0.50%)"
+858,ESE.PA,SELL,127,34.8545,EUR,4426.52,16/10/2026 14:46:05,Pending,"Trailing Profit Triggered at 4.04% (Peak: 4.58%, Trail: 0.50%)"
+859,ESE.PA,SELL,127,34.8500,EUR,4425.95,16/10/2026 15:20:52,Pending,"Trailing Profit Triggered at 4.04% (Peak: 4.58%, Trail: 0.50%)"
+860,ESE.PA,SELL,127,34.7928,EUR,4418.69,16/10/2026 15:25:52,Pending,"Trailing Profit Triggered at 3.86% (Peak: 4.58%, Trail: 0.50%)"
+861,ESE.PA,SELL,127,34.7620,EUR,4414.77,19/10/2026 11:32:00,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.28%, Trail: 0.50%)"
+862,ESE.PA,SELL,127,34.7650,EUR,4415.15,19/10/2026 11:37:00,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.28%, Trail: 0.50%)"
+863,ESE.PA,SELL,127,34.7643,EUR,4415.07,19/10/2026 11:42:00,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.28%, Trail: 0.50%)"
+864,ESE.PA,SELL,127,34.7551,EUR,4413.90,19/10/2026 11:47:18,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.28%, Trail: 0.50%)"
+865,ESE.PA,SELL,127,34.7520,EUR,4413.50,19/10/2026 11:52:19,Pending,"Trailing Profit Triggered at 3.74% (Peak: 4.28%, Trail: 0.50%)"
+866,ESE.PA,SELL,127,34.7535,EUR,4413.69,19/10/2026 11:57:19,Pending,"Trailing Profit Triggered at 3.74% (Peak: 4.28%, Trail: 0.50%)"
+867,ESE.PA,SELL,127,34.7527,EUR,4413.59,19/10/2026 12:02:19,Pending,"Trailing Profit Triggered at 3.74% (Peak: 4.28%, Trail: 0.50%)"
+868,ESE.PA,SELL,127,34.7565,EUR,4414.08,19/10/2026 12:07:19,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.28%, Trail: 0.50%)"
+869,ESE.PA,SELL,127,34.7440,EUR,4412.49,19/10/2026 12:12:19,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.28%, Trail: 0.50%)"
+870,ESE.PA,SELL,127,34.7475,EUR,4412.93,19/10/2026 12:17:37,Pending,"Trailing Profit Triggered at 3.74% (Peak: 4.28%, Trail: 0.50%)"
+871,ESE.PA,SELL,127,34.7546,EUR,4413.83,19/10/2026 12:22:37,Pending,"Trailing Profit Triggered at 3.74% (Peak: 4.28%, Trail: 0.50%)"
+872,ESE.PA,SELL,127,34.7611,EUR,4414.66,19/10/2026 13:09:38,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.28%, Trail: 0.50%)"
+873,ESE.PA,SELL,127,34.7629,EUR,4414.89,19/10/2026 13:14:38,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.28%, Trail: 0.50%)"
+874,ESE.PA,SELL,127,34.7544,EUR,4413.81,19/10/2026 13:19:38,Pending,"Trailing Profit Triggered at 3.74% (Peak: 4.28%, Trail: 0.50%)"
+875,ESE.PA,SELL,127,34.7562,EUR,4414.04,19/10/2026 14:04:37,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.28%, Trail: 0.50%)"
+876,ESE.PA,SELL,127,34.7400,EUR,4411.98,19/10/2026 14:09:37,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.28%, Trail: 0.50%)"
+877,ESE.PA,SELL,127,34.7578,EUR,4414.24,19/10/2026 14:14:38,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.28%, Trail: 0.50%)"
+878,ESE.PA,SELL,127,34.7460,EUR,4412.74,19/10/2026 14:19:38,Pending,"Trailing Profit Triggered at 3.74% (Peak: 4.28%, Trail: 0.50%)"
+879,ESE.PA,SELL,127,34.7449,EUR,4412.60,20/10/2026 07:47:42,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+880,ESE.PA,SELL,127,34.7358,EUR,4411.45,20/10/2026 07:52:42,Pending,"Trailing Profit Triggered at 3.69% (Peak: 4.22%, Trail: 0.50%)"
+881,ESE.PA,SELL,127,34.7428,EUR,4412.34,20/10/2026 08:00:06,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+882,ESE.PA,SELL,127,34.7400,EUR,4411.98,20/10/2026 08:06:18,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+883,ESE.PA,SELL,127,34.7362,EUR,4411.50,20/10/2026 08:11:18,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+884,ESE.PA,SELL,127,34.7354,EUR,4411.40,20/10/2026 08:16:18,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+885,ESE.PA,SELL,127,34.7354,EUR,4411.40,20/10/2026 08:21:37,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+886,ESE.PA,SELL,127,34.7400,EUR,4411.98,20/10/2026 08:26:55,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+887,ESE.PA,SELL,127,34.7431,EUR,4412.37,20/10/2026 08:31:55,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+888,ESE.PA,SELL,127,34.7400,EUR,4411.98,20/10/2026 08:39:01,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+889,ESE.PA,SELL,127,34.7400,EUR,4411.98,20/10/2026 08:47:01,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+890,ESE.PA,SELL,127,34.7376,EUR,4411.67,20/10/2026 09:01:37,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+891,ESE.PA,SELL,127,34.7393,EUR,4411.89,20/10/2026 09:06:55,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+892,ESE.PA,SELL,127,34.7428,EUR,4412.34,20/10/2026 09:13:07,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+893,ESE.PA,SELL,127,34.7450,EUR,4412.61,20/10/2026 09:22:56,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+894,ESE.PA,SELL,127,34.7429,EUR,4412.35,20/10/2026 09:27:56,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+895,ESE.PA,SELL,127,34.7448,EUR,4412.59,20/10/2026 09:58:26,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+896,ESE.PA,SELL,127,34.7382,EUR,4411.75,20/10/2026 10:22:21,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+897,ESE.PA,SELL,127,34.7400,EUR,4411.98,20/10/2026 10:59:09,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+898,ESE.PA,SELL,127,34.7350,EUR,4411.35,20/10/2026 11:20:03,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+899,SAF.PA,SELL,2,306.9000,EUR,613.80,20/10/2026 11:20:33,Pending,FILLED
+900,SAF.PA,SELL,2,306.5000,EUR,613.00,20/10/2026 11:25:34,Pending,ATR Stop Loss Triggered at -6.0%
+901,ESE.PA,SELL,127,34.7313,EUR,4410.88,20/10/2026 11:26:58,Pending,"Trailing Profit Triggered at 3.69% (Peak: 4.22%, Trail: 0.50%)"
+902,ESE.PA,SELL,127,34.7347,EUR,4411.31,20/10/2026 11:33:46,Pending,"Trailing Profit Triggered at 3.69% (Peak: 4.22%, Trail: 0.50%)"
+903,ESE.PA,SELL,127,34.7450,EUR,4412.61,20/10/2026 11:44:28,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+904,ESE.PA,SELL,127,34.7388,EUR,4411.83,20/10/2026 11:49:28,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+905,ESE.PA,SELL,127,34.7415,EUR,4412.17,20/10/2026 11:54:28,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+906,ESE.PA,SELL,127,34.7400,EUR,4411.98,20/10/2026 12:01:16,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.22%, Trail: 0.50%)"
+907,ESE.PA,SELL,127,34.7187,EUR,4409.27,20/10/2026 12:06:16,Pending,"Trailing Profit Triggered at 3.66% (Peak: 4.22%, Trail: 0.50%)"
+908,SAF.PA,SELL,2,306.5000,EUR,613.00,20/10/2026 12:08:52,Pending,ATR Stop Loss Triggered at -6.0%
+909,ESE.PA,SELL,127,34.7186,EUR,4409.26,20/10/2026 12:11:46,Pending,"Trailing Profit Triggered at 3.66% (Peak: 4.22%, Trail: 0.50%)"
+910,ESE.PA,SELL,127,34.7165,EUR,4409.00,20/10/2026 12:16:46,Pending,"Trailing Profit Triggered at 3.66% (Peak: 4.22%, Trail: 0.50%)"
+911,SAF.PA,SELL,2,306.5000,EUR,613.00,20/10/2026 12:18:10,Pending,ATR Stop Loss Triggered at -6.0%
+912,ESE.PA,SELL,127,34.7053,EUR,4407.57,20/10/2026 12:21:58,Pending,"Trailing Profit Triggered at 3.63% (Peak: 4.22%, Trail: 0.50%)"
+913,SAF.PA,SELL,2,306.1000,EUR,612.20,20/10/2026 12:23:22,Pending,ATR Stop Loss Triggered at -6.0%
+914,ESE.PA,SELL,127,34.6903,EUR,4405.67,20/10/2026 12:27:28,Pending,"Trailing Profit Triggered at 3.57% (Peak: 4.22%, Trail: 0.50%)"
+915,SAF.PA,SELL,2,305.5000,EUR,611.00,20/10/2026 12:28:34,Pending,ATR Stop Loss Triggered at -6.1%
+916,ESE.PA,SELL,127,34.6922,EUR,4405.91,20/10/2026 12:32:40,Pending,"Trailing Profit Triggered at 3.63% (Peak: 4.22%, Trail: 0.50%)"
+917,SAF.PA,SELL,2,306.2000,EUR,612.40,20/10/2026 12:33:46,Pending,ATR Stop Loss Triggered at -6.1%
+918,ESE.PA,SELL,127,34.6689,EUR,4402.95,20/10/2026 12:37:52,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.22%, Trail: 0.50%)"
+919,SAF.PA,SELL,2,306.0000,EUR,612.00,20/10/2026 12:38:58,Pending,ATR Stop Loss Triggered at -6.1%
+920,ESE.PA,SELL,127,34.6383,EUR,4399.06,20/10/2026 12:43:05,Pending,"Trailing Profit Triggered at 3.45% (Peak: 4.22%, Trail: 0.50%)"
+921,SAF.PA,SELL,2,305.1000,EUR,610.20,20/10/2026 12:44:29,Pending,ATR Stop Loss Triggered at -6.1%
+922,ESE.PA,SELL,127,34.6330,EUR,4398.39,20/10/2026 12:48:17,Pending,"Trailing Profit Triggered at 3.39% (Peak: 4.22%, Trail: 0.50%)"
+923,SAF.PA,SELL,2,304.2000,EUR,608.40,20/10/2026 12:49:41,Pending,ATR Stop Loss Triggered at -6.1%
+924,ESE.PA,SELL,127,34.6710,EUR,4403.22,20/10/2026 12:53:29,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.22%, Trail: 0.50%)"
+925,SAF.PA,SELL,2,305.6000,EUR,611.20,20/10/2026 12:55:11,Pending,ATR Stop Loss Triggered at -6.1%
+926,ESE.PA,SELL,127,34.7006,EUR,4406.98,20/10/2026 12:58:41,Pending,"Trailing Profit Triggered at 3.60% (Peak: 4.22%, Trail: 0.50%)"
+927,ESE.PA,SELL,127,34.7016,EUR,4407.10,20/10/2026 13:03:41,Pending,"Trailing Profit Triggered at 3.60% (Peak: 4.22%, Trail: 0.50%)"
+928,ESE.PA,SELL,127,34.7195,EUR,4409.38,20/10/2026 13:08:41,Pending,"Trailing Profit Triggered at 3.66% (Peak: 4.22%, Trail: 0.50%)"
+929,ESE.PA,SELL,127,34.7060,EUR,4407.66,20/10/2026 13:13:41,Pending,"Trailing Profit Triggered at 3.63% (Peak: 4.22%, Trail: 0.50%)"
+930,ESE.PA,SELL,127,34.7134,EUR,4408.60,20/10/2026 13:18:41,Pending,"Trailing Profit Triggered at 3.63% (Peak: 4.22%, Trail: 0.50%)"
+931,ESE.PA,SELL,127,34.7348,EUR,4411.32,20/10/2026 13:23:41,Pending,"Trailing Profit Triggered at 3.69% (Peak: 4.22%, Trail: 0.50%)"
+932,ESE.PA,SELL,127,34.7149,EUR,4408.79,20/10/2026 13:28:41,Pending,"Trailing Profit Triggered at 3.69% (Peak: 4.22%, Trail: 0.50%)"
+933,ESE.PA,SELL,127,34.7204,EUR,4409.49,20/10/2026 13:34:00,Pending,"Trailing Profit Triggered at 3.66% (Peak: 4.22%, Trail: 0.50%)"
+934,ESE.PA,SELL,127,34.7152,EUR,4408.83,20/10/2026 13:39:00,Pending,"Trailing Profit Triggered at 3.66% (Peak: 4.22%, Trail: 0.50%)"
+935,ESE.PA,SELL,127,34.7201,EUR,4409.45,20/10/2026 13:44:01,Pending,"Trailing Profit Triggered at 3.66% (Peak: 4.22%, Trail: 0.50%)"
+936,ESE.PA,SELL,127,34.6700,EUR,4403.09,20/10/2026 13:49:01,Pending,"Trailing Profit Triggered at 3.54% (Peak: 4.22%, Trail: 0.50%)"
+937,ESE.PA,SELL,127,34.7000,EUR,4406.90,20/10/2026 13:54:20,Pending,"Trailing Profit Triggered at 3.60% (Peak: 4.22%, Trail: 0.50%)"
+938,ESE.PA,SELL,127,34.6415,EUR,4399.47,20/10/2026 13:59:21,Pending,"Trailing Profit Triggered at 3.42% (Peak: 4.22%, Trail: 0.50%)"
+939,ESE.PA,SELL,127,34.6812,EUR,4404.51,20/10/2026 14:04:21,Pending,"Trailing Profit Triggered at 3.54% (Peak: 4.22%, Trail: 0.50%)"
+940,ESE.PA,SELL,127,34.7155,EUR,4408.87,20/10/2026 14:09:40,Pending,"Trailing Profit Triggered at 3.66% (Peak: 4.22%, Trail: 0.50%)"
+941,GOOG,SELL,3,329.1600,USD,987.48,21/10/2026 14:00:17,Pending,FILLED
+942,MCD,SELL,4,243.8200,USD,975.28,21/10/2026 14:00:47,Pending,"Trailing Profit Triggered at 1.68% (Peak: 2.81%,FILLED
+943,BAC,BUY,40,50.7150,USD,2028.60,21/10/2026 14:01:17,Pending,"[DIP] Score: 12/12 {RSI<25: +4, BB<0.2: +1, Trend: +1, Analyst: +3 (Strong-Upside),FILLED
+944,ESE.PA,SELL,127,34.6782,EUR,4404.13,22/10/2026 07:30:15,Pending,"Trailing Profit Triggered at 3.54% (Peak: 4.43%, Trail: 0.50%)"
+945,SAF.PA,SELL,2,305.6000,EUR,611.20,22/10/2026 07:30:45,Pending,ATR Stop Loss Triggered at -6.1%
+946,ESE.PA,SELL,127,34.6604,EUR,4401.87,22/10/2026 07:35:27,Pending,"Trailing Profit Triggered at 3.48% (Peak: 4.43%, Trail: 0.50%)"
+947,SAF.PA,SELL,2,305.7000,EUR,611.40,22/10/2026 07:36:15,Pending,ATR Stop Loss Triggered at -6.1%
+948,ESE.PA,SELL,127,34.6861,EUR,4405.13,22/10/2026 07:40:39,Pending,"Trailing Profit Triggered at 3.57% (Peak: 4.43%, Trail: 0.50%)"
+949,SAF.PA,SELL,2,306.3000,EUR,612.60,22/10/2026 07:42:57,Pending,ATR Stop Loss Triggered at -6.0%
+950,ESE.PA,SELL,127,34.6723,EUR,4403.38,22/10/2026 07:45:51,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+951,ESE.PA,SELL,127,34.6866,EUR,4405.20,22/10/2026 07:51:09,Pending,"Trailing Profit Triggered at 3.57% (Peak: 4.43%, Trail: 0.50%)"
+952,ESE.PA,SELL,127,34.6877,EUR,4405.34,22/10/2026 07:56:09,Pending,"Trailing Profit Triggered at 3.57% (Peak: 4.43%, Trail: 0.50%)"
+953,ESE.PA,SELL,127,34.6907,EUR,4405.72,22/10/2026 08:01:09,Pending,"Trailing Profit Triggered at 3.60% (Peak: 4.43%, Trail: 0.50%)"
+954,ESE.PA,SELL,127,34.6705,EUR,4403.15,22/10/2026 08:06:09,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+955,ESE.PA,SELL,127,34.6741,EUR,4403.61,22/10/2026 08:11:09,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+956,ESE.PA,SELL,127,34.6748,EUR,4403.70,22/10/2026 08:16:09,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+957,ESE.PA,SELL,127,34.6782,EUR,4404.13,22/10/2026 08:21:09,Pending,"Trailing Profit Triggered at 3.54% (Peak: 4.43%, Trail: 0.50%)"
+958,ESE.PA,SELL,127,34.6892,EUR,4405.53,22/10/2026 08:26:09,Pending,"Trailing Profit Triggered at 3.57% (Peak: 4.43%, Trail: 0.50%)"
+959,ESE.PA,SELL,127,34.6935,EUR,4406.07,22/10/2026 08:31:10,Pending,"Trailing Profit Triggered at 3.57% (Peak: 4.43%, Trail: 0.50%)"
+960,ESE.PA,SELL,127,34.6706,EUR,4403.17,22/10/2026 08:36:10,Pending,"Trailing Profit Triggered at 3.48% (Peak: 4.43%, Trail: 0.50%)"
+961,ESE.PA,SELL,127,34.6580,EUR,4401.57,22/10/2026 08:41:10,Pending,"Trailing Profit Triggered at 3.48% (Peak: 4.43%, Trail: 0.50%)"
+962,ESE.PA,SELL,127,34.6746,EUR,4403.67,22/10/2026 08:46:10,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+963,SAF.PA,SELL,2,306.8000,EUR,613.60,22/10/2026 08:46:58,Pending,ATR Stop Loss Triggered at -5.9%
+964,ESE.PA,SELL,127,34.6610,EUR,4401.95,22/10/2026 08:51:22,Pending,"Trailing Profit Triggered at 3.48% (Peak: 4.43%, Trail: 0.50%)"
+965,SAF.PA,SELL,2,306.8000,EUR,613.60,22/10/2026 08:52:10,Pending,ATR Stop Loss Triggered at -5.9%
+966,ESE.PA,SELL,127,34.6733,EUR,4403.51,22/10/2026 08:56:34,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+967,ESE.PA,SELL,127,34.6770,EUR,4403.98,22/10/2026 09:01:34,Pending,"Trailing Profit Triggered at 3.54% (Peak: 4.43%, Trail: 0.50%)"
+968,ESE.PA,SELL,127,34.6782,EUR,4404.13,22/10/2026 09:06:34,Pending,"Trailing Profit Triggered at 3.54% (Peak: 4.43%, Trail: 0.50%)"
+969,ESE.PA,SELL,127,34.6603,EUR,4401.86,22/10/2026 09:11:34,Pending,"Trailing Profit Triggered at 3.48% (Peak: 4.43%, Trail: 0.50%)"
+970,ESE.PA,SELL,127,34.6400,EUR,4399.28,22/10/2026 09:16:34,Pending,"Trailing Profit Triggered at 3.45% (Peak: 4.43%, Trail: 0.50%)"
+971,ESE.PA,SELL,127,34.6466,EUR,4400.12,22/10/2026 09:21:34,Pending,"Trailing Profit Triggered at 3.45% (Peak: 4.43%, Trail: 0.50%)"
+972,SAF.PA,SELL,2,307.0000,EUR,614.00,22/10/2026 09:23:52,Pending,ATR Stop Loss Triggered at -5.9%
+973,ESE.PA,SELL,127,34.6726,EUR,4403.42,22/10/2026 09:27:04,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+974,ESE.PA,SELL,127,34.6885,EUR,4405.44,22/10/2026 09:32:04,Pending,"Trailing Profit Triggered at 3.57% (Peak: 4.43%, Trail: 0.50%)"
+975,ESE.PA,SELL,127,34.6693,EUR,4403.00,22/10/2026 09:37:05,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+976,ESE.PA,SELL,127,34.6599,EUR,4401.81,22/10/2026 09:42:05,Pending,"Trailing Profit Triggered at 3.48% (Peak: 4.43%, Trail: 0.50%)"
+977,ESE.PA,SELL,127,34.6594,EUR,4401.74,22/10/2026 09:47:05,Pending,"Trailing Profit Triggered at 3.48% (Peak: 4.43%, Trail: 0.50%)"
+978,ESE.PA,SELL,127,34.6678,EUR,4402.81,22/10/2026 09:52:05,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+979,ESE.PA,SELL,127,34.6466,EUR,4400.12,22/10/2026 09:57:05,Pending,"Trailing Profit Triggered at 3.45% (Peak: 4.43%, Trail: 0.50%)"
+980,ESE.PA,SELL,127,34.6724,EUR,4403.39,22/10/2026 10:02:05,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+981,ESE.PA,SELL,127,34.6893,EUR,4405.54,22/10/2026 10:07:05,Pending,"Trailing Profit Triggered at 3.57% (Peak: 4.43%, Trail: 0.50%)"
+982,ESE.PA,SELL,127,34.7000,EUR,4406.90,22/10/2026 10:12:05,Pending,"Trailing Profit Triggered at 3.60% (Peak: 4.43%, Trail: 0.50%)"
+983,ESE.PA,SELL,127,34.7087,EUR,4408.00,22/10/2026 10:17:05,Pending,"Trailing Profit Triggered at 3.63% (Peak: 4.43%, Trail: 0.50%)"
+984,ESE.PA,SELL,127,34.7252,EUR,4410.10,22/10/2026 10:22:05,Pending,"Trailing Profit Triggered at 3.69% (Peak: 4.43%, Trail: 0.50%)"
+985,ESE.PA,SELL,127,34.7291,EUR,4410.60,22/10/2026 10:27:05,Pending,"Trailing Profit Triggered at 3.69% (Peak: 4.43%, Trail: 0.50%)"
+986,ESE.PA,SELL,127,34.7037,EUR,4407.37,22/10/2026 10:32:06,Pending,"Trailing Profit Triggered at 3.60% (Peak: 4.43%, Trail: 0.50%)"
+987,ESE.PA,SELL,127,34.7281,EUR,4410.47,22/10/2026 10:37:06,Pending,"Trailing Profit Triggered at 3.69% (Peak: 4.43%, Trail: 0.50%)"
+988,ESE.PA,SELL,127,34.7275,EUR,4410.39,22/10/2026 10:42:06,Pending,"Trailing Profit Triggered at 3.69% (Peak: 4.43%, Trail: 0.50%)"
+989,ESE.PA,SELL,127,34.7400,EUR,4411.98,22/10/2026 10:47:24,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.43%, Trail: 0.50%)"
+990,ESE.PA,SELL,127,34.7488,EUR,4413.10,22/10/2026 10:52:42,Pending,"Trailing Profit Triggered at 3.74% (Peak: 4.43%, Trail: 0.50%)"
+991,ESE.PA,SELL,127,34.7569,EUR,4414.13,22/10/2026 10:57:42,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.43%, Trail: 0.50%)"
+992,ESE.PA,SELL,127,34.7630,EUR,4414.90,22/10/2026 11:02:42,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.43%, Trail: 0.50%)"
+993,ESE.PA,SELL,127,34.7487,EUR,4413.08,22/10/2026 11:07:42,Pending,"Trailing Profit Triggered at 3.74% (Peak: 4.43%, Trail: 0.50%)"
+994,ESE.PA,SELL,127,34.7425,EUR,4412.30,22/10/2026 11:12:42,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.43%, Trail: 0.50%)"
+995,ESE.PA,SELL,127,34.7422,EUR,4412.26,22/10/2026 11:17:42,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.43%, Trail: 0.50%)"
+996,ESE.PA,SELL,127,34.7571,EUR,4414.15,22/10/2026 11:22:43,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.43%, Trail: 0.50%)"
+997,ESE.PA,SELL,127,34.7700,EUR,4415.79,22/10/2026 11:27:43,Pending,"Trailing Profit Triggered at 3.80% (Peak: 4.43%, Trail: 0.50%)"
+998,ESE.PA,SELL,127,34.7638,EUR,4415.00,22/10/2026 11:32:43,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.43%, Trail: 0.50%)"
+999,ESE.PA,SELL,127,34.7443,EUR,4412.53,22/10/2026 11:37:43,Pending,"Trailing Profit Triggered at 3.72% (Peak: 4.43%, Trail: 0.50%)"
+1000,ESE.PA,SELL,127,34.7591,EUR,4414.41,22/10/2026 11:42:43,Pending,"Trailing Profit Triggered at 3.77% (Peak: 4.43%, Trail: 0.50%)"
+1001,ESE.PA,SELL,127,34.7804,EUR,4417.11,22/10/2026 11:47:43,Pending,"Trailing Profit Triggered at 3.83% (Peak: 4.43%, Trail: 0.50%)"
+1002,ESE.PA,SELL,127,34.7978,EUR,4419.32,22/10/2026 11:52:43,Pending,"Trailing Profit Triggered at 3.89% (Peak: 4.43%, Trail: 0.50%)"
+1003,ESE.PA,SELL,127,34.8080,EUR,4420.62,22/10/2026 11:57:43,Pending,"Trailing Profit Triggered at 3.92% (Peak: 4.43%, Trail: 0.50%)"
+1004,ESE.PA,SELL,127,34.8059,EUR,4420.35,22/10/2026 12:02:43,Pending,"Trailing Profit Triggered at 3.92% (Peak: 4.43%, Trail: 0.50%)"
+1005,ESE.PA,SELL,127,34.8099,EUR,4420.86,22/10/2026 12:10:43,Pending,"Trailing Profit Triggered at 3.92% (Peak: 4.43%, Trail: 0.50%)"
+1006,ESE.PA,SELL,127,34.7938,EUR,4418.81,22/10/2026 12:15:44,Pending,"Trailing Profit Triggered at 3.86% (Peak: 4.43%, Trail: 0.50%)"
+1007,ESE.PA,SELL,127,34.8000,EUR,4419.60,22/10/2026 12:20:44,Pending,"Trailing Profit Triggered at 3.89% (Peak: 4.43%, Trail: 0.50%)"
+1008,ESE.PA,SELL,127,34.7884,EUR,4418.13,22/10/2026 12:26:02,Pending,"Trailing Profit Triggered at 3.86% (Peak: 4.43%, Trail: 0.50%)"
+1009,ESE.PA,SELL,127,34.7855,EUR,4417.76,22/10/2026 12:31:02,Pending,"Trailing Profit Triggered at 3.86% (Peak: 4.43%, Trail: 0.50%)"
+1010,ESE.PA,SELL,127,34.7975,EUR,4419.28,22/10/2026 12:36:02,Pending,"Trailing Profit Triggered at 3.89% (Peak: 4.43%, Trail: 0.50%)"
+1011,ESE.PA,SELL,127,34.7881,EUR,4418.09,22/10/2026 12:41:02,Pending,"Trailing Profit Triggered at 3.86% (Peak: 4.43%, Trail: 0.50%)"
+1012,ESE.PA,SELL,127,34.8121,EUR,4421.14,22/10/2026 12:46:38,Pending,"Trailing Profit Triggered at 3.92% (Peak: 4.43%, Trail: 0.50%)"
+1013,ESE.PA,SELL,127,34.8105,EUR,4420.93,22/10/2026 12:51:38,Pending,"Trailing Profit Triggered at 3.92% (Peak: 4.43%, Trail: 0.50%)"
+1014,ESE.PA,SELL,127,34.8065,EUR,4420.43,22/10/2026 12:56:56,Pending,"Trailing Profit Triggered at 3.92% (Peak: 4.43%, Trail: 0.50%)"
+1015,ESE.PA,SELL,127,34.8139,EUR,4421.37,22/10/2026 13:02:14,Pending,"Trailing Profit Triggered at 3.92% (Peak: 4.43%, Trail: 0.50%)"
+1016,ESE.PA,SELL,127,34.7950,EUR,4418.96,22/10/2026 13:07:14,Pending,"Trailing Profit Triggered at 3.89% (Peak: 4.43%, Trail: 0.50%)"
+1017,ESE.PA,SELL,127,34.7976,EUR,4419.30,22/10/2026 13:12:32,Pending,"Trailing Profit Triggered at 3.89% (Peak: 4.43%, Trail: 0.50%)"
+1018,ESE.PA,SELL,127,34.7882,EUR,4418.10,22/10/2026 13:17:33,Pending,"Trailing Profit Triggered at 3.86% (Peak: 4.43%, Trail: 0.50%)"
+1019,ESE.PA,SELL,127,34.7943,EUR,4418.88,22/10/2026 13:22:33,Pending,"Trailing Profit Triggered at 3.86% (Peak: 4.43%, Trail: 0.50%)"
+1020,ESE.PA,SELL,127,34.7930,EUR,4418.71,22/10/2026 13:27:51,Pending,"Trailing Profit Triggered at 3.86% (Peak: 4.43%, Trail: 0.50%)"
+1021,ESE.PA,SELL,127,34.7986,EUR,4419.42,22/10/2026 13:32:51,Pending,"Trailing Profit Triggered at 3.89% (Peak: 4.43%, Trail: 0.50%)"
+1022,ESE.PA,SELL,127,34.7866,EUR,4417.90,22/10/2026 13:38:10,Pending,"Trailing Profit Triggered at 3.86% (Peak: 4.43%, Trail: 0.50%)"
+1023,ESE.PA,SELL,127,34.8033,EUR,4420.02,22/10/2026 13:43:10,Pending,"Trailing Profit Triggered at 3.89% (Peak: 4.43%, Trail: 0.50%)"
+1024,ESE.PA,SELL,127,34.8060,EUR,4420.36,22/10/2026 14:00:48,Pending,"Trailing Profit Triggered at 3.92% (Peak: 4.43%, Trail: 0.50%)"
+1025,ESE.PA,SELL,127,34.8000,EUR,4419.60,22/10/2026 14:06:25,Pending,"Trailing Profit Triggered at 3.89% (Peak: 4.43%, Trail: 0.50%)"
+1026,SAF.PA,SELL,2,306.9000,EUR,613.80,22/10/2026 14:07:31,Pending,ATR Stop Loss Triggered at -5.9%
+1027,SAF.PA,SELL,2,306.6000,EUR,613.20,22/10/2026 14:12:32,Pending,ATR Stop Loss Triggered at -5.9%
+1028,SAF.PA,SELL,2,306.3000,EUR,612.60,22/10/2026 14:17:32,Pending,ATR Stop Loss Triggered at -5.9%
+1029,SAF.PA,SELL,2,304.9000,EUR,609.80,22/10/2026 14:22:33,Pending,ATR Stop Loss Triggered at -5.9%
+1030,ESE.PA,SELL,127,34.8137,EUR,4421.34,22/10/2026 14:26:03,Pending,"Trailing Profit Triggered at 3.92% (Peak: 4.43%, Trail: 0.50%)"
+1031,SAF.PA,SELL,2,305.6000,EUR,611.20,22/10/2026 14:28:04,Pending,ATR Stop Loss Triggered at -5.9%
+1032,ESE.PA,SELL,127,34.8000,EUR,4419.60,22/10/2026 14:31:34,Pending,"Trailing Profit Triggered at 3.89% (Peak: 4.43%, Trail: 0.50%)"
+1033,SAF.PA,SELL,2,305.0000,EUR,610.00,22/10/2026 14:33:16,Pending,ATR Stop Loss Triggered at -5.9%
+1034,ESE.PA,SELL,127,34.8122,EUR,4421.15,22/10/2026 14:36:47,Pending,"Trailing Profit Triggered at 3.92% (Peak: 4.43%, Trail: 0.50%)"
+1035,SAF.PA,SELL,2,304.5000,EUR,609.00,22/10/2026 14:38:29,Pending,ATR Stop Loss Triggered at -5.9%
+1036,ESE.PA,SELL,127,34.7530,EUR,4413.63,22/10/2026 14:41:59,Pending,"Trailing Profit Triggered at 3.74% (Peak: 4.43%, Trail: 0.50%)"
+1037,SAF.PA,SELL,2,303.7000,EUR,607.40,22/10/2026 14:43:41,Pending,ATR Stop Loss Triggered at -6.0%
+1038,ESE.PA,SELL,127,34.6787,EUR,4404.19,22/10/2026 14:47:11,Pending,"Trailing Profit Triggered at 3.54% (Peak: 4.43%, Trail: 0.50%)"
+1039,SAF.PA,SELL,2,304.1000,EUR,608.20,22/10/2026 14:48:54,Pending,ATR Stop Loss Triggered at -6.0%
+1040,ESE.PA,SELL,127,34.6820,EUR,4404.61,22/10/2026 14:52:24,Pending,"Trailing Profit Triggered at 3.54% (Peak: 4.43%, Trail: 0.50%)"
+1041,SAF.PA,SELL,2,304.0000,EUR,608.00,22/10/2026 14:54:06,Pending,ATR Stop Loss Triggered at -6.0%
+1042,ESE.PA,SELL,127,34.6600,EUR,4401.82,22/10/2026 14:57:37,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+1043,SAF.PA,SELL,2,303.9000,EUR,607.80,22/10/2026 14:59:19,Pending,ATR Stop Loss Triggered at -6.0%
+1044,ESE.PA,SELL,127,34.6610,EUR,4401.95,22/10/2026 15:02:50,Pending,"Trailing Profit Triggered at 3.48% (Peak: 4.43%, Trail: 0.50%)"
+1045,SAF.PA,SELL,2,303.5000,EUR,607.00,22/10/2026 15:04:32,Pending,ATR Stop Loss Triggered at -6.0%
+1046,ESE.PA,SELL,127,34.6645,EUR,4402.39,22/10/2026 15:08:39,Pending,"Trailing Profit Triggered at 3.48% (Peak: 4.43%, Trail: 0.50%)"
+1047,SAF.PA,SELL,2,304.1000,EUR,608.20,22/10/2026 15:09:45,Pending,ATR Stop Loss Triggered at -6.0%
+1048,ESE.PA,SELL,127,34.6685,EUR,4402.90,22/10/2026 15:13:52,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+1049,SAF.PA,SELL,2,304.7000,EUR,609.40,22/10/2026 15:14:58,Pending,ATR Stop Loss Triggered at -6.0%
+1050,ESE.PA,SELL,127,34.6661,EUR,4402.59,22/10/2026 15:19:04,Pending,"Trailing Profit Triggered at 3.51% (Peak: 4.43%, Trail: 0.50%)"
+1051,SAF.PA,SELL,2,303.8000,EUR,607.60,22/10/2026 15:20:11,Pending,ATR Stop Loss Triggered at -6.0%
+1052,ESE.PA,SELL,127,34.6400,EUR,4399.28,22/10/2026 15:24:17,Pending,"Trailing Profit Triggered at 3.45% (Peak: 4.43%, Trail: 0.50%)"
+1053,SAF.PA,SELL,2,303.1000,EUR,606.20,22/10/2026 15:25:23,Pending,ATR Stop Loss Triggered at -6.0%
+1054,ESE.PA,SELL,127,34.6574,EUR,4401.49,22/10/2026 15:29:30,Pending,"Trailing Profit Triggered at 3.45% (Peak: 4.43%, Trail: 0.50%)"
+1055,SAF.PA,SELL,2,286.7000,EUR,573.40,23/10/2026 07:30:09,Pending,ATR Stop Loss Triggered at -7.0%
+1056,SAF.PA,SELL,2,283.9000,EUR,567.80,23/10/2026 07:35:09,Pending,ATR Stop Loss Triggered at -7.0%
+1057,SAF.PA,SELL,2,284.3000,EUR,568.60,23/10/2026 07:40:09,Pending,ATR Stop Loss Triggered at -7.0%
+1058,SAF.PA,SELL,2,283.1000,EUR,566.20,23/10/2026 07:45:09,Pending,ATR Stop Loss Triggered at -7.0%
+1059,SAF.PA,SELL,2,283.9000,EUR,567.80,23/10/2026 07:50:09,Pending,ATR Stop Loss Triggered at -7.0%
+1060,SAF.PA,SELL,2,283.6000,EUR,567.20,23/10/2026 07:55:09,Pending,ATR Stop Loss Triggered at -7.0%
+1061,SAF.PA,SELL,2,282.7000,EUR,565.40,23/10/2026 08:00:09,Pending,ATR Stop Loss Triggered at -7.0%
+1062,SAF.PA,SELL,2,282.7000,EUR,565.40,23/10/2026 08:05:09,Pending,ATR Stop Loss Triggered at -7.0%
+1063,SAF.PA,SELL,2,282.7000,EUR,565.40,23/10/2026 08:10:09,Pending,ATR Stop Loss Triggered at -7.0%
+1064,SAF.PA,SELL,2,281.5000,EUR,563.00,23/10/2026 08:15:09,Pending,ATR Stop Loss Triggered at -7.0%
+1065,SAF.PA,SELL,2,281.2000,EUR,562.40,23/10/2026 08:20:27,Pending,ATR Stop Loss Triggered at -7.0%
+1066,SAF.PA,SELL,2,281.3000,EUR,562.60,23/10/2026 08:25:46,Pending,ATR Stop Loss Triggered at -7.0%
+1067,SAF.PA,SELL,2,282.2000,EUR,564.40,23/10/2026 08:30:46,Pending,ATR Stop Loss Triggered at -7.0%
+1068,SAF.PA,SELL,2,282.0500,EUR,564.10,23/10/2026 08:36:04,Pending,ATR Stop Loss Triggered at -7.0%
+1069,SAF.PA,SELL,2,282.0000,EUR,564.00,23/10/2026 08:41:22,Pending,ATR Stop Loss Triggered at -7.0%
+1070,SAF.PA,SELL,2,281.6000,EUR,563.20,23/10/2026 08:46:22,Pending,ATR Stop Loss Triggered at -7.0%
+1071,SAF.PA,SELL,2,282.1000,EUR,564.20,23/10/2026 08:51:22,Pending,ATR Stop Loss Triggered at -7.0%
+1072,SAF.PA,SELL,2,282.4000,EUR,564.80,23/10/2026 08:56:22,Pending,ATR Stop Loss Triggered at -7.0%
+1073,SAF.PA,SELL,2,281.3500,EUR,562.70,23/10/2026 09:01:22,Pending,ATR Stop Loss Triggered at -7.0%
+1074,SAF.PA,SELL,2,280.8000,EUR,561.60,23/10/2026 09:06:22,Pending,ATR Stop Loss Triggered at -7.0%
+1075,SAF.PA,SELL,2,279.5000,EUR,559.00,23/10/2026 09:11:22,Pending,ATR Stop Loss Triggered at -7.0%
+1076,SAF.PA,SELL,2,279.5000,EUR,559.00,23/10/2026 09:16:40,Pending,ATR Stop Loss Triggered at -7.0%
+1077,SAF.PA,SELL,2,279.0000,EUR,558.00,23/10/2026 09:21:40,Pending,ATR Stop Loss Triggered at -7.0%
+1078,SAF.PA,SELL,2,278.1000,EUR,556.20,23/10/2026 09:26:41,Pending,ATR Stop Loss Triggered at -7.0%
+1079,SAF.PA,SELL,2,278.4000,EUR,556.80,23/10/2026 09:31:41,Pending,ATR Stop Loss Triggered at -7.0%
+1080,SAF.PA,SELL,2,278.2000,EUR,556.40,23/10/2026 09:36:41,Pending,ATR Stop Loss Triggered at -7.0%
+1081,SAF.PA,SELL,2,277.3500,EUR,554.70,23/10/2026 09:41:41,Pending,ATR Stop Loss Triggered at -7.0%
+1082,SAF.PA,SELL,2,277.0000,EUR,554.00,23/10/2026 09:46:41,Pending,ATR Stop Loss Triggered at -7.0%
+1083,SAF.PA,SELL,2,276.3000,EUR,552.60,23/10/2026 09:51:41,Pending,ATR Stop Loss Triggered at -7.0%
+1084,SAF.PA,SELL,2,276.4000,EUR,552.80,23/10/2026 09:56:41,Pending,ATR Stop Loss Triggered at -7.0%
+1085,SAF.PA,SELL,2,276.1000,EUR,552.20,23/10/2026 10:01:41,Pending,ATR Stop Loss Triggered at -7.0%
+1086,SAF.PA,SELL,2,275.7000,EUR,551.40,23/10/2026 10:06:41,Pending,ATR Stop Loss Triggered at -7.0%
+1087,SAF.PA,SELL,2,275.7000,EUR,551.40,23/10/2026 10:11:41,Pending,ATR Stop Loss Triggered at -7.0%
+1088,SAF.PA,SELL,2,275.4000,EUR,550.80,23/10/2026 10:16:59,Pending,ATR Stop Loss Triggered at -7.0%
+1089,ESE.PA,SELL,127,34.6135,EUR,4395.91,23/10/2026 10:18:59,Pending,"Trailing Profit Triggered at 3.33% (Peak: 3.83%, Trail: 0.50%)"
+1090,SAF.PA,SELL,2,277.2000,EUR,554.40,23/10/2026 10:22:11,Pending,ATR Stop Loss Triggered at -7.0%
+1091,SAF.PA,SELL,2,277.9000,EUR,555.80,23/10/2026 10:27:12,Pending,ATR Stop Loss Triggered at -7.0%
+1092,SAF.PA,SELL,2,278.0000,EUR,556.00,23/10/2026 10:32:12,Pending,ATR Stop Loss Triggered at -7.0%
+1093,SAF.PA,SELL,2,277.7000,EUR,555.40,23/10/2026 10:37:12,Pending,ATR Stop Loss Triggered at -7.0%
+1094,SAF.PA,SELL,2,277.2000,EUR,554.40,23/10/2026 10:42:12,Pending,ATR Stop Loss Triggered at -7.0%
+1095,SAF.PA,SELL,2,276.2000,EUR,552.40,23/10/2026 10:47:12,Pending,ATR Stop Loss Triggered at -7.0%
+1096,SAF.PA,SELL,2,275.2000,EUR,550.40,23/10/2026 10:52:12,Pending,ATR Stop Loss Triggered at -7.0%
+1097,SAF.PA,SELL,2,275.6000,EUR,551.20,23/10/2026 10:57:12,Pending,ATR Stop Loss Triggered at -7.0%
+1098,SAF.PA,SELL,2,275.7000,EUR,551.40,23/10/2026 11:02:12,Pending,ATR Stop Loss Triggered at -7.0%
+1099,SAF.PA,SELL,2,275.9000,EUR,551.80,23/10/2026 11:07:12,Pending,ATR Stop Loss Triggered at -7.0%
+1100,ESE.PA,SELL,127,34.6131,EUR,4395.86,23/10/2026 11:08:18,Pending,"Trailing Profit Triggered at 3.33% (Peak: 3.83%, Trail: 0.50%)"
+1101,SAF.PA,SELL,2,275.7000,EUR,551.40,23/10/2026 11:12:24,Pending,ATR Stop Loss Triggered at -7.0%
+1102,SAF.PA,SELL,2,276.1000,EUR,552.20,23/10/2026 11:17:24,Pending,ATR Stop Loss Triggered at -7.0%
+1103,SAF.PA,SELL,2,276.0000,EUR,552.00,23/10/2026 11:22:25,Pending,ATR Stop Loss Triggered at -7.0%
+1104,SAF.PA,SELL,2,276.2000,EUR,552.40,23/10/2026 11:27:25,Pending,ATR Stop Loss Triggered at -7.0%
+1105,SAF.PA,SELL,2,277.0000,EUR,554.00,23/10/2026 11:32:25,Pending,ATR Stop Loss Triggered at -7.0%
+1106,SAF.PA,SELL,2,277.4000,EUR,554.80,23/10/2026 11:37:25,Pending,ATR Stop Loss Triggered at -7.0%
+1107,SAF.PA,SELL,2,276.9000,EUR,553.80,23/10/2026 11:42:25,Pending,ATR Stop Loss Triggered at -7.0%
+1108,SAF.PA,SELL,2,276.4000,EUR,552.80,23/10/2026 11:47:43,Pending,ATR Stop Loss Triggered at -7.0%
+1109,SAF.PA,SELL,2,276.2000,EUR,552.40,23/10/2026 11:52:43,Pending,ATR Stop Loss Triggered at -7.0%
+1110,SAF.PA,SELL,2,276.9000,EUR,553.80,23/10/2026 11:57:43,Pending,ATR Stop Loss Triggered at -7.0%
+1111,SAF.PA,SELL,2,277.5000,EUR,555.00,23/10/2026 12:02:43,Pending,ATR Stop Loss Triggered at -7.0%
+1112,SAF.PA,SELL,2,276.9000,EUR,553.80,23/10/2026 12:07:43,Pending,ATR Stop Loss Triggered at -7.0%
+1113,SAF.PA,SELL,2,277.4000,EUR,554.80,23/10/2026 12:13:01,Pending,ATR Stop Loss Triggered at -7.0%
+1114,SAF.PA,SELL,2,276.9000,EUR,553.80,23/10/2026 12:18:02,Pending,ATR Stop Loss Triggered at -7.0%
+1115,SAF.PA,SELL,2,276.3000,EUR,552.60,23/10/2026 12:23:02,Pending,ATR Stop Loss Triggered at -7.0%
+1116,ESE.PA,SELL,127,34.6046,EUR,4394.78,23/10/2026 12:25:56,Pending,"Trailing Profit Triggered at 3.30% (Peak: 3.83%, Trail: 0.50%)"
+1117,SAF.PA,SELL,2,275.4000,EUR,550.80,23/10/2026 12:28:32,Pending,ATR Stop Loss Triggered at -7.0%
+1118,ESE.PA,SELL,127,34.6089,EUR,4395.33,23/10/2026 12:31:44,Pending,"Trailing Profit Triggered at 3.33% (Peak: 3.83%, Trail: 0.50%)"
+1119,SAF.PA,SELL,2,274.9000,EUR,549.80,23/10/2026 12:33:44,Pending,ATR Stop Loss Triggered at -7.0%
+1120,SAF.PA,SELL,2,275.3000,EUR,550.60,23/10/2026 12:38:44,Pending,ATR Stop Loss Triggered at -7.0%
+1121,ESE.PA,SELL,127,34.6111,EUR,4395.61,23/10/2026 12:39:32,Pending,"Trailing Profit Triggered at 3.33% (Peak: 3.83%, Trail: 0.50%)"
+1122,SAF.PA,SELL,2,274.8000,EUR,549.60,23/10/2026 12:43:56,Pending,ATR Stop Loss Triggered at -7.0%
+1123,ESE.PA,SELL,127,34.5958,EUR,4393.67,23/10/2026 12:44:44,Pending,"Trailing Profit Triggered at 3.30% (Peak: 3.83%, Trail: 0.50%)"
+1124,SAF.PA,SELL,2,275.8000,EUR,551.60,23/10/2026 12:49:08,Pending,ATR Stop Loss Triggered at -7.0%
+1125,ESE.PA,SELL,127,34.5699,EUR,4390.38,23/10/2026 12:49:56,Pending,"Trailing Profit Triggered at 3.21% (Peak: 3.83%, Trail: 0.50%)"
+1126,SAF.PA,SELL,2,276.4000,EUR,552.80,23/10/2026 12:54:20,Pending,ATR Stop Loss Triggered at -7.0%
+1127,ESE.PA,SELL,127,34.5690,EUR,4390.26,23/10/2026 12:55:08,Pending,"Trailing Profit Triggered at 3.21% (Peak: 3.83%, Trail: 0.50%)"
+1128,SAF.PA,SELL,2,276.5000,EUR,553.00,23/10/2026 12:59:32,Pending,ATR Stop Loss Triggered at -7.0%
+1129,ESE.PA,SELL,127,34.5585,EUR,4388.93,23/10/2026 13:00:20,Pending,"Trailing Profit Triggered at 3.18% (Peak: 3.83%, Trail: 0.50%)"
+1130,SAF.PA,SELL,2,276.4000,EUR,552.80,23/10/2026 13:05:02,Pending,ATR Stop Loss Triggered at -7.0%
+1131,ESE.PA,SELL,127,34.5416,EUR,4386.78,23/10/2026 13:06:08,Pending,"Trailing Profit Triggered at 3.12% (Peak: 3.83%, Trail: 0.50%)"
+1132,SAF.PA,SELL,2,276.1000,EUR,552.20,23/10/2026 13:10:14,Pending,ATR Stop Loss Triggered at -7.0%
+1133,ESE.PA,SELL,127,34.4897,EUR,4380.19,23/10/2026 13:11:20,Pending,"Trailing Profit Triggered at 3.00% (Peak: 3.83%, Trail: 0.50%)"
+1134,SAF.PA,SELL,2,275.7000,EUR,551.40,23/10/2026 13:15:44,Pending,ATR Stop Loss Triggered at -7.0%
+1135,ESE.PA,SELL,127,34.5323,EUR,4385.60,23/10/2026 13:16:32,Pending,"Trailing Profit Triggered at 3.09% (Peak: 3.83%, Trail: 0.50%)"
+1136,SAF.PA,SELL,2,275.2000,EUR,550.40,23/10/2026 13:20:56,Pending,ATR Stop Loss Triggered at -7.0%
+1137,ESE.PA,SELL,127,34.5477,EUR,4387.56,23/10/2026 13:21:44,Pending,"Trailing Profit Triggered at 3.15% (Peak: 3.83%, Trail: 0.50%)"
+1138,SAF.PA,SELL,2,273.5000,EUR,547.00,23/10/2026 13:26:08,Pending,ATR Stop Loss Triggered at -7.0%
+1139,ESE.PA,SELL,127,34.5493,EUR,4387.76,23/10/2026 13:26:57,Pending,"Trailing Profit Triggered at 3.15% (Peak: 3.83%, Trail: 0.50%)"
+1140,SAF.PA,SELL,2,273.6000,EUR,547.20,23/10/2026 13:31:21,Pending,ATR Stop Loss Triggered at -7.0%
+1141,ESE.PA,SELL,127,34.5391,EUR,4386.47,23/10/2026 13:32:09,Pending,"Trailing Profit Triggered at 3.12% (Peak: 3.83%, Trail: 0.50%)"
+1142,SAF.PA,SELL,2,273.6000,EUR,547.20,23/10/2026 13:36:52,Pending,ATR Stop Loss Triggered at -7.0%
+1143,ESE.PA,SELL,127,34.5642,EUR,4389.65,23/10/2026 13:37:40,Pending,"Trailing Profit Triggered at 3.18% (Peak: 3.83%, Trail: 0.50%)"
+1144,SAF.PA,SELL,2,273.6000,EUR,547.20,23/10/2026 13:42:04,Pending,ATR Stop Loss Triggered at -7.0%
+1145,ESE.PA,SELL,127,34.5683,EUR,4390.17,23/10/2026 13:43:11,Pending,"Trailing Profit Triggered at 3.21% (Peak: 3.83%, Trail: 0.50%)"
+1146,SAF.PA,SELL,2,272.8000,EUR,545.60,23/10/2026 13:47:17,Pending,ATR Stop Loss Triggered at -7.0%
+1147,ESE.PA,SELL,127,34.5521,EUR,4388.12,23/10/2026 13:48:41,Pending,"Trailing Profit Triggered at 3.15% (Peak: 3.83%, Trail: 0.50%)"
+1148,SAF.PA,SELL,2,272.4000,EUR,544.80,23/10/2026 13:52:30,Pending,ATR Stop Loss Triggered at -7.0%
+1149,ESE.PA,SELL,127,34.4808,EUR,4379.06,23/10/2026 13:53:54,Pending,"Trailing Profit Triggered at 2.94% (Peak: 3.83%, Trail: 0.50%)"
+1150,SAF.PA,SELL,2,273.2000,EUR,546.40,23/10/2026 13:57:43,Pending,ATR Stop Loss Triggered at -7.0%
+1151,ESE.PA,SELL,127,34.5490,EUR,4387.72,23/10/2026 13:59:07,Pending,"Trailing Profit Triggered at 3.15% (Peak: 3.83%, Trail: 0.50%)"
+1152,SAF.PA,SELL,2,272.7000,EUR,545.40,23/10/2026 14:02:56,Pending,ATR Stop Loss Triggered at -7.0%
+1153,ESE.PA,SELL,127,34.5532,EUR,4388.26,23/10/2026 14:04:20,Pending,"Trailing Profit Triggered at 3.15% (Peak: 3.83%, Trail: 0.50%)"
+1154,SAF.PA,SELL,2,272.5000,EUR,545.00,23/10/2026 14:08:09,Pending,ATR Stop Loss Triggered at -7.0%
+1155,ESE.PA,SELL,127,34.5534,EUR,4388.28,23/10/2026 14:09:51,Pending,"Trailing Profit Triggered at 3.15% (Peak: 3.83%, Trail: 0.50%)"
+1156,SAF.PA,SELL,2,275.3000,EUR,550.60,23/10/2026 14:13:22,Pending,ATR Stop Loss Triggered at -7.0%
+1157,ESE.PA,SELL,127,34.5841,EUR,4392.18,23/10/2026 14:15:04,Pending,"Trailing Profit Triggered at 3.24% (Peak: 3.83%, Trail: 0.50%)"
+1158,SAF.PA,SELL,2,276.7000,EUR,553.40,23/10/2026 14:18:34,Pending,ATR Stop Loss Triggered at -7.0%
+1159,ESE.PA,SELL,127,34.5486,EUR,4387.67,23/10/2026 14:20:16,Pending,"Trailing Profit Triggered at 3.15% (Peak: 3.83%, Trail: 0.50%)"
+1160,SAF.PA,SELL,2,276.9000,EUR,553.80,23/10/2026 14:24:05,Pending,ATR Stop Loss Triggered at -7.0%
+1161,ESE.PA,SELL,127,34.5306,EUR,4385.39,23/10/2026 14:25:29,Pending,"Trailing Profit Triggered at 3.09% (Peak: 3.83%, Trail: 0.50%)"
+1162,SAF.PA,SELL,2,274.1000,EUR,548.20,23/10/2026 14:29:36,Pending,ATR Stop Loss Triggered at -7.0%
+1163,ESE.PA,SELL,127,34.5086,EUR,4382.59,23/10/2026 14:30:42,Pending,"Trailing Profit Triggered at 3.03% (Peak: 3.83%, Trail: 0.50%)"
+1164,SAF.PA,SELL,2,274.8000,EUR,549.60,23/10/2026 14:34:49,Pending,ATR Stop Loss Triggered at -7.0%
+1165,ESE.PA,SELL,127,34.4906,EUR,4380.31,23/10/2026 14:35:55,Pending,"Trailing Profit Triggered at 2.97% (Peak: 3.83%, Trail: 0.50%)"
+1166,SAF.PA,SELL,2,275.1000,EUR,550.20,23/10/2026 14:40:19,Pending,ATR Stop Loss Triggered at -7.0%
+1167,ESE.PA,SELL,127,34.4705,EUR,4377.75,23/10/2026 14:41:07,Pending,"Trailing Profit Triggered at 2.91% (Peak: 3.83%, Trail: 0.50%)"
+1168,SAF.PA,SELL,2,275.0000,EUR,550.00,23/10/2026 14:45:32,Pending,ATR Stop Loss Triggered at -7.0%
+1169,ESE.PA,SELL,127,34.5372,EUR,4386.22,23/10/2026 14:46:20,Pending,"Trailing Profit Triggered at 3.12% (Peak: 3.83%, Trail: 0.50%)"
+1170,SAF.PA,SELL,2,275.2000,EUR,550.40,23/10/2026 14:51:03,Pending,ATR Stop Loss Triggered at -7.0%
+1171,ESE.PA,SELL,127,34.5122,EUR,4383.05,23/10/2026 14:51:51,Pending,"Trailing Profit Triggered at 3.03% (Peak: 3.83%, Trail: 0.50%)"
+1172,SAF.PA,SELL,2,276.9000,EUR,553.80,23/10/2026 14:56:15,Pending,ATR Stop Loss Triggered at -7.0%
+1173,ESE.PA,SELL,127,34.5841,EUR,4392.18,23/10/2026 14:57:21,Pending,"Trailing Profit Triggered at 3.24% (Peak: 3.83%, Trail: 0.50%)"
+1174,SAF.PA,SELL,2,275.1000,EUR,550.20,23/10/2026 15:01:28,Pending,ATR Stop Loss Triggered at -7.0%
+1175,ESE.PA,SELL,127,34.5971,EUR,4393.83,23/10/2026 15:02:34,Pending,"Trailing Profit Triggered at 3.30% (Peak: 3.83%, Trail: 0.50%)"
+1176,SAF.PA,SELL,2,274.6000,EUR,549.20,23/10/2026 15:06:41,Pending,ATR Stop Loss Triggered at -7.0%
+1177,SAF.PA,SELL,2,274.2000,EUR,548.40,23/10/2026 15:11:41,Pending,ATR Stop Loss Triggered at -7.0%
+1178,SAF.PA,SELL,2,273.7000,EUR,547.40,23/10/2026 15:16:42,Pending,ATR Stop Loss Triggered at -7.0%
+1179,ESE.PA,SELL,127,34.6098,EUR,4395.44,23/10/2026 15:18:42,Pending,"Trailing Profit Triggered at 3.33% (Peak: 3.83%, Trail: 0.50%)"
+1180,SAF.PA,SELL,2,272.0000,EUR,544.00,23/10/2026 15:22:31,Pending,ATR Stop Loss Triggered at -7.0%
+1181,SAF.PA,SELL,2,271.7000,EUR,543.40,23/10/2026 15:27:31,Pending,ATR Stop Loss Triggered at -7.0%
+1182,ISRG,SELL,2,452.1732,USD,904.35,23/10/2026 18:30:46,Pending,"Trailing Profit Triggered at 6.27% (Peak: 7.74%,FILLED
+1183,META,BUY,1,644.4900,USD,644.49,23/10/2026 18:31:16,Pending,"[DIP] Score: 12/12 {RSI<40: +2, BB<0: +3, Trend: +3, Analyst: +3 (Strong-Upside),FILLED
+1184,JPM,SELL,2,336.1179,USD,672.24,26/10/2026 14:18:09,Pending,FILLED
+1185,TSM,BUY,2,421.9950,USD,843.99,26/10/2026 14:18:39,Pending,"[DIP] Score: 12/12 {RSI<25: +4, Trend: +3, Analyst: +3 (Strong-Upside),FILLED

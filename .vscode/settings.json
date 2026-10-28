@@ -1,0 +1,30 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.typeCheckingMode": "off",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/backend",
+    "${workspaceFolder}/backend/services",
+    "${workspaceFolder}/frontend"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/backend",
+    "${workspaceFolder}/backend/services",
+    "${workspaceFolder}/frontend"
+  ],
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.DS_Store": true,
+    "**/*.pyc": true,
+    "**/.venv": true,
+    "**/.python-version": true,
+    "**/*.db-shm": true,
+    "**/*.db-wal": true,
+    "**/backups_local": true,
+    "**/uv.lock": true,
+    "**/pyproject.toml": true,
+    "**/.antigravityignore": true,
+    "**/.gitignore": true
+  }
+}
