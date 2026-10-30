@@ -129,7 +129,7 @@ class TableRenderer:
             score_display = f"{bot.smart_score}{strategy_arrow}"
 
         # Trailing sell price
-        peak_pnl = max(price_pct, getattr(bot, "highest_pnl", 0.0))
+        peak_pnl = max(getattr(bot, "pnl_percent", 0.0), getattr(bot, "highest_pnl", 0.0))
         target_pnl_pct = bot.dynamic_profit_target * 100
 
         if bot.quantity > 0 and bot.bought_price > 0 and peak_pnl >= target_pnl_pct:

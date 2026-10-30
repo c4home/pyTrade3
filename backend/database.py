@@ -1,4 +1,6 @@
 import shutil
+from typing import Optional, List, Dict, Any, Tuple
+import pandas as pd
 from config import *
 # ==================== DATABASE MANAGER ====================
 class DatabaseManager:
@@ -218,6 +220,19 @@ class DatabaseManager:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS ignored_stocks (
                     stock_id TEXT PRIMARY KEY
+                )
+            """)
+
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS historical_daily_bars (
+                    stock_id TEXT NOT NULL,
+                    bar_date TEXT NOT NULL,
+                    open REAL NOT NULL,
+                    high REAL NOT NULL,
+                    low REAL NOT NULL,
+                    close REAL NOT NULL,
+                    volume REAL NOT NULL,
+                    PRIMARY KEY (stock_id, bar_date)
                 )
             """)
 
@@ -453,6 +468,65 @@ class DatabaseManager:
                     float(day_before_yesterday_close or 0)
                 )
             )
+
+    def save_daily_bars(self, stock_id: str, df: pd.DataFrame):
+        """Saves historical daily bars into SQLite table historical_daily_bars."""
+        if df is None or df.empty:
+            return
+        rows = []
+        for idx, row in df.iterrows():
+            date_str = str(idx)[:10]
+            try:
+                o = float(row.get('Open', 0.0))
+                h = float(row.get('High', 0.0))
+                l = float(row.get('Low', 0.0))
+                c = float(row.get('Close', 0.0))
+                v = float(row.get('Volume', 0.0))
+                if c > 0:
+                    rows.append((stock_id, date_str, o, h, l, c, v))
+            except Exception:
+                continue
+
+        if not rows:
+            return
+
+        with self.get_cursor() as cursor:
+            cursor.executemany(
+                """INSERT OR REPLACE INTO historical_daily_bars
+                   (stock_id, bar_date, open, high, low, close, volume)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                rows
+            )
+
+    def get_daily_bars(self, stock_id: str, limit: int = 260) -> pd.DataFrame:
+        """Retrieves cached historical daily bars sorted chronologically."""
+        with self.get_cursor() as cursor:
+            cursor.execute(
+                """SELECT bar_date, open, high, low, close, volume
+                   FROM historical_daily_bars
+                   WHERE stock_id = ?
+                   ORDER BY bar_date ASC""",
+                (stock_id,)
+            )
+            rows = cursor.fetchall()
+            if not rows:
+                return pd.DataFrame()
+            df = pd.DataFrame(rows, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+            df['Date'] = pd.to_datetime(df['Date'])
+            df.set_index('Date', inplace=True)
+            if limit and len(df) > limit:
+                df = df.iloc[-limit:]
+            return df
+
+    def get_latest_daily_bar_date(self, stock_id: str) -> Optional[str]:
+        """Returns the most recent bar date stored in historical_daily_bars."""
+        with self.get_cursor() as cursor:
+            cursor.execute(
+                """SELECT MAX(bar_date) FROM historical_daily_bars WHERE stock_id = ?""",
+                (stock_id,)
+            )
+            row = cursor.fetchone()
+            return row[0] if row and row[0] else None
             
     def save_target_to_db(self, symbol, target_price, firm_name, date_str):
         try:

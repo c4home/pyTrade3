@@ -5,10 +5,12 @@
 
 import time
 import threading
+import re
 from datetime import datetime, time as dtime
 from zoneinfo import ZoneInfo
 import pandas as pd
 import yfinance as yf
+from ibapi.contract import Contract
 from config import logger, executor
 from analyst_scraper import AnalystDataMixin
 from .models import MarketSnapshot
@@ -25,6 +27,7 @@ class DataFeedService(AnalystDataMixin):
         self.ibapi = ibapi
 
         self.market_value = 0.0
+        self.price_source = "INIT"
         self.last_yf_fetch = 0
         self.yf_fetch_interval_open = 20
         self.yf_fetch_interval_closed = 3600
@@ -78,6 +81,31 @@ class DataFeedService(AnalystDataMixin):
         self._last_info_fetch = 0
 
         self._load_initial_metadata()
+
+    def _build_contract(self) -> Contract:
+        """Constructs an IBKR Contract object for streaming market data."""
+        contract = Contract()
+        clean_sym = re.sub(r'\..*$', '', self.stock_id).upper()
+        contract.symbol = clean_sym
+        contract.secType = "STK"
+        contract.exchange = "SMART"
+        contract.currency = self.currency or "USD"
+
+        sym = self.stock_id.upper()
+        if sym.endswith(".PA"):
+            contract.primaryExchange = "SBF"
+        elif sym.endswith(".L"):
+            contract.primaryExchange = "LSE"
+        elif sym.endswith(".AS") or sym.endswith(".BR"):
+            contract.primaryExchange = "EURONEXT"
+        elif sym.endswith(".DE"):
+            contract.primaryExchange = "IBIS"
+        elif sym.endswith(".TO"):
+            contract.primaryExchange = "TSE"
+        elif sym.endswith(".HK"):
+            contract.primaryExchange = "SEHK"
+        # For US stocks (USD), leaving primaryExchange empty lets SMART auto-resolve NYSE/NASDAQ/AMEX
+        return contract
 
     def _load_initial_metadata(self):
         """Loads static metadata and cached indicators from SQLite."""
@@ -247,11 +275,28 @@ class DataFeedService(AnalystDataMixin):
 
             def fetch_task():
                 try:
-                    ticker_obj = yf.Ticker(self.stock_id)
-                    data = ticker_obj.history(period="1y", interval="1d", auto_adjust=False, actions=False)
-                    if data.empty or len(data) < 200:
-                        logger.warning(f"Insufficient data for {self.stock_id}: {len(data)} rows")
-                        return
+                    data = None
+                    ticker_obj = None
+
+                    # Phase 4: Try loading historical daily bars from SQLite cache first
+                    if self.db_manager:
+                        cached_bars = self.db_manager.get_daily_bars(self.stock_id, limit=260)
+                        if len(cached_bars) >= 200:
+                            last_bar_date = cached_bars.index[-1].date()
+                            today_date = datetime.now().date()
+                            # If cached data is recent (<= 2 days old), we can reuse it
+                            if (today_date - last_bar_date).days <= 2:
+                                data = cached_bars
+
+                    # If SQLite has insufficient bars, fetch from yfinance and cache
+                    if data is None or data.empty or len(data) < 200:
+                        ticker_obj = yf.Ticker(self.stock_id)
+                        data = ticker_obj.history(period="1y", interval="1d", auto_adjust=False, actions=False)
+                        if data.empty or len(data) < 200:
+                            logger.warning(f"Insufficient data for {self.stock_id}: {len(data)} rows")
+                            return
+                        if self.db_manager:
+                            self.db_manager.save_daily_bars(self.stock_id, data)
 
                     if isinstance(data.columns, pd.MultiIndex):
                         try:
@@ -362,11 +407,14 @@ class DataFeedService(AnalystDataMixin):
                     self.today_volume = float(volume.iat[-1])
                     self.avg_volume_14d = float(volume.rolling(14).mean().iat[-1])
 
-                    self.next_earnings_date = self.fetch_next_event_date(ticker_obj)
+                    if ticker_obj is not None:
+                        self.next_earnings_date = self.fetch_next_event_date(ticker_obj)
 
                     try:
                         now_time = time.time()
                         if (now_time - self._last_info_fetch > 86400) or self.target_price <= 0:
+                            if ticker_obj is None:
+                                ticker_obj = yf.Ticker(self.stock_id)
                             self.target_price = ticker_obj.info.get('targetMeanPrice', 0) or 0.0
                             self.num_analysts = ticker_obj.info.get('numberOfAnalystOpinions', 0) or 0
                             self._last_info_fetch = now_time
@@ -411,6 +459,36 @@ class DataFeedService(AnalystDataMixin):
         return self._cached_atr_14 if self._cached_atr_14 > 0 else 1.0
 
     def get_market_value(self) -> float:
+        # Phase 2 & 3: Priority 1 - Streaming Real-Time Price from IBKR Socket
+        if self.ibapi and getattr(self.ibapi, 'ibkr_backend_connected', False):
+            # Auto-subscribe market data stream if not yet subscribed
+            if hasattr(self.ibapi, 'is_subscribed_mkt_data') and not self.ibapi.is_subscribed_mkt_data(self.stock_id):
+                contract = self._build_contract()
+                self.ibapi.subscribe_mkt_data(self.stock_id, contract)
+
+            if hasattr(self.ibapi, 'get_live_price'):
+                live_price = self.ibapi.get_live_price(self.stock_id)
+                if live_price and live_price > 0:
+                    self.market_value = round(live_price, 2)
+                    self.last_yf_fetch = time.time()
+                    if self.price_source != "IBKR":
+                        self.price_source = "IBKR"
+                        logger.info(f"⚡ [{self.stock_id}] Real-Time data active from IBKR Socket (price={self.market_value})")
+
+                    # Sync live volume and prev_close from IBKR streaming ticks
+                    if hasattr(self.ibapi, 'get_live_mkt_data'):
+                        mkt = self.ibapi.get_live_mkt_data(self.stock_id)
+                        if mkt:
+                            if mkt.get('volume', 0) > 0:
+                                self.today_volume = mkt['volume']
+                            if mkt.get('prev_close', 0) > 0 and self.previous_close <= 0:
+                                self.previous_close = mkt['prev_close']
+
+                    if self.db_manager:
+                        self.db_manager.update_latest_price(self.stock_id, self.market_value)
+                    return self.market_value
+
+        # Priority 2: Fallback to Yahoo Finance when IBKR stream is unavailable/disconnected
         now = time.time()
         interval = self.yf_fetch_interval_open if self.is_market_open() else self.yf_fetch_interval_closed
         if now - self.last_yf_fetch < interval:
@@ -424,14 +502,26 @@ class DataFeedService(AnalystDataMixin):
         def fetch():
             try:
                 ticker = yf.Ticker(self.stock_id)
-                hist = ticker.history(period="5d", interval="1m")
-                if not hist.empty:
-                    price = float(hist['Close'].iloc[-1])
+                price = None
+                if hasattr(ticker, 'fast_info'):
+                    try:
+                        price = float(ticker.fast_info['lastPrice'])
+                    except Exception:
+                        pass
+                if price is None or price <= 0:
+                    hist = ticker.history(period="1d")
+                    if not hist.empty:
+                        price = float(hist['Close'].iloc[-1])
+
+                if price and price > 0:
                     if self.ibapi and hasattr(self.ibapi, 'data_lock'):
                         with self.ibapi.data_lock:
                             self.market_value = round(price, 2)
                     else:
                         self.market_value = round(price, 2)
+                    if self.price_source != "YFINANCE":
+                        self.price_source = "YFINANCE"
+                        logger.info(f"🔄 [{self.stock_id}] Using Yahoo Finance fallback (price={self.market_value})")
                     if self.db_manager:
                         self.db_manager.update_latest_price(self.stock_id, price)
             except Exception:

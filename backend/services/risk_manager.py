@@ -82,10 +82,26 @@ class RiskManagementEngine:
         self._last_sell_log: Dict[str, float] = {}
 
     @classmethod
-    def check_macro_guard(cls) -> Dict[str, Any]:
-        """Fetches S&P 500 drop % with a 5-minute cache to prevent API spam."""
+    def check_macro_guard(cls, ibapi: Any = None) -> Dict[str, Any]:
+        """Fetches S&P 500 drop % with priority given to IBKR live stream, fallback to yfinance."""
         now = time.time()
         with cls._macro_lock:
+            # Priority 1: Check live market stream from IBKR socket
+            if ibapi and hasattr(ibapi, 'get_live_mkt_data'):
+                mkt = ibapi.get_live_mkt_data(cls.MACRO_TICKER)
+                if mkt and mkt.get('price', 0) > 0 and mkt.get('prev_close', 0) > 0:
+                    prev_close = mkt['prev_close']
+                    current_price = mkt['price']
+                    drop_pct = (current_price - prev_close) / prev_close
+                    cls._macro_cache['drop_pct'] = drop_pct
+                    if drop_pct <= cls.MACRO_DROP_LIMIT:
+                        cls._macro_cache['status'] = f"RED ({drop_pct*100:.2f}%)"
+                    else:
+                        cls._macro_cache['status'] = f"GREEN ({drop_pct*100:.2f}%)"
+                    cls._macro_cache['time'] = now
+                    return cls._macro_cache
+
+            # Priority 2: Fallback to Yahoo Finance with 5-minute cache
             if now - cls._macro_cache['time'] > 300:
                 try:
                     ticker = yf.Ticker(cls.MACRO_TICKER)
@@ -319,7 +335,7 @@ class RiskManagementEngine:
             if alpha_signal.base_score < 5:
                 return RiskDecision(allowed=False, reason=f"DIP base technical score too weak (base={alpha_signal.base_score}/10, need >= 5)")
 
-            macro_status = self.check_macro_guard()
+            macro_status = self.check_macro_guard(getattr(self.app, 'ibapi', None))
             if macro_status['drop_pct'] <= self.MACRO_DROP_LIMIT:
                 return RiskDecision(allowed=False, reason=f"Macro Market Guard Active ({macro_status['status']})")
 

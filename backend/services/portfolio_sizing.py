@@ -34,6 +34,13 @@ class ExchangeRateManager:
     def get_eur_usd_rate(self) -> float:
         return self.get_rate("USD")
 
+    def update_rate(self, currency: str, rate: float):
+        """Directly updates rate from IBKR IDEALPRO FX or external source."""
+        curr = currency.upper()
+        if rate and rate > 0 and curr in self.rates:
+            self.rates[curr] = round(rate, 4)
+            self.last_update = time.time()
+
     def get_rate(self, currency: str) -> float:
         currency = currency.upper()
         if currency == "EUR":

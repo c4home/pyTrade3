@@ -589,17 +589,81 @@ class TradingBot(AnalystDataMixin):
         self.last_trade_reason = self.score_reason
         return 'BUY'
 
+    def _get_fresh_execution_price(self, is_sell: bool = False) -> Optional[float]:
+        """Resolves fresh executable price for BUY/SELL orders with tiered real-time fallback."""
+        now = time.time()
+        # For SELL (exit/stop-loss/trailing profit): Allow up to 300s cache, exit takes priority
+        # For BUY: 45s for IBKR stream, 120s for Yahoo Finance fallback
+        is_yf = getattr(self.data_feed, 'price_source', '') == 'YFINANCE'
+        max_age = 300 if is_sell else (120 if is_yf else 45)
+
+        # Tier 1: Check DB latest_prices
+        latest = self.db_manager.get_latest_price(self.stock_id) if self.db_manager else None
+        if latest and latest.get("price", 0) > 0:
+            age = now - latest["fetched_at"]
+            if age <= max_age:
+                return float(latest["price"])
+
+        # Tier 2: Check live streaming price directly from IBKR socket
+        if self.ibapi and hasattr(self.ibapi, 'get_live_price'):
+            live_price = self.ibapi.get_live_price(self.stock_id)
+            if live_price and live_price > 0:
+                if self.db_manager:
+                    self.db_manager.update_latest_price(self.stock_id, live_price)
+                return float(live_price)
+
+        # Tier 3: Check IBKR portfolio position marketPrice (for SELL orders)
+        if is_sell and self.ibapi and hasattr(self.ibapi, 'positions'):
+            with self.ibapi.data_lock:
+                pos = self.ibapi.positions.get(self.ibkr_symbol, {})
+                pos_mkt_price = pos.get('marketPrice')
+                if pos_mkt_price and pos_mkt_price > 0:
+                    if self.db_manager:
+                        self.db_manager.update_latest_price(self.stock_id, pos_mkt_price)
+                    return float(pos_mkt_price)
+
+        # Tier 4: Synchronous fresh fetch via yfinance fallback
+        try:
+            ticker = yf.Ticker(self.stock_id)
+            fresh_price = None
+            if hasattr(ticker, 'fast_info'):
+                try:
+                    fresh_price = float(ticker.fast_info['lastPrice'])
+                except Exception:
+                    pass
+            if fresh_price is None or fresh_price <= 0:
+                hist = ticker.history(period="1d")
+                if not hist.empty:
+                    fresh_price = float(hist['Close'].iloc[-1])
+            if fresh_price and fresh_price > 0:
+                self.market_value = round(fresh_price, 2)
+                if self.db_manager:
+                    self.db_manager.update_latest_price(self.stock_id, fresh_price)
+                logger.info(f"🔄 [{self.stock_id}] Refreshed fresh price synchronously for order execution: {fresh_price:.2f}")
+                return float(fresh_price)
+        except Exception as e:
+            logger.warning(f"[{self.stock_id}] Synchronous price refresh failed: {e}")
+
+        # Tier 5: For SELL orders - capital preservation fallback to self.market_value
+        if is_sell and self.market_value > 0:
+            logger.warning(
+                f"[{self.stock_id}] Stale price guard bypassed for SELL order "
+                f"(using last known market_value €{self.market_value:.2f}) to ensure exit execution."
+            )
+            return float(self.market_value)
+
+        return None
+
     def place_buy_order(self) -> bool:
         usable_cash = self.ibapi.available_cash - self.min_cash
         if not self.is_market_open() or self.has_pending_order() or min(self.cash_left, usable_cash) < self.MIN_CASH_FOR_BUY:
             return False
 
         native_currency, primary_exchange = self.get_native_currency_and_exchange()
-        latest = self.db_manager.get_latest_price(self.stock_id) if self.db_manager else None
-        if not latest or time.time() - latest["fetched_at"] > 30:
+        price_native = self._get_fresh_execution_price(is_sell=False)
+        if not price_native or price_native <= 0:
             logger.warning(f"[{self.stock_id}] No fresh price -> skip buy")
             return False
-        price_native = latest["price"]
 
         dynamic_max = getattr(self, 'current_max_investment', 0) or self._calculate_dynamic_max_amount()
         quantity, total_cost_eur, effective_limit = self.portfolio_sizer.calculate_order_sizing(
@@ -647,10 +711,10 @@ class TradingBot(AnalystDataMixin):
         if not self.is_market_open() or self.has_pending_order() or self.quantity == 0:
             return False
 
-        latest = self.db_manager.get_latest_price(self.stock_id) if self.db_manager else None
-        if not latest or time.time() - latest["fetched_at"] > 30:
+        price_native = self._get_fresh_execution_price(is_sell=True)
+        if not price_native or price_native <= 0:
+            logger.warning(f"[{self.stock_id}] Cannot obtain valid price for sell order -> skip sell")
             return False
-        price_native = latest["price"]
         native_currency, primary_exchange = self.get_native_currency_and_exchange()
 
         reason = getattr(self, 'last_trade_reason', None) or f"PROFIT {self.pnl_percent:.1f}% | Score:{self.smart_score} | RSI:{self.rsi_value:.0f}"

@@ -32,6 +32,12 @@ class IBApi(EWrapper, EClient):
         self.broken_farms = set()
         self.consecutive_ping_failures = 0
 
+        # ---- MARKET DATA STREAMING (US Non-Consolidated & EU BATS/Chi-X) ----
+        self.mkt_data = {}  # stock_id -> {price, bid, ask, last, high, low, volume, prev_close, open, last_update}
+        self.req_id_to_stock_id = {}
+        self.stock_id_to_req_id = {}
+        self.next_mkt_req_id = 50000
+
     def managedAccounts(self, accountsList: str):
         with self.data_lock:
             if self.ibkr_backend_connected:
@@ -57,6 +63,11 @@ class IBApi(EWrapper, EClient):
         self.ibkr_backend_issue_reason = ""
         self.broken_farms.clear()
         self.consecutive_ping_failures = 0
+        try:
+            self.reqMarketDataType(1)  # 1 = Real-time streaming (Non-Consolidated & BATS/Chi-X)
+            logger.info("📡 IBKR MarketDataType set to 1 (Real-Time Streaming)")
+        except Exception as e:
+            logger.warning(f"Could not set MarketDataType to 1: {e}")
         self.connected_event.set()
 
     def get_next_order_id(self):
@@ -70,6 +81,9 @@ class IBApi(EWrapper, EClient):
         logger.warning("🚨 IBKR TWS/Gateway socket connection was closed by host.")
         self.ibkr_backend_connected = False
         self.ibkr_backend_issue_reason = "TWS/Gateway đã đóng kết nối socket"
+        with self.data_lock:
+            self.req_id_to_stock_id.clear()
+            self.stock_id_to_req_id.clear()
         self.connected_event.clear()
         self.cash_ready_event.clear()
 
@@ -144,6 +158,11 @@ class IBApi(EWrapper, EClient):
         if errorCode in [10147, 202]:
             if hasattr(self, 'order_callbacks'):
                 self.order_callbacks.pop(reqId, None)
+            return
+
+        # Market data informational notices (10167, 10089: delayed data available, 354: not subscribed, 300: can't find EId)
+        if errorCode in [10167, 10089, 354, 300]:
+            logger.info(f"ℹ️ IBKR Market Data Notice {reqId}: [{errorCode}] {errorString}")
             return
 
         logger.error(f"Error {reqId}: {errorCode} - {errorString}")
@@ -253,4 +272,127 @@ class IBApi(EWrapper, EClient):
                 callback = self.order_callbacks[orderId]
                 callback(orderId, status, filled, avgFillPrice)
                 del self.order_callbacks[orderId]
+
+    # ==================== MARKET DATA STREAMING ====================
+    def tickPrice(self, reqId: int, tickType: int, price: float, attrib):
+        if price is None or price <= 0 or math.isnan(price):
+            return
+        with self.data_lock:
+            stock_id = self.req_id_to_stock_id.get(reqId)
+            if not stock_id:
+                return
+            if stock_id not in self.mkt_data:
+                self.mkt_data[stock_id] = {
+                    'price': 0.0, 'bid': 0.0, 'ask': 0.0, 'last': 0.0,
+                    'high': 0.0, 'low': 0.0, 'volume': 0.0, 'prev_close': 0.0,
+                    'open': 0.0, 'last_update': 0
+                }
+            entry = self.mkt_data[stock_id]
+            entry['last_update'] = time.time()
+            if self.ibkr_backend_connected:
+                self.last_ibkr_update = time.time()
+
+            if tickType == 1:       # Bid
+                entry['bid'] = price
+            elif tickType == 2:     # Ask
+                entry['ask'] = price
+            elif tickType == 4:     # Last Price
+                entry['last'] = price
+                entry['price'] = price
+            elif tickType == 6:     # High
+                entry['high'] = price
+            elif tickType == 7:     # Low
+                entry['low'] = price
+            elif tickType == 9:     # Close (Prev Close)
+                entry['prev_close'] = price
+            elif tickType == 14:    # Open
+                entry['open'] = price
+
+            # Fallback for 'price' if Last is not yet available
+            if entry['price'] <= 0:
+                if entry.get('last', 0) > 0:
+                    entry['price'] = entry['last']
+                elif entry.get('bid', 0) > 0 and entry.get('ask', 0) > 0:
+                    entry['price'] = round((entry['bid'] + entry['ask']) / 2.0, 2)
+                elif tickType in (1, 2, 4) and price > 0:
+                    entry['price'] = price
+
+    def tickSize(self, reqId: int, tickType: int, size: float):
+        if size is None or size < 0 or math.isnan(size):
+            return
+        with self.data_lock:
+            stock_id = self.req_id_to_stock_id.get(reqId)
+            if not stock_id:
+                return
+            if stock_id not in self.mkt_data:
+                self.mkt_data[stock_id] = {
+                    'price': 0.0, 'bid': 0.0, 'ask': 0.0, 'last': 0.0,
+                    'high': 0.0, 'low': 0.0, 'volume': 0.0, 'prev_close': 0.0,
+                    'open': 0.0, 'last_update': 0
+                }
+            if tickType == 8:       # Volume
+                self.mkt_data[stock_id]['volume'] = float(size)
+                self.mkt_data[stock_id]['last_update'] = time.time()
+
+    def tickGeneric(self, reqId: int, tickType: int, value: float):
+        pass
+
+    def tickString(self, reqId: int, tickType: int, value: str):
+        pass
+
+    def subscribe_mkt_data(self, stock_id: str, contract: Contract) -> Optional[int]:
+        """Subscribes to live streaming market data for a given stock/contract."""
+        if not self.isConnected() or not self.ibkr_backend_connected:
+            return None
+        with self.data_lock:
+            if stock_id in self.stock_id_to_req_id:
+                return self.stock_id_to_req_id[stock_id]
+            req_id = self.next_mkt_req_id
+            self.next_mkt_req_id += 1
+            self.stock_id_to_req_id[stock_id] = req_id
+            self.req_id_to_stock_id[req_id] = stock_id
+
+        try:
+            logger.info(
+                f"📡 Subscribing IBKR live market data: {stock_id} "
+                f"(reqId={req_id}, symbol={contract.symbol}, exchange={contract.exchange})"
+            )
+            self.reqMktData(req_id, contract, "", False, False, [])
+            return req_id
+        except Exception as e:
+            logger.error(f"Failed to subscribe market data for {stock_id}: {e}")
+            return None
+
+    def cancel_mkt_data(self, stock_id: str):
+        """Cancels market data subscription for a stock."""
+        with self.data_lock:
+            req_id = self.stock_id_to_req_id.pop(stock_id, None)
+            if req_id is not None:
+                self.req_id_to_stock_id.pop(req_id, None)
+                try:
+                    self.cancelMktData(req_id)
+                    logger.info(f"🛑 Cancelled IBKR market data for {stock_id} (reqId={req_id})")
+                except Exception as e:
+                    logger.warning(f"Error cancelling market data for {stock_id}: {e}")
+
+    def is_subscribed_mkt_data(self, stock_id: str) -> bool:
+        with self.data_lock:
+            return stock_id in self.stock_id_to_req_id
+
+    def get_live_price(self, stock_id: str) -> Optional[float]:
+        """Returns the latest streaming price from IBKR if available."""
+        with self.data_lock:
+            entry = self.mkt_data.get(stock_id)
+            if entry and entry.get('price', 0) > 0:
+                return entry['price']
+        return None
+
+    def get_live_mkt_data(self, stock_id: str) -> Optional[dict]:
+        """Returns a snapshot copy of streaming market data dict."""
+        with self.data_lock:
+            entry = self.mkt_data.get(stock_id)
+            if entry:
+                return entry.copy()
+        return None
+
 
