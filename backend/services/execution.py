@@ -80,8 +80,9 @@ class ExecutionService:
         order.action = "BUY"
         order.orderType = "MKT"
         order.totalQuantity = quantity
-        order.algoStrategy = "Adaptive"
-        setattr(order, "algoParams", [TagValue("adaptivePriority", "Normal")])
+        if native_currency == "USD":  # Adaptive algo is rejected (error 442) on many EU exchanges
+            order.algoStrategy = "Adaptive"
+            setattr(order, "algoParams", [TagValue("adaptivePriority", "Normal")])
         order.eTradeOnly = False
         order.firmQuoteOnly = False
         order.tif = "DAY"
@@ -144,8 +145,9 @@ class ExecutionService:
         order.action = "SELL"
         order.orderType = "MKT"
         order.totalQuantity = quantity
-        order.algoStrategy = "Adaptive"
-        setattr(order, "algoParams", [TagValue("adaptivePriority", "Normal")])
+        if native_currency == "USD":  # Adaptive algo is rejected (error 442) on many EU exchanges
+            order.algoStrategy = "Adaptive"
+            setattr(order, "algoParams", [TagValue("adaptivePriority", "Normal")])
         order.eTradeOnly = False
         order.firmQuoteOnly = False
         order.tif = "DAY"

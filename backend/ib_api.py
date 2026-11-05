@@ -173,7 +173,10 @@ class IBApi(EWrapper, EClient):
             self.order_callbacks.pop(reqId, None)
             logger.warning(f"Automatically cancelling order {reqId} due to error/warning {errorCode}: {errorString}")
             try:
-                self.cancelOrder(reqId)
+                try:
+                    self.cancelOrder(reqId, "")  # newer ibapi requires manualCancelOrderTime
+                except TypeError:
+                    self.cancelOrder(reqId)
             except Exception as e:
                 logger.error(f"Failed to send cancel request for order {reqId}: {e}")
         
